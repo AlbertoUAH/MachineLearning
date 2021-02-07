@@ -1,65 +1,63 @@
 setwd("/Users/alberto/UCM/Machine Learning/Practica ML/")
 library(corrplot)
+library(readxl)
+library(ggplot2)
 
-datos.exoplanetas <- read.csv("exoplanets_2018.csv", sep = ";")
-dim(datos.exoplanetas) # 9564 filas y 43 columnas
+datos.elecciones <- read_excel("DatosEleccionesEspaña.xlsx")
+dim(datos.elecciones) # 8119 filas y 34 columnas
 
-dput(names(datos.exoplanetas))
+dput(names(datos.elecciones))
 
 # 1. Eliminacion de columnas
-apply(datos.exoplanetas, 2, function(x) {length(unique(x))})
-datos.exoplanetas <- datos.exoplanetas[, !colnames(datos.exoplanetas) %in% c("kepid", "kepoi_name", "koi_pdisposition", "koi_score")]
-datos.exoplanetas <- datos.exoplanetas[datos.exoplanetas$koi_disposition != "CANDIDATE", ]
-
-dim(datos.exoplanetas) # 7197 filas y 39 columnas
-
 library(DataExplorer)
-create_report(datos.exoplanetas)
+create_report(datos.elecciones)
 
 # El nombre del exoplaneta tambien debemos descartarlo, ya que solo los planetas marcados como "CONFIRMED" presentan nombre, por lo que no aporta informacion alguna al modelo
-library(dplyr)
-datos.exoplanetas  %>% group_by(koi_disposition) %>% summarise(total_na = sum(kepler_name == ""))
-datos.exoplanetas <- datos.exoplanetas[, !colnames(datos.exoplanetas) %in% c("kepler_name")]
-which(apply(datos.exoplanetas, 2, function(x) sum(is.na(x))) == dim(datos.exoplanetas)[1]) # koi_teq_err1 y koi_teq_err2 presentan todos los valores missing
-datos.exoplanetas <- datos.exoplanetas[, !colnames(datos.exoplanetas) %in% c("koi_teq_err1", "koi_teq_err2")]
+length(unique(datos.elecciones$Name))
+datos.elecciones <- datos.elecciones[, !colnames(datos.elecciones) %in% c("Name")]
 
-dim(datos.exoplanetas) # 7197 filas y 36 columnas
+dim(datos.elecciones) # 8119 filas y 33 columnas
+
+summary(datos.elecciones)
 
 # 2. RECATEGORIZACION DE VARIABLES
-apply(datos.exoplanetas, 2, function(x) {length(unique(x))})
-datos.exoplanetas[,c(1:5)] <- lapply(datos.exoplanetas[,c(1:5)], factor)
-summary(datos.exoplanetas[, c(1:5)])
-datos.exoplanetas$koi_fpflag_nt<-questionr::recode.na(datos.exoplanetas$koi_fpflag_nt, "465") # Categoria desconocida
+apply(datos.elecciones, 2, function(x) {length(unique(x))})
+datos.elecciones[,c(1,4,26,30)] <- lapply(datos.elecciones[,c(1,4,26,30)], factor)
+summary(datos.elecciones[, c(1,4,26,30)])
+datos.elecciones$Densidad<-questionr::recode.na(datos.elecciones$Densidad, "?") # Categoria desconocida
+# Valores numericos que no corresponden con lo indicado en la documentacion
+datos.elecciones$SameComAutonPtge <-replace(datos.elecciones$SameComAutonPtge, which(datos.elecciones$SameComAutonPtge > 100), NA)
+datos.elecciones$ForeignersPtge <-replace(datos.elecciones$ForeignersPtge, which(datos.elecciones$ForeignersPtge < 0), NA)
+datos.elecciones$PobChange_pct <-replace(datos.elecciones$PobChange_pct, which(datos.elecciones$PobChange_pct > 100), NA)
+datos.elecciones$Explotaciones<-replace(datos.elecciones$Explotaciones,which(datos.elecciones$Explotaciones==99999),NA)
 
-numericas<-names(Filter(is.numeric, datos.exoplanetas))
-factores<-names(Filter(is.factor, datos.exoplanetas))[-1]
+numericas<-names(Filter(is.numeric, datos.elecciones))
+factores<-names(Filter(is.factor, datos.elecciones))[-2]
 
 # 3. VALORES MISSING
 # Observar gráficamente missing y estructura
 library(naniar)
-gg_miss_var(datos.exoplanetas)
+gg_miss_var(datos.elecciones)
 
 # Observaciones missing por variables
-tablamis.numericas<-as.data.frame(sapply(datos.exoplanetas[,numericas],function(x) sum(is.na(x))))
+tablamis.numericas<-as.data.frame(sapply(datos.elecciones[,numericas],function(x) sum(is.na(x))))
 names(tablamis.numericas)[1]<-"nmiss"
-max(tablamis.numericas)/nrow(datos.exoplanetas) # Alrededor de un 5 % (en el peor de los casos)
+max(tablamis.numericas)/nrow(datos.elecciones) # Alrededor de un 8 % (en el peor de los casos)
 
-tablamis.factores<-as.data.frame(sapply(datos.exoplanetas[,factores],function(x) sum(is.na(x))))
+tablamis.factores<-as.data.frame(sapply(datos.elecciones[,factores],function(x) sum(is.na(x))))
 names(tablamis.factores)[1]<-"nmiss"
-max(tablamis.factores)/ nrow(datos.exoplanetas) # Apenas llega al 0.01 % (en el peor de los casos)
+max(tablamis.factores)/ nrow(datos.elecciones) # Apenas llega al 1 % (en el peor de los casos)
 
 # Observaciones missing por observaciones
-datos.exoplanetas$prop_missings<-apply(datos.exoplanetas,1,function(x) sum(is.na(x)) / length(colnames(datos.exoplanetas)))
-# Max = 0.75 -> Tengo alguna observacion con un 75 % de los datos perdidos
-summary(datos.exoplanetas$prop_missings)
-sum(boxplot(datos.exoplanetas$prop_missings, plot = FALSE)$out > 0.5) # 258 observaciones con mas del 50 % de sus variables a missing
-datos.exoplanetas<-datos.exoplanetas[datos.exoplanetas$prop_missings<=0.5,]
-
-# Max = 0.38 -> Ahora, el maximo porcentaje es de un 38 %
-summary(datos.exoplanetas$prop_missings)
+datos.elecciones$prop_missings<-apply(datos.elecciones,1,function(x) sum(is.na(x)) / length(colnames(datos.elecciones)))
+summary(datos.elecciones$prop_missings)
+sum(boxplot(datos.elecciones$prop_missings, plot = FALSE)$out > 0.3) # 5 observaciones con mas del 30 % de sus variables a missing
 
 # La media NO es representativa
-psych::describe(Filter(is.numeric, datos.exoplanetas))
+psych::describe(Filter(is.numeric, datos.elecciones))
+
+# Columnas a imputar
+columnas <- c("Explotaciones", "Industria", "Construccion", "inmuebles", "Servicios", "ComercTTEHosteleria", "Pob2010", "SameComAutonPtge", "SUPERFICIE", "PobChange_pct", "ForeignersPtge")
 
 # 3.1 Imputaciones
 # Variables cuantitativas
@@ -71,70 +69,105 @@ ImputacionCuant<-function(vv,tipo){
   }
   vv
 }
+datos.elecciones.media <- sapply(Filter(is.numeric, datos.elecciones[, columnas]),function(x) ImputacionCuant(x,"media"))
+datos.elecciones.mediana <- sapply(Filter(is.numeric, datos.elecciones[, columnas]),function(x) ImputacionCuant(x,"mediana"))
 
-correlacion.original <- cor(Filter(is.numeric, datos.exoplanetas), use="complete.obs", method="pearson")
-datos.exoplanetas.media <- sapply(Filter(is.numeric, datos.exoplanetas),function(x) ImputacionCuant(x,"media"))
-dif.correlacion.media <- abs(correlacion.original) - abs(cor(datos.exoplanetas.media, use="complete.obs", method="pearson"))
+datos.elecciones[, columnas] <- sapply(Filter(is.numeric, datos.elecciones[, columnas]),function(x) ImputacionCuant(x,"mediana"))
 
-datos.exoplanetas.mediana <- sapply(Filter(is.numeric, datos.exoplanetas),function(x) ImputacionCuant(x,"mediana"))
-dif.correlacion.mediana <- abs(correlacion.original) - abs(cor(datos.exoplanetas.mediana, use="complete.obs", method="pearson"))
+# Imputacion manual
+gg_miss_var(datos.elecciones)
 
-corrplot(cor(Filter(is.numeric, datos.exoplanetas), use="complete.obs", method="pearson"), method = "ellipse",type = "upper") #No se aprecia ning?n patr?n
+personas_inmueble <- apply(datos.elecciones,1,function(x) ifelse(is.na(x["PersonasInmueble"]), round(as.numeric(x["Population"]) / as.numeric(x["inmuebles"]), 3), x["PersonasInmueble"]))
+datos.elecciones[, "PersonasInmueble"] <- as.numeric(personas_inmueble)
 
-summary(c(dif.correlacion.media)); summary(c(dif.correlacion.mediana));
+total.empresas <- apply(datos.elecciones,1,function(x) ifelse(is.na(x["totalEmpresas"]), x["totalEmpresas"] <- as.numeric(x["Industria"]) + as.numeric(x["Construccion"]) + 
+                          as.numeric(x["ComercTTEHosteleria"]) + as.numeric(x["Servicios"]), x["totalEmpresas"]))
+datos.elecciones[, "totalEmpresas"] <- as.numeric(total.empresas)
 
-datos.exoplanetas[, numericas] <- sapply(Filter(is.numeric, datos.exoplanetas)[,-32],function(x) ImputacionCuant(x,"mediana"))
+corrplot(cor(Filter(is.numeric, datos.elecciones), use="complete.obs", method="pearson"), method = "ellipse",type = "upper") #No se aprecia ning?n patr?n
 
 # Variables cualitativas
-datos.exoplanetas[,"koi_fpflag_nt"]<-sapply(datos.exoplanetas[, "koi_fpflag_nt"],function(x) {
-                                                          x[is.na(x)]<-names(sort(table(x),decreasing = T))[1]
-                                                          as.factor(x)
-                                                      })
-summary(datos.exoplanetas)
-corrplot(cor(Filter(is.numeric, datos.exoplanetas), use="complete.obs", method="pearson"), method = "ellipse",type = "upper") #No se aprecia ning?n patr?n
+modificar.columna <- function(fila) {
+  densidad <- ""
+  if(is.na(fila["Densidad"])) {
+    proporcion <- as.numeric(fila["Population"]) / as.numeric(fila["SUPERFICIE"])
+    ifelse(proporcion < 1, densidad <- "MuyBaja", ifelse(proporcion > 1 & proporcion < 5, densidad <- "Baja", densidad <- "Alta"))
+  }
+  else {
+    densidad <- fila["Densidad"]
+  }
+  as.factor(densidad)
+}
+datos.elecciones$Densidad <- apply(datos.elecciones, 1, modificar.columna)
 
-# Modificamos los nombres de columnas
-colnames(datos.exoplanetas) <- c("is_exoplanet", "light_curve_flag", "secondary_event_flag", "nearby_star_flag", "electronic_crosstalk_flag",
-                                 "orbital_period", "orbital_period_err1", "orbital_period_err2", "distance_star_object_disk", "distance_star_object_disk_err1",
-                                 "distance_star_object_disk_err2", "transit_duration", "transit_duration_err1", "transi_duration_err2", "ratio_blocked_by_object",
-                                 "ratio_blocked_by_object_err1", "ratio_blocked_by_object_err2", "object_radius", "object_radius_err1", "object_radius_err2",
-                                 "object_temperature", "luminosity_degree", "luminosity_degree_err1", "luminosity_degree_err2", "signal_noise_relation", "star_temperature",
-                                 "star_temperature_err1", "star_temperature_err2", "object_gravity", "object_gravity_err1", "object_gravity_err2", "star_radius",
-                                 "star_radius_err1", "star_radius_err2", "right_ascension", "declination", "prop_missing")
+summary(datos.elecciones)
+corrplot(cor(Filter(is.numeric, datos.elecciones), use="complete.obs", method="pearson"), method = "ellipse",type = "upper") #No se aprecia ning?n patr?n
 
-create_report(datos.exoplanetas, output_file = "datos_exoplanetas_imputados")
+# 5. RE-CATEGORIZACION DE VARIABLES CUALITATIVAS
+mosaico_targetbinaria<-function(var,target,nombreEje){
+  ds <- table(var, target)
+  ord <- order(apply(ds, 1, sum), decreasing=TRUE)
+  mosaicplot(ds[ord,], color=c("darkturquoise","indianred1"), las=2, main="",xlab=nombreEje)
+}
+# CCAA
+questionr::freq(datos.elecciones$CCAA)
+mosaico_targetbinaria(datos.elecciones$CCAA, datos.elecciones$Derecha, "Derecha")
+
+datos.elecciones$CCAA <- car::recode(datos.elecciones$CCAA, "c('Extremadura', 'Navarra', 'Asturias') = 'EX_NA_AS'; c('CastillaMancha', 'Aragón' , 'Canarias', 'Baleares') = 'CM_AR_CA_BA'; 
+                                     c('Madrid', 'Rioja', 'Cantabria', 'Murcia', 'Ceuta', 'Melilla', 'Galicia', 'ComValenciana') = 'MA_CA_RI_MU_CE_ME_GA_CV'; c('PaísVasco', 'Cataluña') = 'PV_CAT'")
+
+questionr::freq(datos.elecciones$Densidad)
+questionr::freq(datos.elecciones$ActividadPpal)
+mosaico_targetbinaria(datos.elecciones$ActividadPpal, datos.elecciones$Derecha, "Derecha")
+
+datos.elecciones$ActividadPpal <- car::recode(datos.elecciones$ActividadPpal, "c('Construccion', 'Industria', 'Otro') = 'Construccion_Industria_Otro';")
+
+create_report(datos.elecciones, output_file = "datos_elecciones_imputados")
 
 # 5. TRANSFORMACION DE VARIABLES
-datos.exoplanetas.copia <- datos.exoplanetas
+datos.elecciones.copia <- datos.elecciones
 
 library(bestNormalize)
 vector.mejor.lambda <- c()
-numericas.filtradas <- setdiff(numericas, c("koi_duration", "koi_duration_err1", "koi_duration_err2", "koi_period_err1", "koi_period_err2", "dec", "koi_slogg", "koi_slogg_err2", "ra"))
-for(col in numericas.filtradas) {
-  mejor.lambda <- yeojohnson(unlist(datos.exoplanetas.copia[, col]))$lambda
-  vector.mejor.lambda <- c(vector.mejor.lambda, mejor.lambda)
-  datos.exoplanetas.copia[, col] <- VGAM::yeo.johnson(unlist(datos.exoplanetas[, col]), lambda = mejor.lambda)
-}
-data.frame("columna" = numericas.filtradas, "lambda" = vector.mejor.lambda)
-
-create_report(datos.exoplanetas.copia, output_file = "datos_exoplanetas_imputados_transformados")
-
-# 5. ESTANDARIZACION DE VARIABLES CONTINUAS
 numericas <- c(numericas, "prop_missings")
-media <- sapply(datos.exoplanetas[, numericas], mean)
-desv.tipica <- sapply(datos.exoplanetas[, numericas], sd)
-datos.exoplanetas[, numericas] <- scale(datos.exoplanetas[, numericas], center = media, scale = desv.tipica)
+for(col in numericas) {
+  mejor.lambda <- yeojohnson(unlist(datos.elecciones.copia[, col]))$lambda
+  vector.mejor.lambda <- c(vector.mejor.lambda, mejor.lambda)
+  datos.elecciones.copia[, col] <- VGAM::yeo.johnson(unlist(datos.elecciones[, col]), lambda = mejor.lambda)
+}
+data.frame("columna" = numericas, "lambda" = vector.mejor.lambda)
+
+create_report(datos.elecciones.copia, output_file = "datos_elecciones_imputados_transformados")
+
+library(scorecard)
+
+salida.woe <- woebin(datos.elecciones, "Derecha", print_step = 0)
+salida.woe.copia <- woebin(datos.elecciones.copia, "Derecha", print_step = 0)
+summary(sapply(salida.woe.copia[numericas], function(x) x$total_iv[1]) - 
+          sapply(salida.woe[numericas], function(x) x$total_iv[1]))
+psych::describe(Filter(is.numeric, datos.elecciones))
+
+
+columnas.transformadas <- c("Population", "TotalCensus", "Age_over65_pct", "SameComAutonPtge", "AgricultureUnemploymentPtge", "IndustryUnemploymentPtge", "ConstructionUnemploymentPtge", "totalEmpresas", "inmuebles", "Pob2010", "SUPERFICIE", "PersonasInmueble", "Explotaciones")
+datos.elecciones[, columnas.transformadas] <- datos.elecciones.copia[, columnas.transformadas]
+rm(datos.elecciones.copia);
+
+# 6. ESTANDARIZACION DE VARIABLES CONTINUAS
+media <- sapply(datos.elecciones[, numericas], mean)
+desv.tipica <- sapply(datos.elecciones[, numericas], sd)
+datos.elecciones[, numericas] <- scale(datos.elecciones[, numericas], center = media, scale = desv.tipica)
+psych::describe(Filter(is.numeric, datos.elecciones))
 
 # PARA EVITAR PROBLEMAS, MEJOR DEFINIR LA VARIABLE OUTPUT
 # con valores alfanuméricos Yes, No
-datos.exoplanetas$is_exoplanet <- ifelse(datos.exoplanetas$is_exoplanet=="CONFIRMED","Yes","No")
-datos.exoplanetas$is_exoplanet <- as.factor(datos.exoplanetas$is_exoplanet)
+datos.elecciones$Derecha <- ifelse(datos.elecciones$Derecha==1,"Si","No")
+datos.elecciones$Derecha <- as.factor(datos.elecciones$Derecha)
 
-# Dado que las variables cualitativas solo presentan dos valores, es mejor tratarlas como variables numericas
-datos.exoplanetas$light_curve_flag <- as.numeric(as.character(datos.exoplanetas$light_curve_flag))
-datos.exoplanetas$secondary_event_flag <- as.numeric(as.character(datos.exoplanetas$secondary_event_flag))
-datos.exoplanetas$nearby_star_flag <- as.numeric(as.character(datos.exoplanetas$nearby_star_flag))
-datos.exoplanetas$electronic_crosstalk_flag <- as.numeric(as.character(datos.exoplanetas$electronic_crosstalk_flag))
+# 7. CREACION VARIABLES DUMMY
+library(dummies)
+datos.elecciones[, factores] <- sapply(datos.elecciones[, factores], as.character)
+datos.elecciones <- as.data.frame(datos.elecciones)
+datos.elecciones.final <- dummy.data.frame(datos.elecciones, names = factores, sep = ".")
 
-create_report(datos.exoplanetas, output_file = "datos_exoplanetas_final")
+create_report(datos.elecciones, output_file = "datos_elecciones_final")
   
