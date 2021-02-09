@@ -165,6 +165,7 @@ telco.data <- telco.data %>%
 telco.data.final <- cbind(telco.data.final, telco.data[, c("Partner", "Dependents", "PaperlessBilling")], telco.data[, numericas], telco.data[, "target"])
 colnames(telco.data.final)[38] <- "target"
 colnames(telco.data.final) <- gsub(" ", ".", colnames(telco.data.final))
+colnames(telco.data.final) <- gsub("-", ".", colnames(telco.data.final))
 
 create_report(telco.data.final, output_file = "datos_telco_final")
   
