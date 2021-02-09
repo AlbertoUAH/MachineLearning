@@ -42,16 +42,17 @@ for(columna in factores) {
   mosaico_targetbinaria(telco.data[, columna], telco.data[, "Churn"],columna)
 }
 
-
-
 tabla <- table(telco.data$tenure, telco.data$Churn)
 tabla.orden <- order(tabla[,2])
 barplot(tabla[, 2], type = "l", xlab = "Month", ylab = "Churn", col = "red")
 
-
 library(scorecard)
 salida.woe <- woebin(telco.data, y = "Churn", positive = "Yes")
 woebin_plot(salida.woe)
+telco.data$tenure.cont <- as.numeric(as.character(telco.data$tenure))
+
+salida.woe <- woebin(telco.data, y = "Churn", positive = "Yes")
+numericas <- c(numericas, "tenure.cont")
 
 # Podemos descartar determinadas columnas
 telco.data$MultipleLines <- NULL
@@ -107,7 +108,7 @@ sum(is.na(telco.data))
 DescTools::Freq(telco.data$tenure)
 mosaico_targetbinaria(telco.data$tenure, telco.data$Churn, "Churn")
 
-telco.data$tenure <- car::recode(telco.data$tenure, "seq(0,5)='0-5'; seq(6,25)='6-25'; seq(26,43)='26-43'; else='44+'")
+telco.data$tenure <- car::recode(telco.data$tenure, "seq(0,5)='0-5'; seq(6,17)='6-17'; seq(18,72)='18';")
 
 DescTools::Freq(telco.data$tenure)
 mosaico_targetbinaria(telco.data$tenure, telco.data$Churn, "Churn")
@@ -134,7 +135,7 @@ psych::describe(Filter(is.numeric, telco.data.copia))
 
 columnas.transformadas <- c("TotalCharges")
 telco.data[, columnas.transformadas] <- telco.data.copia[, columnas.transformadas]
-rm(telco.data.copia);
+rm(telco.data.copia)
 
 # 6. ESTANDARIZACION DE VARIABLES CONTINUAS
 media <- sapply(telco.data[, numericas], mean)
@@ -168,4 +169,5 @@ colnames(telco.data.final) <- gsub(" ", ".", colnames(telco.data.final))
 colnames(telco.data.final) <- gsub("-", ".", colnames(telco.data.final))
 
 create_report(telco.data.final, output_file = "datos_telco_final")
+save.image("depuracion.RData")
   
