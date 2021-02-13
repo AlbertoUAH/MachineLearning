@@ -35,15 +35,25 @@ for(i in seq(1,5)) {
 }
 vector.semillas[6] <- 12345
 
+# Con regresion logistica
+control.lr <- rfeControl(functions = lrFuncs, method = "cv", number = 5, repeats = 15, seeds = vector.semillas)
+salida.rfe.lr <- rfe(telco.data.final[, c(columnas, "tenure.cont")], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
+predictors(salida.rfe.rf)
+plot(salida.rfe.rf, type=c("g", "o"))
+
 # Con random forest
 control.rf <- rfeControl(functions = rfFuncs, method = "cv", number = 5, repeats = 15, seeds = vector.semillas)
-salida.rfe.rf <- rfe(telco.data.final[, columnas], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
+salida.rfe.rf <- rfe(telco.data.final[, c(columnas, "tenure.cont")], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
 predictors(salida.rfe.rf)
 plot(salida.rfe.rf, type=c("g", "o"))
 
 # ************************************ 
 # APLICANDO cruzadalogistica a los modelos candidatos 
 # ************************************
+medias.base<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("tenure.cont", "TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "TechSupport.No"), listclass=c(""), grupos=5,sinicio=1234,repe=15)
+
+medias.base.df <- data.frame(medias.base[1])
+medias.base.df$modelo="RFE LR-RF TOP 5"
 
 medias1<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Contract.Month.to.month", "InternetService.Fiber.optic", "TotalCharges", "InternetService.DSL",
                                                                              "StreamingMovies.No", "PaperlessBilling", "Contract.One.year", "StreamingTV.No", "PaymentMethod.Electronic.check",
@@ -56,6 +66,10 @@ medias2<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Co
                                                                              "OnlineSecurity.No"), listclass=c(""), grupos=5,sinicio=1234,repe=15)
 medias2.df <- data.frame(medias2[1])
 medias2.df$modelo="LOGISTICA BIC"
+
+# Diferencia entre ambos modelos
+setdiff(predictors(salida.rfe.rf), candidato.bic)
+setdiff(candidato.bic, predictors(salida.rfe.rf))
 
 medias3<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "OnlineSecurity.No", "tenure.18", "tenure.0.5", 
                                                                              "TechSupport.No", "Contract.Month.to.month", "InternetService.DSL"), listclass=, c(""), grupos=5,sinicio=1234,repe=15)
@@ -77,18 +91,17 @@ medias4.df <- data.frame(medias4[1])
 medias4.df$modelo="LOGISTICA AIC CON tenure.cont"
 
 medias5<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "OnlineSecurity.No", "tenure.cont",
-                                                                             "TechSupport.No", "Contract.Month.to.month", "InternetService.DSL"), listclass=, c(""), grupos=5,sinicio=1234,repe=15)
+                                                                             "TechSupport.No", "Contract.Month.to.month"), listclass=, c(""), grupos=5,sinicio=1234,repe=15)
 medias5.df <- data.frame(medias5[1])
 medias5.df$modelo="LOGISTICA RFE CON tenure.cont"
 
-union1<-rbind(medias1.df,medias2.df,medias3.df, medias4.df, medias5.df)
+union1<-rbind(medias.base.df, medias1.df,medias2.df,medias3.df, medias4.df, medias5.df)
 
 par(cex.axis=0.5) 
 boxplot(data=union1,tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
 
 par(cex.axis=0.5) 
 boxplot(data=union1,auc~modelo,main="AUC", col = "#F28773", lwd = 1)
-
 
 # Opcion 3. Grafico VCramer
 # Calcula el V de Cramer
@@ -105,9 +118,6 @@ graficoVcramer<-function(varsInd, varDep){
 graficoVcramer(c("PaperlessBilling", "Contract.One.year", "StreamingTV.No", "PaymentMethod.Electronic.check",
                  "StreamingMovies.No", "OnlineSecurity.No", "TechSupport.No"), vardep)
 
-# Diferencia entre ambos modelos
-setdiff(predictors(salida.rfe.rf), candidato.bic)
-setdiff(candidato.bic, predictors(salida.rfe.rf))
 
 # ¿Y si eliminamos OnlineSecurity.No?
 medias6<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Contract.Month.to.month", "InternetService.Fiber.optic", "TotalCharges", "InternetService.DSL",
@@ -116,7 +126,7 @@ medias6<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Co
 medias6.df <- data.frame(medias6[1])
 medias6.df$modelo="LOGISTICA BIC SIN OnlineSecurity.No"
 
-union1<-rbind(medias1.df,medias2.df,medias3.df, medias4.df, medias5.df, medias6.df)
+union1<-rbind(medias.base.df, medias1.df,medias2.df,medias3.df, medias4.df, medias5.df, medias6.df)
 
 par(cex.axis=0.5) 
 boxplot(data=union1,tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
@@ -124,7 +134,7 @@ boxplot(data=union1,tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
 par(cex.axis=0.5) 
 boxplot(data=union1,auc~modelo,main="AUC", col = "#F28773", lwd = 1)
 
-for(modelo in c(medias1,medias2,medias3, medias4, medias5, medias6)) {
+for(modelo in c(medias.base, medias1,medias2,medias3, medias4, medias5, medias6)) {
   print(modelo$table)
 }
 
