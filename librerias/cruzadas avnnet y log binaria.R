@@ -171,7 +171,7 @@ if (any(listclass==c(""))==FALSE)
   
   set.seed(sinicio)
   control<-trainControl(method = "repeatedcv",number=grupos,repeats=repe,
-   savePredictions = "all",classProbs=TRUE) 
+   savePredictions = "all",classProbs=TRUE, verboseIter = TRUE) 
   
   # Aplico caret y construyo modelo
   

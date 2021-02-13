@@ -5,6 +5,10 @@ source("./librerias/cruzadas avnnet y log binaria.R")
 library(parallel)
 library(doParallel)
 library(caret)
+
+cluster <- makeCluster(detectCores() - 1) 
+registerDoParallel(cluster) 
+
 variables.candidato.1 <- c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", 
                            "OnlineSecurity.No", "tenure.cont", "TechSupport.No", "Contract.Month.to.month")
 
@@ -20,7 +24,7 @@ vardep <- "target"
 size.candidato.1 <- c(5, 10, 15, 20, 25, 30, 40)
 decay.candidato.1 <- c(0.1, 0.01, 0.001)
 cvnnet.candidato.1 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listconti=variables.candidato.1, listclass=c(""),
-                                          grupos=5,sinicio=1234,repe=15, size=size.candidato.1,decay=decay.candidato.1,repeticiones=15,itera=100)
+                                          grupos=5,sinicio=1234,repe=5, size=size.candidato.1,decay=decay.candidato.1,repeticiones=5,itera=100)
 
 # Si quisieramos 20 observaciones por parametro
 # h * (k + 1) + h + 1 = 7043 / 20 ~ 352.2
@@ -29,5 +33,5 @@ cvnnet.candidato.1 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listc
 size.candidato.2 <- c(5, 10, 15, 20, 25, 30, 40, 50)
 decay.candidato.2 <- c(0.1, 0.01, 0.001)
 cvnnet.candidato.2 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listconti=variables.candidato.2, listclass=c(""),
-                                       grupos=5,sinicio=1234,repe=15, size=size.candidato.2,decay=decay.candidato.2,repeticiones=15,itera=100)
+                                       grupos=5,sinicio=1234,repe=5, size=size.candidato.2,decay=decay.candidato.2,repeticiones=5,itera=100)
 
