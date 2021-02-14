@@ -171,7 +171,7 @@ if (any(listclass==c(""))==FALSE)
   
   set.seed(sinicio)
   control<-trainControl(method = "repeatedcv",number=grupos,repeats=repe,
-   savePredictions = "all",classProbs=TRUE, verboseIter = TRUE) 
+   savePredictions = "all",classProbs=TRUE) 
   
   # Aplico caret y construyo modelo
   
@@ -189,6 +189,8 @@ if (any(listclass==c(""))==FALSE)
   preditest$Fold <- sapply(preditest$prueba, "[", 1)
   preditest$Rep <- sapply(preditest$prueba, "[", 2)
   preditest$prueba<-NULL
+  
+  medias.confu <- c()
   
   tasafallos<-function(x,y) {
    confu<-confusionMatrix(x,y)
@@ -208,6 +210,7 @@ paso1<-preditest[which(preditest$Rep==repi),]
 tasa=1-tasafallos(paso1$pred,paso1$obs)  
 medias<-rbind(medias,tasa)
 }
+medias.confu <- c(medias.confu, confusionMatrix(avnnet))
 names(medias)<-"tasa"
 
   
@@ -237,7 +240,7 @@ names(mediasbis)<-"auc"
   
   medias$auc<-mediasbis$auc
   
-  return(medias)
+  return(list(medias, medias.confu))
   
  }
 
