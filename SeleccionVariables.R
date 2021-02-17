@@ -37,23 +37,23 @@ vector.semillas[6] <- 12345
 
 # Con regresion logistica
 control.lr <- rfeControl(functions = lrFuncs, method = "cv", number = 5, repeats = 5, seeds = vector.semillas)
-salida.rfe.lr <- rfe(telco.data.final[, c(columnas, "tenure.cont")], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
-predictors(salida.rfe.rf)
+salida.rfe.lr <- rfe(telco.data.final[, columnas], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
+predictors(salida.rfe.lr)
 plot(salida.rfe.rf, type=c("g", "o"))
 
 # Con random forest
 control.rf <- rfeControl(functions = rfFuncs, method = "cv", number = 5, repeats = 5, seeds = vector.semillas)
-salida.rfe.rf <- rfe(telco.data.final[, c(columnas, "tenure.cont")], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
+salida.rfe.rf <- rfe(telco.data.final[, columnas], telco.data.final[, vardep], sizes = c(1:20), rfeControl = control.rf)
 predictors(salida.rfe.rf)
 plot(salida.rfe.rf, type=c("g", "o"))
 
 # ************************************ 
 # APLICANDO cruzadalogistica a los modelos candidatos 
 # ************************************
-medias.base<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("tenure.cont", "TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "TechSupport.No"), listclass=c(""), grupos=5,sinicio=1234,repe=5)
+medias.base<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("OnlineSecurity.No", "TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "TechSupport.No"), listclass=c(""), grupos=5,sinicio=1234,repe=5)
 
 medias.base.df <- data.frame(medias.base[1])
-medias.base.df$modelo="RFE LR-RF TOP 5"
+medias.base.df$modelo="RFE LR TOP 5"
 
 medias1<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Contract.Month.to.month", "InternetService.Fiber.optic", "TotalCharges", "InternetService.DSL",
                                                                              "StreamingMovies.No", "PaperlessBilling", "Contract.One.year", "StreamingTV.No", "PaymentMethod.Electronic.check",
@@ -71,12 +71,11 @@ medias2.df$modelo="LOGISTICA BIC"
 setdiff(predictors(salida.rfe.rf), candidato.bic)
 setdiff(candidato.bic, predictors(salida.rfe.rf))
 
-medias3<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "OnlineSecurity.No", "tenure.18", "tenure.0.5", 
-                                                                             "TechSupport.No", "Contract.Month.to.month", "InternetService.DSL"), listclass=, c(""), grupos=5,sinicio=1234,repe=5)
+medias3<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "OnlineSecurity.No", "tenure.18"), listclass= c(""), grupos=5,sinicio=1234,repe=5)
 medias3.df <- data.frame(medias3[1])
-medias3.df$modelo="LOGISTICA RFE"
+medias3.df$modelo="RFE RF TOP 5"
 
-union1<-rbind(medias1.df,medias2.df,medias3.df)
+union1<-rbind(medias.base.df,medias1.df,medias2.df,medias3.df)
 
 par(cex.axis=0.5) 
 boxplot(data=union1,tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
@@ -90,10 +89,9 @@ medias4<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Co
 medias4.df <- data.frame(medias4[1])
 medias4.df$modelo="LOGISTICA AIC CON tenure.cont"
 
-medias5<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "OnlineSecurity.No", "tenure.cont",
-                                                                             "TechSupport.No", "Contract.Month.to.month"), listclass=, c(""), grupos=5,sinicio=1234,repe=5)
+medias5<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("TotalCharges", "MonthlyCharges", "InternetService.Fiber.optic", "OnlineSecurity.No", "tenure.cont"), listclass=, c(""), grupos=5,sinicio=1234,repe=5)
 medias5.df <- data.frame(medias5[1])
-medias5.df$modelo="LOGISTICA RFE CON tenure.cont"
+medias5.df$modelo="LOGISTICA RFE-RF CON tenure.cont"
 
 union1<-rbind(medias.base.df, medias1.df,medias2.df,medias3.df, medias4.df, medias5.df)
 
@@ -115,16 +113,16 @@ graficoVcramer<-function(varsInd, varDep){
   vector.cramer <- c(sapply(varsInd, function(x) {Vcramer(x, varDep)}))
   barplot(sort(vector.cramer,decreasing =T),las=3,ylim=c(0,1), names.arg = varsInd, cex.names=0.8)
 }
-graficoVcramer(c("PaperlessBilling", "Contract.One.year", "StreamingTV.No", "PaymentMethod.Electronic.check",
-                 "StreamingMovies.No", "OnlineSecurity.No", "TechSupport.No"), vardep)
-
+graficoVcramer(c("Contract.Month.to.month", "InternetService.Fiber.optic", "TotalCharges", "InternetService.DSL",
+                 "StreamingMovies.No", "PaperlessBilling", "Contract.One.year", "StreamingTV.No", "PaymentMethod.Electronic.check",
+                 "OnlineSecurity.No"), vardep)
 
 # ?Y si eliminamos OnlineSecurity.No?
 medias6<-cruzadalogistica(data=telco.data.final, vardep="target",listconti=c("Contract.Month.to.month", "InternetService.Fiber.optic", "TotalCharges", "InternetService.DSL",
-                                                                             "StreamingMovies.No", "PaperlessBilling", "Contract.One.year", "StreamingTV.No", "PaymentMethod.Electronic.check"), 
+                                                                             "StreamingMovies.No", "PaperlessBilling", "Contract.One.year"), 
                                                                               listclass=c(""), grupos=5,sinicio=1234,repe=5)
 medias6.df <- data.frame(medias6[1])
-medias6.df$modelo="LOGISTICA BIC SIN OnlineSecurity.No"
+medias6.df$modelo="LOGISTICA BIC SIN 3 ULTIMAS VARIABLES"
 
 union1<-rbind(medias.base.df, medias1.df,medias2.df,medias3.df, medias4.df, medias5.df, medias6.df)
 

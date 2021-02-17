@@ -19,6 +19,7 @@ library(reshape)
 library(caret)
 library(dplyr)
 library(pROC)
+library(NeuralNetTools)
 
 # *********************************
 # CRUZADA LOGISTICA
