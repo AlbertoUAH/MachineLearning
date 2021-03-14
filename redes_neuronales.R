@@ -107,7 +107,7 @@ rm(medias1.1.df,medias1.2.df,medias1.3.df,medias1.4.df,medias1.5.df,medias1.6.df
 rm(cvnnet.candidato.1.1, cvnnet.candidato.1.2, cvnnet.candidato.1.3, cvnnet.candidato.1.4, cvnnet.candidato.1.5, cvnnet.candidato.1.6, cvnnet.candidato.1.7,
    cvnnet.candidato.1.8, cvnnet.candidato.1.9)
 
-# Candidatos: 20-25 nodos, lr = 0.1
+# Candidatos: 25 nodos, lr = 0.1
 # ¿Y si aumentamos el lr?
 cruzadaavnnetbin(data=medic.data.final,vardep=vardep,listconti=conjunto.1, listclass=c(""),
                  grupos=5,sinicio=1234,repe=5, size=c(20,25),decay=c(0.1, 0.2, 0.5),repeticiones=5,itera=200)
@@ -230,21 +230,33 @@ rm(medias1.1.df.bis,medias1.2.df.bis,medias1.1.df,medias1.2.df,medias1.3.df,medi
 rm(cvnnet.candidato.1.1, cvnnet.candidato.1.2, cvnnet.candidato.1.3, cvnnet.candidato.1.4, cvnnet.candidato.1.5, cvnnet.candidato.1.6, cvnnet.candidato.1.7,
    cvnnet.candidato.1.8, cvnnet.candidato.1.9, cvnnet.candidato.1.1.bis, cvnnet.candidato.1.2.bis.2)
 
+# Modelo candidato: 20 nodos y lr 0.01
+
+# El mejor lr ha sido 0.01 ¿Y si lo aumentamos?
+cruzadaavnnetbin(data=medic.data.final,vardep=vardep,listconti=conjunto.2, listclass=c(""),
+                 grupos=5,sinicio=1234,repe=5, size=20,decay=c(0.01, 0.02, 0.03),repeticiones=5,itera=200)
+
+# No parece mejorar...
+#   size decay   bag  Accuracy     Kappa  AccuracySD    KappaSD
+# 1   20  0.01 FALSE 0.8623555 0.6880542 0.007277640 0.01734610
+# 2   20  0.02 FALSE 0.8623555 0.6875894 0.006284624 0.01577546
+# 3   20  0.03 FALSE 0.8605999 0.6841189 0.006969005 0.01718625
+
 # MODELOS DE RED CANDIDATOS
-# Con 7 variables: 5 nodos y 0.1 decay
-# Con 5 variables: 5 nodos y 0.1 decay
+# Con 7 variables: 25 nodos y 0.1 decay
+# Con 5 variables: 20 nodos y 0.01 decay
 # Ahora, podemos modificar el maxit
 lista.1 <- list(); lista.2 <- list()
 for(maxit in c(50, 100, 150, 200, 300, 400, 500)) {
-  cvnnet.candidato.final.1 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listconti=variables.candidato.1, listclass=c(""),
-                                           grupos=5,sinicio=1234,repe=5, size=5,decay=0.1,repeticiones=5,itera=maxit)
+  cvnnet.candidato.final.1 <- cruzadaavnnetbin(data=medic.data.final,vardep=vardep,listconti=conjunto.1, listclass=c(""),
+                                           grupos=5,sinicio=1234,repe=5, size=25,decay=0.1,repeticiones=5,itera=maxit)
   
   medias.temp.df <- data.frame(cvnnet.candidato.final.1[1])
   medias.temp.df$modelo=paste("MAXIT: ", as.character(maxit))
   lista.1[[as.character(maxit)]] <- medias.temp.df
   
-  cvnnet.candidato.final.2 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listconti=variables.candidato.2, listclass=c(""),
-                                               grupos=5,sinicio=1234,repe=5, size=5,decay=0.1,repeticiones=5,itera=maxit)
+  cvnnet.candidato.final.2 <- cruzadaavnnetbin(data=medic.data.final,vardep=vardep,listconti=conjunto.2, listclass=c(""),
+                                               grupos=5,sinicio=1234,repe=5, size=20,decay=0.01,repeticiones=5,itera=maxit)
   
   medias.temp.df <- data.frame(cvnnet.candidato.final.2[1])
   medias.temp.df$modelo=paste("MAXIT: ", as.character(maxit))
@@ -252,27 +264,25 @@ for(maxit in c(50, 100, 150, 200, 300, 400, 500)) {
 }
 rm(medias.temp.df)
 # Modelo 1
-boxplot(data = rbind(plyr::ldply(lista.1, data.frame)[, -1], medias6.df), tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
-boxplot(data = rbind(plyr::ldply(lista.1, data.frame)[, -1], medias6.df), auc~modelo,main="AUC", col = "#F28773", lwd = 1)
+boxplot(data = rbind(plyr::ldply(lista.1, data.frame)[, -1], logistico.1), tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
+boxplot(data = rbind(plyr::ldply(lista.1, data.frame)[, -1], logistico.1), auc~modelo,main="AUC", col = "#F28773", lwd = 1)
 
 # Modelo 2
-boxplot(data = rbind(plyr::ldply(lista.2, data.frame)[, -1], medias.base.df), tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
-boxplot(data = rbind(plyr::ldply(lista.2, data.frame)[, -1], medias.base.df), auc~modelo,main="AUC", col = "#F28773", lwd = 1)
+boxplot(data = rbind(plyr::ldply(lista.2, data.frame)[, -1], logistico.2), tasa~modelo,main="TASA FALLOS", col = "#F28773", lwd = 1)
+boxplot(data = rbind(plyr::ldply(lista.2, data.frame)[, -1], logistico.2), auc~modelo,main="AUC", col = "#F28773", lwd = 1)
 
-# Podemos bajar el numero maximo de iteraciones a 150
-cvnnet.candidato.final.1 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listconti=variables.candidato.1, listclass=c(""),
-                                         grupos=5,sinicio=1234,repe=5, size=5,decay=0.01,repeticiones=5,itera=100)
+# Podemos mantener el numero maximo de iteraciones a 200
+cvnnet.candidato.final.1 <- cruzadaavnnetbin(data=medic.data.final,vardep=vardep,listconti=conjunto.1, listclass=c(""),
+                                         grupos=5,sinicio=1234,repe=5, size=25,decay=0.1,repeticiones=5,itera=100)
 cvnnet.candidato.final.1.df <- data.frame(cvnnet.candidato.final.1[1])
-cvnnet.candidato.final.1.df$modelo="AVNNET 1. NODOS: 5 - DECAY: 0.1 - MAXIT: 100"
+cvnnet.candidato.final.1.df$modelo="AVNNET 1"
 
-cvnnet.candidato.final.2 <- cruzadaavnnetbin(data=telco.data.final,vardep=vardep,listconti=variables.candidato.2, listclass=c(""),
-                                             grupos=5,sinicio=1234,repe=5, size=5,decay=0.1,repeticiones=5,itera=200)
+cvnnet.candidato.final.2 <- cruzadaavnnetbin(data=medic.data.final,vardep=vardep,listconti=conjunto.2, listclass=c(""),
+                                             grupos=5,sinicio=1234,repe=5, size=20,decay=0.01,repeticiones=5,itera=200)
 cvnnet.candidato.final.2.df <- data.frame(cvnnet.candidato.final.2[1])
-cvnnet.candidato.final.2.df$modelo="AVNNET 2. NODOS: 5 - DECAY: 0.1 - MAXIT: 200"
+cvnnet.candidato.final.2.df$modelo="AVNNET 2"
 
-medias6.df$modelo <- "MODELO LOGISTICO 1"
-medias.base.df$modelo <- "MODELO LOGISTICO 2"
-union.final <- rbind(medias6.df, medias.base.df, cvnnet.candidato.final.1.df, cvnnet.candidato.final.2.df)
+union.final <- rbind(logistico.1, logistico.2, cvnnet.candidato.final.1.df, cvnnet.candidato.final.2.df)
 
 union.final$formula <- c(rep("1", 5), rep("2", 5), rep("1", 5), rep("2", 5))
 union.final$formula <- as.factor(union.final$formula)
@@ -296,6 +306,12 @@ legend("bottomright", legend = c("FORMULA 1","FORMULA 2") ,
 for(modelo in c(cvnnet.candidato.final.1, cvnnet.candidato.final.2)) {
   print(modelo$table)
 }
+
+# Candidatos hasta el momento
+# Modelo logistico 1
+# Modelo logistico 2
+# avnnet conjunto variables 1 (num nodos: 25, lr: 0.1, maxit: 200)
+# avnnet conjunto variables 2 (num nodos: 20, lr: 0.01, maxit: 200)
 
 # Al finalizar
 stopCluster(cluster) 
