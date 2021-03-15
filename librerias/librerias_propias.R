@@ -48,7 +48,7 @@ cruzada_logistica <- function(dataset, target, candidatos, nombres_candidatos, g
               scale_x_discrete(name = "Modelo") +
               ggtitle("AUC por modelo"))
   
-  return(union1)
+  return(union)
 }
 
 # Funcion para obtener la matriz de confusion de las predicciones resultantes
@@ -67,6 +67,48 @@ matriz_confusion_predicciones <- function(formula, dataset, corte) {
   
   matriz_confusion <- confusionMatrix(dataset$target, pred_vector)
   return(matriz_confusion)
+}
+
+# comparacion modelos redes neuronales
+comparar_modelos_red <- function(sizes, decays, grupos, repe, iteraciones) {
+  
+  union  <- data.frame(tasa = numeric(), auc = numeric(), modelo = character())
+  for (i in seq(1:length(sizes))) {
+    cvnnet.candidato <- cruzadaavnnetbin(data=medic.data.final,vardep=vardep,
+                                         listconti=conjunto.1, 
+                                         listclass=c(""),
+                                         grupos=grupos,sinicio=1234,
+                                         repe=repe, size=sizes[i],
+                                         decay=decays[i],repeticiones=repe,
+                                         itera=iteraciones)
+    
+    modelo <- paste0("NODOS: ", sizes[i] , " - DECAY: ", decays[i])
+    
+    medias.df <- data.frame(cvnnet.candidato[1])
+    medias.df$modelo <- paste0(modelo)
+    
+    union <- rbind(union, medias.df)
+    
+    print(paste0(modelo, ": completed!"))
+    
+  }
+  
+  fill <- "#4271AE"
+  line <- "#1F3552"
+  
+  print(ggplot(union, aes(x = modelo, y = tasa)) +
+          geom_boxplot(fill = fill, colour = line,
+                       alpha = 0.7) +
+          scale_x_discrete(name = "Modelo") +
+          ggtitle("Tasa de fallos por modelo"))
+  
+  print(ggplot(union, aes(x = modelo, y = auc)) +
+          geom_boxplot(fill = fill, colour = line,
+                       alpha = 0.7) +
+          scale_x_discrete(name = "Modelo") +
+          ggtitle("AUC por modelo"))
+  
+  return(union)
 }
 
 

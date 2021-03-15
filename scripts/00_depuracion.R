@@ -28,7 +28,7 @@ dim(surgical_dataset) # Filas x columnas
 # Por tiempo, se ha tomado la decision de elegir un subconjunto de datos
 # Para ello, recurrimos a createDataPartition
 set.seed(1234)
-partitions <- createDataPartition(surgical_dataset$complication, p = 0.4, list = FALSE)
+partitions <- createDataPartition(surgical_dataset$complication, p = 0.30, list = FALSE)
 surgical_dataset_partitioned <- surgical_dataset[partitions, ]
 
 #--- EDA (Exploratory Data Analysis)
