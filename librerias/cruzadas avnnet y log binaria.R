@@ -136,7 +136,7 @@ names(mediasbis)<-"auc"
 cruzadaavnnetbin<-
  function(data=data,vardep="vardep",
   listconti="listconti",listclass="listclass",grupos=4,sinicio=1234,repe=5,
-  size=c(5),decay=c(0.01),repeticiones=5,itera=100,trace=TRUE)
+  size=c(5),decay=c(0.01),repeticiones=5,itera=100,trace=FALSE)
  { 
   
   # Preparación del archivo

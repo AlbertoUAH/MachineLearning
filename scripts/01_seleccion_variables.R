@@ -22,7 +22,7 @@ cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster)
 
 #--- Lectura dataset depurado
-surgical_dataset <- fread("./data/surgical_dataset_final.csv", data.table = FALSE)
+surgical_dataset <- fread("./data/surgical_dataset_final_completo.csv", data.table = FALSE)
 surgical_dataset$target <- as.factor(surgical_dataset$target)
 
 # Separamos variable objetivo del resto
@@ -41,14 +41,15 @@ lista.variables.bic <- steprepetidobinaria(data=surgical_dataset,
 tabla.bic <- lista.variables.bic[[1]]
 
 # Ya tenemos las variables, pero...
-# aic -> 14 parametros
+# aic -> 14 parametros (con todas las observaciones 17)
 candidato.aic <- unlist(strsplit(tabla.aic[order(tabla.aic$Freq, decreasing = TRUE), ][1,1], split = "+", fixed = TRUE))
-# bic -> 9 parametros
+# bic -> 9 parametros (con todas las observaciones 10)
 candidato.bic <- unlist(strsplit(tabla.bic[order(tabla.bic$Freq, decreasing = TRUE), ][1,1], split = "+", fixed = TRUE))
 
 # Las variables comunes son las que aparecen en candidato.bic
 # "mortality_rsi"     "ccsMort30Rate"     "bmi"               "month.8"           "asa_status.0"     
-# "baseline_osteoart" "moonphase.0"       "Age"               "dow.0"     
+# "baseline_osteoart" "moonphase.0"       "Age"               "dow.0"
+# Con todas las observaciones (bic), el modelo es el mismo salvo con el añadido de baseline_cancer
 intersect(candidato.aic, candidato.bic)
 
 #--- Seleccion de variables con RFE
@@ -68,11 +69,12 @@ salida.rfe.lr <- rfe(surgical_dataset[, vars], surgical_dataset[, target],
 salida.rfe.lr
 
 # Mejores variables RFE - LR (18 variables). Accuracy => 0.7796
+# Con todas las observaciones 0.7880
 salida.rfe.lr$optVariables
 # Top 5: ccsComplicationRate, mortality_rsi, bmi, month.8, Age
 # Las variables obtenidas en la interseccion anterior se situan practicamente entre las primeras del RFE - LR
 ggplot(salida.rfe.lr) + ggtitle("Variable importance Logistic Regression RFE")
-ggsave('./charts/01_feature_selection_RFE_LR.png')
+ggsave('./charts/01_feature_selection_RFE_LR_whole_dataset.png')
 
 candidato.rfe.lr <- salida.rfe.lr$optVariables
 candidato.rfe.lr.2 <- c("ccsMort30Rate", "mortality_rsi", "bmi")
@@ -85,10 +87,11 @@ salida.rfe.rf <- rfe(surgical_dataset[, vars], surgical_dataset[, target],
                      sizes = c(1:20), rfeControl = control.rf)
 
 # Mejores variables RFE - RF (5 variables). Accuracy => 0.8902
+# Con el dataset completo, con 4 variables se obtiene un 0.9040 (sin ahrq_ccs)
 salida.rfe.rf$optVariables
 # Top 5: Age, mortality_rsi, ccsMort30Rate, bmi, ahrq_ccs
 ggplot(salida.rfe.rf) + ggtitle("Variable importance Random Forest RFE")
-ggsave('./charts/01_feature_selection_RFE_RF.png')
+ggsave('./charts/01_feature_selection_RFE_RF_whole_dataset.png')
 
 candidato.rfe.rf <- salida.rfe.rf$optVariables
 
@@ -133,8 +136,6 @@ union3 <- cruzada_logistica(surgical_dataset, target, candidatos_3, nombres_cand
 #   RFE RF TOP 5 -> seleccion2
 #   "Age" "mortality_rsi" "ccsMort30Rate" "bmi" "ahrq_ccs"
 #
-#--- Estadisticas
-# Regresion logistica: modelo1 (tasa fallos: 0.222, auc: 0.777); modelo 2 (tasa fallos: 0.216, auc: 0.755)
 
 surgical_test_data <- fread("./data/surgical_test_data.csv", data.table = FALSE)
 names(surgical_test_data)[35] <- "target"
@@ -165,6 +166,14 @@ matriz_conf_2 <- matriz_confusion_predicciones(formula = paste0(target, "~" ,
 #      No         6250  344
 #      Yes        1443  744
 #
+
+#---- Estadisticas
+# Por tasa fallos --------------- auc
+#   log.   modelo 2           log.   modelo 1
+#   log.   modelo 1           log.   modelo 2
+
+#---- Detenemos el cluster
+stopCluster(cluster)
 
 #---- Guardamos el fichero RData
 save.image(file = "./rdata/SeleccionVariables.RData")

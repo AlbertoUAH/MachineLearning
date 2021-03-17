@@ -208,6 +208,8 @@ my_model <- ranger(
 # **Estimacion** del error / acierto **esperado**
 acierto <- 1 - my_model$prediction.error
 acierto
+#-- Con dataset completo: 0.880
+#-- Con 5854 observaciones: 0.844
 
 # Pintar importancia de variables
 impor_df <- as.data.frame(my_model$variable.importance)
@@ -221,6 +223,7 @@ ggplot(impor_df, aes(fct_reorder(vars, Importance), Importance)) +
   labs(x = 'Variables', y = 'Importancia', title = 'Importancia Variables') +
   theme_bw()
 ggsave('./charts/00_variable_importance_random_forest.png')
+#-- Con dataset completo y un subconjunto es muy similar la importancia
 
 # 1 - "Yes" ; 0 - "No"
 surgical_dataset_final$target <- ifelse(
