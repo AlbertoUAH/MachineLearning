@@ -107,22 +107,32 @@ ggplot(bagging_modelo1, aes(x=factor(sampsizes), y=auc,
   geom_point(position=position_dodge(width=0.3),size=3, shape = 18)
 
 nodesizes.1 <- list(20)
-sampsizes.1 <- list(1, 500, 1000, 2000, 3000, 4600)
+sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4600)
 bagging_modelo1_2 <- tuneo_bagging(surgical_dataset, target = target,
                                  lista.continua = var_modelo1,
                                  nodesizes = nodesizes.1,
                                  sampsizes = sampsizes.1, mtry = mtry.1,
                                  ntree = n.trees, grupos = 5, repe = 5)
 
+# A partir de 2500 submuestras el error se estabiliza
 nodesizes.1 <- list(50)
-sampsizes.1 <- list(1, 500, 1000, 2000, 3000, 4600)
+sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4600)
 bagging_modelo1_3 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
                                    nodesizes = nodesizes.1,
                                    sampsizes = sampsizes.1, mtry = mtry.1,
                                    ntree = n.trees, grupos = 5, repe = 5)
+
+nodesizes.1 <- list(100)
+sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4600)
+bagging_modelo1_4 <- tuneo_bagging(surgical_dataset, target = target,
+                                   lista.continua = var_modelo1,
+                                   nodesizes = nodesizes.1,
+                                   sampsizes = sampsizes.1, mtry = mtry.1,
+                                   ntree = n.trees, grupos = 5, repe = 5)
+
 #-- Posible candidato: nodesize 20 y sampsize 1000 (ligera tasa de error superior a con reemplazamiento)
-# 
+#-- Posible candidato: nodesize 50 y sampsize 2500
 
 # MODELO 2
 nodesizes.2 <- list(5, 10, 20, 30, 40, 50)
