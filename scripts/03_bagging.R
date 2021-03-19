@@ -53,30 +53,30 @@ rfbis.2<-randomForest(factor(target)~Age+mortality_rsi+ccsMort30Rate+bmi+ahrq_cc
                       data=surgical_dataset,
                       mtry=mtry.2,ntree=5000,nodesize=10,replace=TRUE)
 
-rfbis.1.df <- as.data.frame(rfbis.1$err.rate)
-rfbis.1.df$n_trees <- seq(1, nrow(rfbis.1.df))
-rfbis.2.df <- as.data.frame(rfbis.2$err.rate)
-rfbis.2.df$n_trees <- seq(1, nrow(rfbis.2.df))
-
-plot(rfbis.2$err.rate[,1], col = 'red', type = 'l')
+plot(rfbis.2$err.rate[,1], col = 'red', type = 'l', 
+     main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate')
 lines(rfbis.1$err.rate[,1], col = 'blue')
 legend("topright", legend = c("5 variables","8 variables") , 
        col = c('red', 'blue') , bty = "n", horiz = FALSE, 
        lty=1, cex = 0.75)
 
 #-- Ampliamos entre 0 y 2000 arboles
-plot(rfbis.2$err.rate[c(0:2000),1], type = 'l', col = 'red')
+plot(rfbis.2$err.rate[c(0:2000),1], type = 'l', col = 'red', 
+     main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate')
 lines(rfbis.1$err.rate[c(0:2000),1], col = 'blue')
 legend("topright", legend = c("5 variables","8 variables") , 
        col = c('red', 'blue') , bty = "n", horiz = FALSE, 
        lty=1, cex = 0.75)
 
 #-- Ampliamos entre 0 y 1000 arboles
-plot(rfbis.2$err.rate[c(0:1000),1], type = 'l', col = 'red')
+plot(rfbis.2$err.rate[c(0:1000),1], type = 'l', col = 'red', 
+     main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate')
 lines(rfbis.1$err.rate[c(0:1000),1], col = 'blue')
 legend("topright", legend = c("5 variables","8 variables") , 
        col = c('red', 'blue') , bty = "n", horiz = FALSE, 
        lty=1, cex = 0.75)
+
+#-- Conclusion: con 300 arboles parece ser suficiente
 
 #--- Tuneo de modelos
 n.trees <- 300
@@ -85,7 +85,7 @@ n.trees <- 300
 
 #--  Modelo 1
 sampsizes.1 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
-nodesizes.1 <- list(5, 10, 20, 30, 40, 50, 100, 150)
+nodesizes.1 <- list(5, 10, 20, 30, 40, 50, 60, 100, 150)
 
 bagging_modelo1 <- tuneo_bagging(surgical_dataset, target = target,
                                  lista.continua = var_modelo1,
@@ -98,33 +98,37 @@ bagging_modelo1$sampsizes <- as.numeric(c(data.frame(strsplit(bagging_modelo1$mo
 #-- Distribucion de la tasa de error
 ggplot(bagging_modelo1, aes(x=factor(sampsizes), y=tasa,
                             colour=factor(nodesizes))) +
-  geom_point(position=position_dodge(width=0.3),size=3, shape = 18)
+  geom_point(position=position_dodge(width=0.3),size=3, shape = 18) +
+  ggtitle("Distribucion de la tasa de error por sampsizes y nodesizes (Modelo 1)")
 
 #-- Distribucion del AUC
-#  Parece buen candidato 20 nodeszie y sampsize todos salvo 100
+#  Parece buen candidato 20 nodesize y sampsize todos salvo 100
 ggplot(bagging_modelo1, aes(x=factor(sampsizes), y=auc,
                  colour=factor(nodesizes))) +
-  geom_point(position=position_dodge(width=0.3),size=3, shape = 18)
+  geom_point(position=position_dodge(width=0.3),size=3, shape = 18) +
+  ggtitle("Distribucion del AUC por sampsizes y nodesizes (Modelo 1)")
 
+# Me decanto por 1000-1500
 nodesizes.1 <- list(20)
-sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4600)
+sampsizes.1 <- list(1000, 1500)
 bagging_modelo1_2 <- tuneo_bagging(surgical_dataset, target = target,
                                  lista.continua = var_modelo1,
                                  nodesizes = nodesizes.1,
                                  sampsizes = sampsizes.1, mtry = mtry.1,
                                  ntree = n.trees, grupos = 5, repe = 5)
 
-# A partir de 2500 submuestras el error se estabiliza
+# A partir de 1000-2000-2500 submuestras el error se estabiliza
 nodesizes.1 <- list(50)
-sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4600)
+sampsizes.1 <- list(1000, 2000, 2500)
 bagging_modelo1_3 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
                                    nodesizes = nodesizes.1,
                                    sampsizes = sampsizes.1, mtry = mtry.1,
                                    ntree = n.trees, grupos = 5, repe = 5)
 
+# Con 1000-2000 filas, aunque la tasa de error es ligeramente mayor, la varianza en el AUC es muy pequeña
 nodesizes.1 <- list(30)
-sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4600)
+sampsizes.1 <- list(1000, 2000)
 bagging_modelo1_4 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
                                    nodesizes = nodesizes.1,
@@ -137,11 +141,16 @@ bagging_modelo1_4 <- tuneo_bagging(surgical_dataset, target = target,
 #-- ¿Por qué modelo bagging nos decantamos?
 union_bagging_modelo1 <- rbind(
   bagging_modelo1_2[bagging_modelo1_2$modelo == "20+1000", ],
-  bagging_modelo1_3[bagging_modelo1_3$modelo == "50+1", ],
+  bagging_modelo1_2[bagging_modelo1_2$modelo == "20+1500", ],
+  bagging_modelo1_3[bagging_modelo1_3$modelo == "50+1000", ],
+  bagging_modelo1_3[bagging_modelo1_3$modelo == "50+2000", ],
   bagging_modelo1_3[bagging_modelo1_3$modelo == "50+2500", ],
+  bagging_modelo1_4[bagging_modelo1_4$modelo == "30+1000", ],
   bagging_modelo1_4[bagging_modelo1_4$modelo == "30+2000", ]
 )
 #-- Distribucion de la tasa de error
+union_bagging_modelo1$modelo <- with(union_bagging_modelo1,
+                   reorder(modelo,tasa, mean))
 ggplot(union_bagging_modelo1, aes(x = modelo, y = tasa)) +
         geom_boxplot(fill = "#4271AE", colour = "#1F3552",
                      alpha = 0.7) +
@@ -150,16 +159,20 @@ ggplot(union_bagging_modelo1, aes(x = modelo, y = tasa)) +
 ggsave("./charts/bagging/03_comparacion_final_tasa_modelo1_5rep.png")
 
 #-- Distribucion del AUC
+union_bagging_modelo1$modelo <- with(union_bagging_modelo1,
+                                     reorder(modelo,auc, mean))
 ggplot(union_bagging_modelo1, aes(x = modelo, y = auc)) +
         geom_boxplot(fill = "#4271AE", colour = "#1F3552",
                      alpha = 0.7) +
         scale_x_discrete(name = "Modelo") +
         ggtitle("AUC por modelo")
-ggsave("./charts/bagging/03_comparacion_final_auc_modelo1_10rep.png")
+ggsave("./charts/bagging/03_comparacion_final_auc_modelo1_5rep.png")
+
+#-- Conclusion: eligo 30+2000
 
 # MODELO 2
 sampsizes.2 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
-nodesizes.2 <- list(5, 10, 20, 30, 40, 50, 100, 150)
+nodesizes.2 <- list(5, 10, 20, 30, 40, 50, 60, 100, 150)
 
 bagging_modelo2 <- tuneo_bagging(surgical_dataset, target = target,
                                  lista.continua = var_modelo2,
@@ -181,14 +194,14 @@ ggplot(bagging_modelo2, aes(x=factor(sampsizes), y=auc,
                             colour=factor(nodesizes))) +
   geom_point(position=position_dodge(width=0.3),size=3, shape = 18)
 
-#- Mejor opcion: 20 + 1000
+#- Mejor opcion: 1000-1500
 nodesizes.2 <- list(20)
-sampsizes.2 <- list(1000)
+sampsizes.2 <- list(1000, 1500)
 bagging_modelo2_2 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 10)
+                                   ntree = n.trees, grupos = 5, repe = 5)
 
 #- Mejor opcion: 30 + 2000
 nodesizes.2 <- list(30)
@@ -197,41 +210,45 @@ bagging_modelo2_3 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 10)
+                                   ntree = n.trees, grupos = 5, repe = 5)
 
 #- Mejora opcion: 50 + 2000-2500-3000
 nodesizes.2 <- list(50)
-sampsizes.2 <- list(1, 2000, 2500, 3000)
+sampsizes.2 <- list(2000, 2500, 3000)
 bagging_modelo2_4 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 10)
+                                   ntree = n.trees, grupos = 5, repe = 5)
 
 #-- ¿Por qué modelo bagging nos decantamos?
 union_bagging_modelo2 <- rbind(
   bagging_modelo2_2[bagging_modelo2_2$modelo == "20+1000", ],
+  bagging_modelo2_2[bagging_modelo2_2$modelo == "20+1500", ],
   bagging_modelo2_3[bagging_modelo2_3$modelo == "30+2000", ],
-  bagging_modelo2_4[bagging_modelo2_4$modelo == "50+1", ],
   bagging_modelo2_4[bagging_modelo2_4$modelo == "50+2000", ],
   bagging_modelo2_4[bagging_modelo2_4$modelo == "50+2500", ],
   bagging_modelo2_4[bagging_modelo2_4$modelo == "50+3000", ]
 )
 
 #-- Distribucion de la tasa de error
+union_bagging_modelo2$modelo <- with(union_bagging_modelo2,
+                                     reorder(modelo,tasa, mean))
 ggplot(union_bagging_modelo2, aes(x = modelo, y = tasa)) +
   geom_boxplot(fill = "#4271AE", colour = "#1F3552",
                alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo")
-ggsave("./charts/bagging/03_comparacion_final_tasa_modelo2_10rep.png")
+ggsave("./charts/bagging/03_comparacion_final_tasa_modelo2_5rep.png")
 
 #-- Distribucion del AUC
+union_bagging_modelo2$modelo <- with(union_bagging_modelo2,
+                                     reorder(modelo,auc, mean))
 ggplot(union_bagging_modelo2, aes(x = modelo, y = auc)) +
   geom_boxplot(fill = "#4271AE", colour = "#1F3552",
                alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo")
-ggsave("./charts/bagging/03_comparacion_final_auc_modelo2_10rep.png")
+ggsave("./charts/bagging/03_comparacion_final_auc_modelo2_5rep.png")
 
-#-- Modelo 2: nos decantamos por nodesize 30 + sampsize 2000
+#-- Conclusion: nos decantamos por nodesize 30 + 2000
