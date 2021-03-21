@@ -28,8 +28,8 @@ target <- "target"
 
 #--- Variables de los modelos candidatos
 #--  Modelo 1
-var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0", 
-                 "Age", "moonphase.0", "baseline_osteoart")
+var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", 
+                 "Age", "baseline_osteoart")
 
 #-- Modelo 2
 var_modelo2 <- c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs")
@@ -38,11 +38,11 @@ var_modelo2 <- c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs")
 #     Nota: por el momento: itera = 200
 # Si quisieramos 20 observaciones por parametro:
 # h * (k + 1) + h + 1 = 5854 / 20 ~ 292 parametros
-# Si k = 8, entonces 10 * h + 1 = 292 => 29.1, es decir, 29-30 nodos
+# Si k = 6, entonces 8 * h + 1 = 292 => es decir, 35-36 nodos
 
 # Si quisieramos 30 observaciones por parametro:
 # h * (k + 1) + h + 1 = 5854 / 30 ~ 195 parametros
-# Si k = 8, entonces 10 * h + 1 = 195 => 19.4, es decir, 19-20 nodos
+# Si k = 6, entonces 8 * h + 1 = 195 => es decir, 24-25 nodos
 size.candidato.1 <- c(5, 10, 15, 20, 25, 30, 35)
 decay.candidato.1 <- c(0.1, 0.01, 0.001)
 
@@ -51,9 +51,9 @@ cvnnet.candidato.1 <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                        grupos=5,sinicio=1234,repe=5, size=size.candidato.1,
                                        decay=decay.candidato.1,repeticiones=5,itera=200)
 
-#-- Modelo 1: interesan nodes 30, 25, 20, 15 y decay 0.1
-size.candidato.1 <- c(15, 20, 25, 30)
-decay.candidato.1 <- c(0.1, 0.1, 0.1, 0.1)
+#-- Modelo 1: interesan nodes 35, 30, 25, 20, 15 y decay 0.01
+size.candidato.1 <- c(15, 20, 25, 30, 35)
+decay.candidato.1 <- c(0.01, 0.01, 0.01, 0.01, 0.01)
 
 union_2 <- comparar_modelos_red(
                                 surgical_dataset,
@@ -66,7 +66,7 @@ union_2 <- comparar_modelos_red(
                                 iteraciones = 200
 )
 
-# Nos decantamos por 20 nodos y decay 0.1
+# Nos decantamos por 20 nodos y decay 0.01
 
 #---- Continuamos con el modelo 2
 # Si quisieramos 20 observaciones por parametro:
@@ -124,7 +124,7 @@ for(num_iteraciones in c(50, 100, 200, 300, 400, 500)) {
   union_it_1_temp <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                       listconti=var_modelo1, listclass=c(""),
                                       grupos=5,sinicio=1234,repe=5, size=20,
-                                      decay=0.1,repeticiones=5,itera=num_iteraciones)[[1]]
+                                      decay=0.01,repeticiones=5,itera=num_iteraciones)[[1]]
   
   union_it_1_temp$num_iter <- rep(as.character(num_iteraciones), 5)
   union_it_1_temp$modelo   <- NULL
@@ -183,10 +183,7 @@ ggplot(union_it_2, aes(x = num_iter, y = auc)) +
 
 ggsave('./charts/02_boxplot_nnet_modelo2_iteraciones_AUC.jpeg')
 
-# Conclusion: con el modelo 2 mantenemos 200 iteraciones
-
-#---- Guardamos el fichero RData
-save.image(file = "./rdata/RedesNeuronales.RData")
+# Conclusion: con el modelo 2 mantenemos 200 iteracioness
 
 #--- Estadisticas
 surgical_test_data <- fread("./data/surgical_test_data.csv", data.table = FALSE)
@@ -197,7 +194,7 @@ surgical_test_data$target     <- as.factor(surgical_test_data$target)
 control <- trainControl(method = "repeatedcv",number=5,repeats=5,
                       savePredictions = "all",classProbs=TRUE) 
 
-avnnetgrid_1 <-  expand.grid(size=20,decay=0.1,bag=FALSE)
+avnnetgrid_1 <-  expand.grid(size=20,decay=0.01,bag=FALSE)
 set.seed(1234)
 avnnet_1 <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, collapse = "+"))),
                   data=surgical_dataset, method="avNNet",linout = FALSE,maxit=200,repeats=5,
@@ -219,8 +216,8 @@ rm(avnnetgrid_2)
 #     Modelo 1
 #     Reference
 #     Prediction   No  Yes
-#     No         6442  152
-#     Yes        809  1378
+#     No         6466  128
+#     Yes        743  1444
 
 #     Modelo 2
 #     Reference
@@ -233,6 +230,8 @@ modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx"))
 modelos_actuales$tasa <- as.numeric(modelos_actuales$tasa)
 modelos_actuales$auc <- as.numeric(modelos_actuales$auc)
 
+modelos_actuales$modelo <- with(modelos_actuales,
+                                reorder(modelo,tasa, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = tasa)) +
   geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
                alpha = 0.7) +
@@ -241,6 +240,8 @@ ggplot(modelos_actuales, aes(x = modelo, y = tasa)) +
 
 ggsave('./charts/comparativas/02_log_avnnet_tasa.jpeg')
 
+modelos_actuales$modelo <- with(modelos_actuales,
+                                reorder(modelo,auc, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = auc)) +
   geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
                alpha = 0.7) +
@@ -251,8 +252,8 @@ ggsave('./charts/comparativas/02_log_avnnet_auc.jpeg')
 
 #---- Estadisticas
 # Por tasa fallos --------------- auc
-#   avnnet modelo 2           avnnet modelo 2
-#   avnnet modelo 1           avnnet modelo 1
+#   avnnet modelo 1           avnnet modelo 2
+#   avnnet modelo 2           avnnet modelo 1
 #   log.   modelo 2           log.   modelo 1
 #   log.   modelo 1           log.   modelo 2
 

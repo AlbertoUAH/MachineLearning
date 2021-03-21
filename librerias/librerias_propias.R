@@ -114,16 +114,29 @@ comparar_modelos_red <- function(dataset, target, lista.continua, sizes,
   return(union)
 }
 
+# Funcion para mostrar el err. rate en Bagging
+mostrar_err_rate <- function(train.err.rate1, train.err.rate2) {
+  plot(train.err.rate1, col = 'red', type = 'l', 
+       main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate', ylim = c(0.09, 0.13))
+  lines(train.err.rate2, col = 'blue')
+  #lines(test.err.rate1, col = 'green')
+  #lines(test.err.rate2, col = 'purple')
+  abline(h = 0.1)
+  legend("topright", legend = c("OOB: 5 variables (train)","OOB: 6 variables (train)") , 
+         col = c('red', 'blue') , bty = "n", horiz = FALSE, 
+         lty=1, cex = 0.75)
+}
+
 # Funcion para el tuneo de un modelo bagging
 tuneo_bagging <- function(dataset, target, lista.continua, nodesizes, sampsizes,
-                          mtry, ntree, grupos, repe) {
+                          mtry, ntree, grupos, repe, replace = TRUE) {
   lista.rf <- list()
   for(x in apply(data.frame(expand.grid(nodesizes, sampsizes)),1,as.list)) {
     salida <- cruzadarfbin(data=dataset, vardep=target,
                            listconti=lista.continua,
                            listclass=c(""),
                            grupos=grupos,sinicio=1234,repe=repe,nodesize=x$Var1,
-                           mtry=mtry,ntree=ntree, sampsize=x$Var2)
+                           mtry=mtry,ntree=ntree, sampsize=x$Var2, replace = replace)
     cat(x$Var1, "+",  x$Var2 , "-> FINISHED\n")
     salida$modelo <- paste0(x$Var1, "+",  x$Var2)
     lista.rf <- c(lista.rf, list(salida))
@@ -149,7 +162,20 @@ tuneo_bagging <- function(dataset, target, lista.continua, nodesizes, sampsizes,
   return(union)
 }
 
-
+train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
+                           nodesize, seed) {
+  set.seed(seed)
+  rfgrid <- expand.grid(mtry=mtry)
+  control <- trainControl(method = "repeatedcv",number=grupos, repeats=repe,
+                          savePredictions = "all",classProbs = TRUE)
+                        
+  rf<- train(formula,data=dataset,
+           method="rf",trControl=control,tuneGrid=rfgrid,
+           linout = FALSE,ntree=ntree,nodesize=nodesize,replace=TRUE,
+           importance=TRUE)
+  
+  return(rf)
+}
 
 
 

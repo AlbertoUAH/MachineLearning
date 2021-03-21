@@ -50,7 +50,7 @@ candidato.bic <- unlist(strsplit(tabla.bic[order(tabla.bic$Freq, decreasing = TR
 # "mortality_rsi"     "ccsMort30Rate"     "bmi"               "month.8"           "asa_status.0"     
 # "baseline_osteoart" "moonphase.0"       "Age"               "dow.0"
 # Con todas las observaciones (bic), el modelo es el mismo salvo con el añadido de baseline_cancer
-intersect(candidato.aic, candidato.bic)
+intersect(candidato.aic, candidato.bic) %in% candidato.bic
 
 #--- Seleccion de variables con RFE
 #--  Logistic Regression
@@ -129,9 +129,33 @@ nombres_candidatos_3 <- c("LOGISTICA AIC", "LOGISTICA AIC (sin 2 variables)" ,"L
 union3 <- cruzada_logistica(surgical_dataset, target, candidatos_3, nombres_candidatos_3,
                             grupos = 5, repe = 5)
 
+#-- Si ejecutamos un random forest...
+rf_modelo_bic <- train_rf_model(surgical_dataset, 
+                                    as.formula(paste0("target~", paste0(candidato.bic.2, collapse = "+"))),
+                                    mtry = c(3:8), ntree = 300, grupos = 5, repe = 5, nodesize = 10,
+                                    seed = 1234)
+
+# Importancia de las variables en un random forest
+final<-rf_modelo_bic$finalModel
+tabla<-as.data.frame(importance(final))
+tabla<-tabla[order(-tabla$MeanDecreaseAccuracy),]
+tabla
+
+# ¿Pueden sobrar dow.0, moonphase.0?
+barplot(tabla$MeanDecreaseAccuracy,names.arg=rownames(tabla))
+
+candidato.bic.3 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8",           
+                     "baseline_osteoart", "Age")
+candidatos_4         <- list(candidato.aic, candidato.aic.2, candidato.bic, candidato.bic.2, candidato.bic.3, 
+                             candidato.rfe.lr, candidato.rfe.lr.2, candidato.rfe.rf)
+nombres_candidatos_4 <- c("LOGISTICA AIC", "LOGISTICA AIC (sin 2 variables)" ,"LOGISTICA BIC", "LOGISTICA BIC (sin asa.status)" ,
+                          "LOGISTICA BIC (TOP 6)", "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5")
+union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
+                            grupos = 5, repe = 5)
+
 #-- De ahora en adelante probaremos con dos modelos candidatos
-#   LOGISTICA BIC (sin asa.status) -> seleccion1
-#   "mortality_rsi" "ccsMort30Rate" "bmi" "month.8" "dow.0" "Age" "moonphase.0" "baseline_osteoart"
+#   LOGISTICA BIC (TOP 6) -> seleccion1
+#   "mortality_rsi" "ccsMort30Rate" "bmi" "month.8" "Age" "baseline_osteoart"
 
 #   RFE RF TOP 5 -> seleccion2
 #   "Age" "mortality_rsi" "ccsMort30Rate" "bmi" "ahrq_ccs"
@@ -142,7 +166,7 @@ names(surgical_test_data)[35] <- "target"
 surgical_test_data$target     <- as.factor(surgical_test_data$target)
 
 matriz_conf_1 <- matriz_confusion_predicciones(formula = paste0(target, "~" , 
-                                                                paste0(candidato.bic.2, collapse = "+")),
+                                                                paste0(candidato.bic.3, collapse = "+")),
                                                 corte = 0.5,
                                                 dataset = surgical_test_data
                                                 )
@@ -157,8 +181,8 @@ matriz_conf_2 <- matriz_confusion_predicciones(formula = paste0(target, "~" ,
 #     Modelo 1
 #     Reference
 #     Prediction   No  Yes
-#     No         6205  389
-#     Yes        1441  746
+#     No         6215  379
+#     Yes        1440  747
 
 #      Modelo 2
 #      Reference
