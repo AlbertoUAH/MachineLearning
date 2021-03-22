@@ -29,11 +29,16 @@ target <- "target"
 
 #--- Variables de los modelos candidatos
 #--  Modelo 1
-var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0", 
-                 "Age", "moonphase.0", "baseline_osteoart")
+var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", 
+                 "Age", "baseline_osteoart")
 
 #-- Modelo 2
 var_modelo2 <- c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs")
+
+# En primer lugar, tuneamos el numero de variables independientes del modelo
+# En nuestro caso, 8 para el modelo 1 y 5 para el modelo 2
+mtry.1 <- 6
+mtry.2 <- 5
 
 #-- Importancia de las variables
 rf_modelo_general <- train_rf_model(surgical_dataset, 

@@ -161,7 +161,7 @@ ggplot(union_bagging_modelo1, aes(x = modelo, y = tasa)) +
                      alpha = 0.7) +
         scale_x_discrete(name = "Modelo") +
         ggtitle("Tasa de fallos por modelo")
-ggsave("./charts/bagging/distribuciones/03_comparacion_final_tasa_modelo1_5rep.png")
+ggsave("./charts/bagging/03_comparacion_final_tasa_modelo1_5rep.png")
 
 #-- Distribucion del AUC
 #   Mejor resultado: 20 + 1500 o 30+2000
@@ -172,12 +172,13 @@ ggplot(union_bagging_modelo1, aes(x = modelo, y = auc)) +
                      alpha = 0.7) +
         scale_x_discrete(name = "Modelo") +
         ggtitle("AUC por modelo")
-ggsave("./charts/bagging/distribuciones/03_comparacion_final_auc_modelo1_5rep.png")
+ggsave("./charts/bagging/03_comparacion_final_auc_modelo1_5rep.png")
 
 # ¿Y si aumentamos el numero de repeticiones a 10?
 # 20 + 1500 se sigue manteniendo en mejor AUC y menor tasa de fallos, aunque con mayor varianza (ligeramente)
 
-#-- Conclusion: eligo nodesize 20 + sampsize 1500
+#-- Conclusion: eligo nodesize 30 + sampsize 2000 (ante la duda y al existir diferencias muy pequeñas, elegimos el modelo mas sencillo
+#   dado que con nodesize 30 se obtienen arboles de menor profundidad que con nodesize 20) aunque tenemos la duda si 20 + 1500
 
 # MODELO 2
 sampsizes.2 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
@@ -207,14 +208,14 @@ ggplot(bagging_modelo2, aes(x=factor(sampsizes), y=auc,
 ggsave("./charts/bagging/distribuciones/03_distribucion_auc_modelo2.png")
 
 #   Parece buen candidato 20, 30 o 40 nodesize y sampsize todos salvo 100
-#   Dada una variabilidad menor, una posibilidad seria escoger sampsize 1000-1500
+#   Dada una variabilidad menor, una posibilidad seria escoger sampsize 1000-1500 (aunque 1500 presenta una mayor varianza)
 nodesizes.2 <- list(20)
-sampsizes.2 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4600)
+sampsizes.2 <- list(1000, 1500)
 bagging_modelo2_2 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 10)
+                                   ntree = n.trees.2, grupos = 5, repe = 5)
 
 # En relacion con 30 (nodesize), parece una mejor alternativa escoger sampsize = 2000 (tanto en tasa de error como en AUC, especialmente en variabilidad)
 nodesizes.2 <- list(30)
@@ -223,39 +224,42 @@ bagging_modelo2_3 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 5)
+                                   ntree = n.trees.2, grupos = 5, repe = 5)
 
-# Nuevamente, una posible alternativa seria emplear sampsize = 2000 o 2500 (aunque este ultimo con mayor varianza)
+# Nuevamente, una posible alternativa seria emplear sampsize = 1500 o 2000 
+# (aunque en el caso de sampsize 1500 presenta mayor varianza, aunque no muy significativa)
 nodesizes.2 <- list(40)
-sampsizes.2 <- list(2000, 2500)
+sampsizes.2 <- list(1500, 2000)
 bagging_modelo2_4 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 5)
-
+                                   ntree = n.trees.2, grupos = 5, repe = 5)
  
 # A medida que aumenta el nodesize la variabilidad tanto en sesgo como en varianza disminuye
-# ¿Mereceria la pena aumentar nodesize a 50?
+# ¿Mereceria la pena aumentar nodesize a 50? ¿O disminuir nodesize a 10?
 nodesizes.2 <- list(50)
 sampsizes.2 <- list(1, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4600)
 bagging_modelo2_5 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.2,
                                    sampsizes = sampsizes.2, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 5)
+                                   ntree = n.trees.2, grupos = 5, repe = 5)
 # No parece merecer demasiado la pena (el mejor modelo presenta un AUC de 0.910 (aproximado) y tasa de fallos 0.10, similar con nodesize 40)
+# Por otro lado, reduciendo nodesize a 10 obtenemos modelos con mayor varianza en relacion al valor AUC
+rm(bagging_modelo2_5)
 
 #-- ¿Por qué modelo bagging nos decantamos?
 union_bagging_modelo2 <- rbind(
   bagging_modelo2_2[bagging_modelo2_2$modelo == "20+1000", ],
   bagging_modelo2_2[bagging_modelo2_2$modelo == "20+1500", ],
   bagging_modelo2_3[bagging_modelo2_3$modelo == "30+2000", ],
-  bagging_modelo2_4[bagging_modelo2_4$modelo == "40+2000", ],
-  bagging_modelo2_4[bagging_modelo2_4$modelo == "40+2500", ]
+  bagging_modelo2_4[bagging_modelo2_4$modelo == "40+1500", ],
+  bagging_modelo2_4[bagging_modelo2_4$modelo == "40+2000", ]
 )
 
 #-- Distribucion de la tasa de error
+#   Modelos candidatos: 30 + 2000, 20 + 1500 y 40 + 2000 (en orden descendente)
 union_bagging_modelo2$modelo <- with(union_bagging_modelo2,
                                      reorder(modelo,tasa, mean))
 ggplot(union_bagging_modelo2, aes(x = modelo, y = tasa)) +
@@ -266,6 +270,8 @@ ggplot(union_bagging_modelo2, aes(x = modelo, y = tasa)) +
 ggsave("./charts/bagging/03_comparacion_final_tasa_modelo2_5rep.png")
 
 #-- Distribucion del AUC
+#   20 + 1000 parece buen candidato, pero el es el modelo con mayor tasa de fallo (aunque la escala
+#   del grafico indique que la diferencia sea de tan solo unas milesimas)
 union_bagging_modelo2$modelo <- with(union_bagging_modelo2,
                                      reorder(modelo,auc, mean))
 ggplot(union_bagging_modelo2, aes(x = modelo, y = auc)) +
@@ -275,12 +281,13 @@ ggplot(union_bagging_modelo2, aes(x = modelo, y = auc)) +
   ggtitle("AUC por modelo")
 ggsave("./charts/bagging/03_comparacion_final_auc_modelo2_5rep.png")
 
-#-- ¿Y si probamos sin reemplazamiento?
+#-- ¿Y con 10 rep?
+#   El modelo 30 + 2000 continua presentando menor tasa de fallos frente al modelo 20 + 1000
 
 
 #-- Conclusion: nos decantamos por nodesize 30 + 2000
 #-- Modelos finales
-#   Bagging (modelo 1 con 6 variables): nodesize 20 + sampsize 2000
+#   Bagging (modelo 1 con 6 variables): nodesize 30 + sampsize 2000 (o 20 + 1500?)
 #   Bagging (modelo 2 con 5 variables): nodesize 30 + sampsize 2000
 
 #--- Estadisticas
@@ -297,7 +304,7 @@ rfgrid.1 <-expand.grid(mtry=mtry.1)
 set.seed(1234)
 bagging_1 <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, collapse = "+"))),
                   data=surgical_dataset, method="rf", trControl = control,tuneGrid = rfgrid.1,
-                  nodesize = 20, sampsize = 2000, ntree = n.trees, replace = TRUE)
+                  nodesize = 30, sampsize = 2000, ntree = n.trees.1, replace = TRUE)
 
 matriz_conf_1 <- matriz_confusion_predicciones(bagging_1, NULL, surgical_test_data, 0.5)
 
@@ -306,24 +313,32 @@ rfgrid.2 <-expand.grid(mtry=mtry.2)
 set.seed(1234)
 bagging_2 <- train(as.formula(paste0(target, "~" , paste0(var_modelo2, collapse = "+"))),
                    data=surgical_dataset, method="rf", trControl = control,tuneGrid = rfgrid.2,
-                   nodesize = 30, sampsize = 2000, ntree = n.trees, replace = TRUE)
+                   nodesize = 30, sampsize = 2000, ntree = n.trees.2, replace = TRUE)
 
 matriz_conf_2 <- matriz_confusion_predicciones(bagging_2, NULL, surgical_test_data, 0.5)
 rm(rfgrid.1)
 rm(rfgrid.2)
 
 #--- Predicciones
-#     Modelo 1
+#     Modelo 1 (20 + 1500)
 #     Reference
 #     Prediction   No  Yes
-#     No         6503  91
-#     Yes        746  1441
+#     No         6496  98
+#     Yes        738  1449
+
+#     Modelo 1 (30 + 2000)
+#     Reference
+#     Prediction   No  Yes
+#     No         6509  85
+#     Yes        748  1439
+
+# No hay demasiada diferencia entre ambos, por lo que nos podriamos decantar por un modelo "mas sencillo"
 
 #     Modelo 2
 #     Reference
 #     Prediction   No  Yes
-#     No         6503  91
-#     Yes        747  1440
+#     No         6512  82
+#     Yes        752  1435
 #
 
 modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx",
@@ -338,8 +353,8 @@ bagging_modelo_sin_reemp <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
                                    nodesizes = nodesizes.final,
                                    sampsizes = sampsizes.final, mtry = mtry.2,
-                                   ntree = n.trees, grupos = 5, repe = 5, replace = FALSE)
-bagging_modelo_sin_reemp$modelo <- "BAGGING MODELO 2 (no rep)"
+                                   ntree = n.trees.2, grupos = 5, repe = 5, replace = FALSE)
+bagging_modelo_sin_reemp$modelo <- "BAGGING MODELO 1 (no rep)"
 modelos_actuales <- rbind(modelos_actuales, bagging_modelo_sin_reemp)
                           
 modelos_actuales$modelo <- with(modelos_actuales,
@@ -364,10 +379,10 @@ ggsave('./charts/comparativas/03_log_avnnet_bagging_auc.jpeg')
 
 #---- Estadisticas
 # Por tasa fallos --------------- auc
-#  bagging modelo 2          bagging modelo 2 -> con reemplazamiento
-#  bagging modelo 1          bagging modelo 1
-#   avnnet modelo 2           avnnet modelo 2
-#   avnnet modelo 1           avnnet modelo 1
+#  bagging modelo 2          bagging modelo 2
+#  bagging modelo 1          bagging modelo 2
+#   avnnet modelo 1           avnnet modelo 2
+#   avnnet modelo 2           avnnet modelo 1
 #   log.   modelo 2           log.   modelo 1
 #   log.   modelo 1           log.   modelo 2
 
