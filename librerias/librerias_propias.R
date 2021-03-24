@@ -4,6 +4,7 @@ suppressPackageStartupMessages({
   library(DataExplorer)  # EDAs automaticos
   library(gridExtra)     # Representar tablas graficamente
   library(ggplot2)       # Libreria grafica
+  library(tidyr)         # Ordenacion datos
   
   source("./librerias/cruzadas avnnet y log binaria.R")
   source("./librerias/cruzada rf binaria.R")
@@ -82,7 +83,7 @@ comparar_modelos_red <- function(dataset, target, lista.continua, sizes,
                                          listclass=c(""),
                                          grupos=grupos,sinicio=1234,
                                          repe=repe, size=sizes[i],
-                                         decay=decays[i],repeticiones=repe,
+                                         decay=decays[i],repeticiones=5,
                                          itera=iteraciones)
     
     modelo <- paste0("NODOS: ", sizes[i] , " - DECAY: ", decays[i])
@@ -119,10 +120,7 @@ mostrar_err_rate <- function(train.err.rate1, train.err.rate2) {
   plot(train.err.rate1, col = 'red', type = 'l', 
        main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate', ylim = c(0.09, 0.13))
   lines(train.err.rate2, col = 'blue')
-  #lines(test.err.rate1, col = 'green')
-  #lines(test.err.rate2, col = 'purple')
-  abline(h = 0.1)
-  legend("topright", legend = c("OOB: 5 variables (train)","OOB: 6 variables (train)") , 
+  legend("topright", legend = c("OOB: MODELO 2","OOB: MODELO 1") , 
          col = c('red', 'blue') , bty = "n", horiz = FALSE, 
          lty=1, cex = 0.75)
 }
@@ -163,21 +161,41 @@ tuneo_bagging <- function(dataset, target, lista.continua, nodesizes, sampsizes,
 }
 
 train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
-                           nodesize, seed) {
+                           nodesize, sampsize, seed) {
   set.seed(seed)
-  rfgrid <- expand.grid(mtry=mtry)
+  rfgrid <- expand.grid(mtry=c(mtry))
   control <- trainControl(method = "repeatedcv",number=grupos, repeats=repe,
                           savePredictions = "all",classProbs = TRUE)
                         
   rf<- train(formula,data=dataset,
            method="rf",trControl=control,tuneGrid=rfgrid,
-           linout = FALSE,ntree=ntree,nodesize=nodesize,replace=TRUE,
-           importance=TRUE)
+           linout = FALSE,ntree=ntree,nodesize=nodesize, sampsize=sampsize,
+           replace=TRUE, importance=TRUE)
   
   return(rf)
 }
 
+show_vars_importance <- function(modelo, title) {
+  final<-modelo$finalModel
+  tabla<-as.data.frame(importance(final))
+  tabla<-tabla[order(tabla$MeanDecreaseAccuracy),]
+  vars <- rownames(tabla)
+  tabla$vars <- factor(vars, levels=unique(vars))
+  rownames(tabla) <- NULL
 
+  tabla %>% 
+    pivot_longer(cols=matches("MeanDecreaseAccuracy")) %>% 
+    ggplot(aes(value, vars)) +
+    geom_col() +
+    geom_text(aes(label=round(value), x=0.5*value), size=3, colour="white") +
+    facet_grid(. ~ name, scales="free_x") +
+    scale_x_continuous(expand=expansion(c(0,0.04))) +
+    ggtitle(title) +
+    theme_bw() +
+    theme(panel.grid.minor=element_blank(),
+          panel.grid.major=element_blank(),
+          axis.title=element_blank())
+}
 
 
 

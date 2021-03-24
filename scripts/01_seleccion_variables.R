@@ -136,30 +136,50 @@ rf_modelo_bic <- train_rf_model(surgical_dataset,
                                     seed = 1234)
 
 # Importancia de las variables en un random forest
-final<-rf_modelo_bic$finalModel
-tabla<-as.data.frame(importance(final))
-tabla<-tabla[order(-tabla$MeanDecreaseAccuracy),]
-tabla
+# ¿Pueden sobrar dow.0, moonphase.0? y baseline osteoart?
+show_vars_importance(rf_modelo_bic, "Importancia variables Random Forest (modelo BIC)")
 
-# ¿Pueden sobrar dow.0, moonphase.0?
-barplot(tabla$MeanDecreaseAccuracy,names.arg=rownames(tabla))
-
-candidato.bic.3 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8",           
-                     "baseline_osteoart", "Age")
+candidato.bic.3 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 candidatos_4         <- list(candidato.aic, candidato.aic.2, candidato.bic, candidato.bic.2, candidato.bic.3, 
                              candidato.rfe.lr, candidato.rfe.lr.2, candidato.rfe.rf)
 nombres_candidatos_4 <- c("LOGISTICA AIC", "LOGISTICA AIC (sin 2 variables)" ,"LOGISTICA BIC", "LOGISTICA BIC (sin asa.status)" ,
-                          "LOGISTICA BIC (TOP 6)", "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5")
+                          "LOGISTICA BIC (TOP 5)", "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5")
 union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
                             grupos = 5, repe = 5)
 
 #-- De ahora en adelante probaremos con dos modelos candidatos
-#   LOGISTICA BIC (TOP 6) -> seleccion1
-#   "mortality_rsi" "ccsMort30Rate" "bmi" "month.8" "Age" "baseline_osteoart"
+#   LOGISTICA BIC (TOP 5) -> seleccion1
+#   "mortality_rsi" "ccsMort30Rate" "bmi" "month.8" "Age"
 
 #   RFE RF TOP 5 -> seleccion2
 #   "Age" "mortality_rsi" "ccsMort30Rate" "bmi" "ahrq_ccs"
 #
+#-- Nota: de cara a las comparaciones con el resto de modelos, aumentamos el numero de repeticiones a 10
+candidatos_final         <- list(candidato.bic.3, candidato.rfe.rf)
+nombres_candidatos_final <- c("LOGISTICA BIC (TOP 5)", "RFE RF TOP 5")
+union_final <- cruzada_logistica(surgical_dataset, target, candidatos_final, nombres_candidatos_final,
+                            grupos = 5, repe = 10)
+rm(candidatos_final)
+rm(nombres_candidatos_final)
+
+union_10_rep <- rbind(union4[union4$modelo %in% c("LOGISTICA BIC (TOP 5)", "RFE RF TOP 5"), ], union_final)
+union_10_rep$rep <- c(rep("5", 10), rep("10", 20))
+
+# Tasa de fallos
+ggplot(union_10_rep, aes(x = modelo, y = tasa, col = rep)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("Tasa de fallos por modelo")
+
+ggsave('./charts/01_boxplot_log_modelo1_error_10rep.jpeg')
+
+# AUC
+ggplot(union_10_rep, aes(x = modelo, y = auc, col = rep)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("AUC por modelo")
+
+ggsave('./charts/01_boxplot_log_modelo1_auc_10rep.jpeg')
 
 surgical_test_data <- fread("./data/surgical_test_data.csv", data.table = FALSE)
 names(surgical_test_data)[35] <- "target"

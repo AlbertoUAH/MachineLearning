@@ -41,14 +41,21 @@ mtry.1 <- 6
 mtry.2 <- 5
 
 #-- Importancia de las variables
-rf_modelo_general <- train_rf_model(surgical_dataset, 
-                             as.formula(paste0(target, "~.")),
-                             mtry = c(3:35), ntree = 300, grupos = 5, repe = 5, nodesize = 20,
-                             seed = 1234)
+#-  Recordemos el caso generico de bagging
+#   Modelo 1
+rf_modelo_1_general <- train_rf_model(surgical_dataset, 
+                             as.formula(paste0(target, "~",paste0(var_modelo1, collapse = "+"))),
+                             mtry = mtry.1, ntree = 500, grupos = 5, repe = 5, nodesize = 30,
+                             sampsize=2000,seed = 1234)
 
+show_vars_importance(rf_modelo_1_general, "Importancia variables modelo 1 (Bagging)")
 
+rf_modelo_2_general <- train_rf_model(surgical_dataset, 
+                                      as.formula(paste0(target, "~",paste0(var_modelo2, collapse = "+"))),
+                                      mtry = mtry.2, ntree = 800, grupos = 5, repe = 5, nodesize = 30,
+                                      sampsize=2000,seed = 1234)
 
-
+show_vars_importance(rf_modelo_2_general, "Importancia variables modelo 2 (Bagging)")
 
 
 
