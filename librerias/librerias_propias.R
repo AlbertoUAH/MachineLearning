@@ -161,7 +161,7 @@ tuneo_bagging <- function(dataset, target, lista.continua, nodesizes, sampsizes,
 }
 
 train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
-                           nodesize, sampsize, seed) {
+                           nodesize, seed) {
   set.seed(seed)
   rfgrid <- expand.grid(mtry=c(mtry))
   control <- trainControl(method = "repeatedcv",number=grupos, repeats=repe,
@@ -169,7 +169,7 @@ train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
                         
   rf<- train(formula,data=dataset,
            method="rf",trControl=control,tuneGrid=rfgrid,
-           linout = FALSE,ntree=ntree,nodesize=nodesize, sampsize=sampsize,
+           linout = FALSE,ntree=ntree,nodesize=nodesize,
            replace=TRUE, importance=TRUE)
   
   return(rf)
@@ -177,18 +177,18 @@ train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
 
 show_vars_importance <- function(modelo, title) {
   final<-modelo$finalModel
-  tabla<-as.data.frame(importance(final))
+  tabla<-as.data.frame(final$importance)
   tabla<-tabla[order(tabla$MeanDecreaseAccuracy),]
   vars <- rownames(tabla)
   tabla$vars <- factor(vars, levels=unique(vars))
   rownames(tabla) <- NULL
-
-  tabla %>% 
-    pivot_longer(cols=matches("MeanDecreaseAccuracy")) %>% 
-    ggplot(aes(value, vars)) +
+  
+  print(tabla %>% arrange(.,-MeanDecreaseAccuracy))
+  
+  tabla %>% arrange(.,-MeanDecreaseAccuracy) %>% 
+    ggplot(aes(MeanDecreaseAccuracy, vars)) +
     geom_col() +
-    geom_text(aes(label=round(value), x=0.5*value), size=3, colour="white") +
-    facet_grid(. ~ name, scales="free_x") +
+    geom_text(aes(label=round(MeanDecreaseAccuracy, 3), x=0.5*MeanDecreaseAccuracy), size=3, colour="white") +
     scale_x_continuous(expand=expansion(c(0,0.04))) +
     ggtitle(title) +
     theme_bw() +
@@ -198,10 +198,29 @@ show_vars_importance <- function(modelo, title) {
 }
 
 
-
-
-
-
+review_ntrees <- function(dataset, formula, mtry, ntree, nodesize, seed) {
+  
+    set.seed(seed)
+    rf_modelo <-randomForest(formula,
+                                       data=dataset,
+                                       mtry=mtry[length(mtry)],ntree=ntree,nodesize=nodesize,replace=TRUE)
+    
+    p <- data.frame(err.rate.5 = rf_modelo$err.rate[, 1])
+    
+    plot_vectors <- list()
+    for (i in mtry[-length(mtry)]) {
+      set.seed(seed)
+      rf_modelo <-randomForest(formula,
+                               data=dataset,
+                               mtry=i,ntree=ntree,nodesize=nodesize,replace=TRUE)
+  
+      error_rates  <- data.frame(x = rf_modelo$err.rate[,1])
+      names(error_rates) <- paste0("err.rate.",i)
+      p <- cbind(p, error_rates)
+    }
+  
+    return(p)
+}
 
 
 

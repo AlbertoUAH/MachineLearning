@@ -22,8 +22,14 @@ cluster <- makeCluster(detectCores() - 1)
 registerDoParallel(cluster)
 
 #--- Lectura dataset depurado
-surgical_dataset <- fread("./data/surgical_dataset_final_completo.csv", data.table = FALSE)
+surgical_dataset <- fread("./data/surgical_dataset_final.csv", data.table = FALSE)
 surgical_dataset$target <- as.factor(surgical_dataset$target)
+
+# Por el momento, eliminamos ccsComplicationRate y complication_rsi
+ccsComplicationRate <- surgical_dataset$ccsComplicationRate
+complication_rsi    <- surgical_dataset$complication_rsi
+
+surgical_dataset$complication_rsi <- NULL; surgical_dataset$ccsComplicationRate <- NULL
 
 # Separamos variable objetivo del resto
 target <- "target"
@@ -32,7 +38,7 @@ vars   <- setdiff(names(surgical_dataset), target)
 #-- Seleccion de variables con step aic y bic
 lista.variables.aic <- steprepetidobinaria(data=surgical_dataset,
                                            vardep=target,listconti=vars,sinicio=1234,
-                                           sfinal=1344,porcen=0.8,criterio="AIC")
+                                           sfinal=1334,porcen=0.8,criterio="AIC")
 tabla.aic <- lista.variables.aic[[1]]
 
 lista.variables.bic <- steprepetidobinaria(data=surgical_dataset,
@@ -50,6 +56,7 @@ candidato.bic <- unlist(strsplit(tabla.bic[order(tabla.bic$Freq, decreasing = TR
 # "mortality_rsi"     "ccsMort30Rate"     "bmi"               "month.8"           "asa_status.0"     
 # "baseline_osteoart" "moonphase.0"       "Age"               "dow.0"
 # Con todas las observaciones (bic), el modelo es el mismo salvo con el añadido de baseline_cancer
+# Por tanto, ambos modelos se diferencian por 5 parametros (propios del candidato aic)
 intersect(candidato.aic, candidato.bic) %in% candidato.bic
 
 #--- Seleccion de variables con RFE
@@ -76,6 +83,7 @@ salida.rfe.lr$optVariables
 ggplot(salida.rfe.lr) + ggtitle("Variable importance Logistic Regression RFE")
 ggsave('./charts/01_feature_selection_RFE_LR_whole_dataset.png')
 
+# Sin embargo, con tan solo 3 variables el modelo alcanza un accuracy de 0.77 en logistica
 candidato.rfe.lr <- salida.rfe.lr$optVariables
 candidato.rfe.lr.2 <- c("ccsMort30Rate", "mortality_rsi", "bmi")
 
@@ -93,6 +101,8 @@ salida.rfe.rf$optVariables
 ggplot(salida.rfe.rf) + ggtitle("Variable importance Random Forest RFE")
 ggsave('./charts/01_feature_selection_RFE_RF_whole_dataset.png')
 
+# Con un Random Forest, dadas las relaciones no lineales entre las variables
+# obtenemos un modelo con mayor precision, aunque sean con 2 variables adicionales
 candidato.rfe.rf <- salida.rfe.rf$optVariables
 
 
@@ -107,16 +117,24 @@ nombres_candidatos <- c("LOGISTICA AIC", "LOGISTICA BIC", "RFE LR TOP 18", "RFE 
 union1 <- cruzada_logistica(surgical_dataset, target, candidatos, nombres_candidatos,
                             grupos = 5, repe = 5)
 # Conclusion
-# llaman la atencio los candidatos bic y rfe rf top 5
-# Problemas: -> alta variabilidad en tasa fallos logistica bic
-#            -> bajo valor AUC en rfe rf top 5 (aunque con RF se obtiene mejor accuracy)
-#--- Revisamos logistica bic ¿Podriamos eliminar aquellas variables con menor poder predictivo?
+# llaman la atencion los candidatos bic y rfe rf top 5
+# RFE TOP 5 presenta un menor valor AUC, aunque el random forest nos ha dado indicios de la
+# no linealidad de los datos, mejorando claramente en modelos no lineales como Random Forests
+# Por otro lado, en relacion con el modelo stepwise AIC, el hecho de disponer de 14 variables
+# adicionales, no ha mejorado relativamente el modelo frente a un modelo BIC con 9  variables
+
+# Del mismo modo sucede con el modelo LR TOP 18, donde con 18 variables la mejora con respecto
+# a BIC es de apenas unas milesimas
+
+#--- Revisamos logistica bic ¿Podriamos eliminar aquellas variables con menor poder predictivo? Visto en IV.pdf
 candidato.bic.2 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0",           
                      "Age", "moonphase.0", "baseline_osteoart")
 candidatos_2         <- list(candidato.aic, candidato.bic, candidato.bic.2, candidato.rfe.lr, candidato.rfe.lr.2, candidato.rfe.rf)
 nombres_candidatos_2 <- c("LOGISTICA AIC", "LOGISTICA BIC", "LOGISTICA BIC (sin asa.status)" , "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5")
 union2 <- cruzada_logistica(surgical_dataset, target, candidatos_2, nombres_candidatos_2,
                             grupos = 5, repe = 5)
+
+# No baja demasiado, pero aunque la tasa de error se mantenga por encima, parece estabilizarse
 
 #--- Revisamos logistica aic ¿Podriamos eliminar aquellas variables con menor poder predictivo?
 candidato.aic.2 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "baseline_charlson", 
@@ -129,15 +147,26 @@ nombres_candidatos_3 <- c("LOGISTICA AIC", "LOGISTICA AIC (sin 2 variables)" ,"L
 union3 <- cruzada_logistica(surgical_dataset, target, candidatos_3, nombres_candidatos_3,
                             grupos = 5, repe = 5)
 
-#-- Si ejecutamos un random forest...
+# Incluso dejando el modelo con 11 variables, el valor AUC es practicamente identico, aunque la varianza
+# del modelo aumenta
+
+#-- Por otro lado, ¿Que ocurriria si ejecutamos un modelo random forest inicial de 1000 arboles con
+#   las variables del candidato bic?
 rf_modelo_bic <- train_rf_model(surgical_dataset, 
                                     as.formula(paste0("target~", paste0(candidato.bic.2, collapse = "+"))),
-                                    mtry = c(3:8), ntree = 300, grupos = 5, repe = 5, nodesize = 10,
+                                    mtry = c(3:8), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
                                     seed = 1234)
+
+rf_modelo_aic_2 <- train_rf_model(surgical_dataset, 
+                                as.formula(paste0("target~", paste0(candidato.aic.2, collapse = "+"))),
+                                mtry = c(3:11), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                seed = 1234)
 
 # Importancia de las variables en un random forest
 # ¿Pueden sobrar dow.0, moonphase.0? y baseline osteoart?
 show_vars_importance(rf_modelo_bic, "Importancia variables Random Forest (modelo BIC)")
+
+show_vars_importance(rf_modelo_aic_2, "Importancia variables Random Forest (modelo AIC)")
 
 candidato.bic.3 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 candidatos_4         <- list(candidato.aic, candidato.aic.2, candidato.bic, candidato.bic.2, candidato.bic.3, 
@@ -154,6 +183,41 @@ union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_cand
 #   RFE RF TOP 5 -> seleccion2
 #   "Age" "mortality_rsi" "ccsMort30Rate" "bmi" "ahrq_ccs"
 #
+
+#-- Previamente, dejamos a un lado variables como ccsComplicationRate y complication_rsi
+#   ¿Como se ve afectado el modelo si incluimos ambas variables?
+surgical_dataset$ccsComplicationRate <- ccsComplicationRate
+surgical_dataset$complication_rsi    <- complication_rsi
+
+candidatos_final_aux         <- list(c(candidato.bic.3, "ccsComplicationRate", "complication_rsi"), candidato.bic.3,
+                                     c(candidato.rfe.rf, "ccsComplicationRate", "complication_rsi"), candidato.rfe.rf)
+
+nombres_candidatos_final_aux <- c("LOGISTICA BIC + comp.", "LOGISTICA BIC (TOP 5)", "RFE RF + comp.", "RFE RF TOP 5")
+union_final_aux <- cruzada_logistica(surgical_dataset, target, candidatos_final_aux, nombres_candidatos_final_aux,
+                                 grupos = 5, repe = 5)
+rm(candidatos_final_aux)
+rm(nombres_candidatos_final_aux)
+
+rf_1 <- train_rf_model(surgical_dataset, 
+                                as.formula(paste0("target~", paste0(candidato.bic.3, collapse = "+"))),
+                                mtry = 5, ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                seed = 1234)
+
+rf_2 <- train_rf_model(surgical_dataset, 
+                                  as.formula(paste0("target~", paste0(candidato.rfe.rf, collapse = "+"))),
+                                  mtry = 5, ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                  seed = 1234)
+
+rf_3 <- train_rf_model(surgical_dataset, 
+                                as.formula(paste0("target~", paste0(c("mortality_rsi", "bmi", "ccsComplicationRate", "complication_rsi"), collapse = "+"))),
+                                mtry = 4, ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                seed = 1234)
+
+# Incluso con las variables "complication" un modelo RandomForest empeora, por lo que me decanto por descartar dichas variables
+surgical_dataset$ccsComplicationRate <- NULL; surgical_dataset$complication_rsi <- NULL;
+
+write.csv(surgical_dataset, "data/surgical_dataset_final.csv", row.names = FALSE)
+
 #-- Nota: de cara a las comparaciones con el resto de modelos, aumentamos el numero de repeticiones a 10
 candidatos_final         <- list(candidato.bic.3, candidato.rfe.rf)
 nombres_candidatos_final <- c("LOGISTICA BIC (TOP 5)", "RFE RF TOP 5")
@@ -182,6 +246,9 @@ ggplot(union_10_rep, aes(x = modelo, y = auc, col = rep)) +
 ggsave('./charts/01_boxplot_log_modelo1_auc_10rep.jpeg')
 
 surgical_test_data <- fread("./data/surgical_test_data.csv", data.table = FALSE)
+surgical_test_data$ccsComplicationRate <- NULL; surgical_test_data$complication_rsi <- NULL
+write.csv(surgical_test_data, "./data/surgical_test_data.csv", row.names = FALSE)
+
 names(surgical_test_data)[35] <- "target"
 surgical_test_data$target     <- as.factor(surgical_test_data$target)
 

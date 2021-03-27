@@ -29,34 +29,46 @@ target <- "target"
 
 #--- Variables de los modelos candidatos
 #--  Modelo 1
-var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", 
-                 "Age", "baseline_osteoart")
+var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 
 #-- Modelo 2
 var_modelo2 <- c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs")
 
 # En primer lugar, tuneamos el numero de variables independientes del modelo
-# En nuestro caso, 8 para el modelo 1 y 5 para el modelo 2
-mtry.1 <- 6
+# En nuestro caso, 5 para ambos modelos
+mtry.1 <- 5
 mtry.2 <- 5
 
-#-- Importancia de las variables
-#-  Recordemos el caso generico de bagging
+#-- Recordemos:
+#   Mejor modelo bagging (modelo 1): nodesize 20 + sampsize 1000
+#   Mejor modelo bagging (modelo 2): nodesize 30 + sampsize 2000
+#   En ambos modelos, el numero de arboles empleado ha sido de 800
+
+
+#-- ¿Varia el numero de arboles con respecto al mtry?
 #   Modelo 1
-rf_modelo_1_general <- train_rf_model(surgical_dataset, 
-                             as.formula(paste0(target, "~",paste0(var_modelo1, collapse = "+"))),
-                             mtry = mtry.1, ntree = 500, grupos = 5, repe = 5, nodesize = 30,
-                             sampsize=2000,seed = 1234)
+err.rates.1 <- review_ntrees(surgical_dataset, factor(target)~mortality_rsi+ccsMort30Rate+bmi+month.8+Age,
+                             mtry = c(3,4,5), ntree = 5000, nodesize = 10, seed = 1234)
 
-show_vars_importance(rf_modelo_1_general, "Importancia variables modelo 1 (Bagging)")
+plot(err.rates.1[,1], col = 'red', type = 'l', 
+     main = 'Error rate by nº trees (Modelo 1)', xlab = 'Number of trees', ylab = 'Error rate', ylim = c(0.09, 0.13))
+lines(err.rates.1[,2], col = 'blue')
+lines(err.rates.1[,3], col = 'darkgreen')
+legend("topright", legend = c("OOB: MODELO 1 - MTRY 5","OOB: MODELO 1 - MTRY 3", "OOB: MODELO 1 - MTRY 4") , 
+       col = c('red', 'blue', 'darkgreen') , bty = "n", horiz = FALSE, 
+       lty=1, cex = 0.75)
 
-rf_modelo_2_general <- train_rf_model(surgical_dataset, 
-                                      as.formula(paste0(target, "~",paste0(var_modelo2, collapse = "+"))),
-                                      mtry = mtry.2, ntree = 800, grupos = 5, repe = 5, nodesize = 30,
-                                      sampsize=2000,seed = 1234)
+#   Modelo 2
+err.rates.2 <- review_ntrees(surgical_dataset, factor(target)~Age+mortality_rsi+ccsMort30Rate+bmi+ahrq_ccs,
+                             mtry = c(3,4,5), ntree = 5000, nodesize = 10, seed = 1234)
 
-show_vars_importance(rf_modelo_2_general, "Importancia variables modelo 2 (Bagging)")
-
+plot(err.rates.2[,1], col = 'red', type = 'l', 
+     main = 'Error rate by nº trees (Modelo 2)', xlab = 'Number of trees', ylab = 'Error rate', ylim = c(0.09, 0.13))
+lines(err.rates.2[,2], col = 'blue')
+lines(err.rates.2[,3], col = 'darkgreen')
+legend("topright", legend = c("OOB: MODELO 2 - MTRY 5","OOB: MODELO 2 - MTRY 3", "OOB: MODELO 2 - MTRY 4") , 
+       col = c('red', 'blue', 'darkgreen') , bty = "n", horiz = FALSE, 
+       lty=1, cex = 0.75)
 
 
 

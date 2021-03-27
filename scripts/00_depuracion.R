@@ -28,7 +28,7 @@ dim(surgical_dataset) # Filas x columnas
 # Por tiempo, se ha tomado la decision de elegir un subconjunto de datos
 # Para ello, recurrimos a createDataPartition
 set.seed(1234)
-partitions <- createDataPartition(surgical_dataset$complication, p = 0.30, list = FALSE)
+partitions <- createDataPartition(surgical_dataset$complication, p = 0.40, list = FALSE)
 surgical_dataset_partitioned <- surgical_dataset[partitions, ]
 
 #--- EDA (Exploratory Data Analysis)
@@ -43,8 +43,8 @@ cat_columns <- c("gender", "race", "asa_status", "baseline_cancer", "baseline_cv
 surgical_dataset_partitioned[,cat_columns] <- lapply(surgical_dataset_partitioned[, cat_columns], factor)
 
 # Problema: complication_rsi y ccsComplicationRate se calculan a partir de la variable objetivo
-surgical_dataset_partitioned$complication_rsi    <- NULL
-surgical_dataset_partitioned$ccsComplicationRate <- NULL
+# surgical_dataset_partitioned$complication_rsi    <- NULL
+# surgical_dataset_partitioned$ccsComplicationRate <- NULL
 
 # Separamos las variables en numericas, categoricas y target
 cat_columns <- names(Filter(is.factor, surgical_dataset_partitioned))[-16]
@@ -91,7 +91,7 @@ surgical_dataset_partitioned_num <- surgical_dataset_partitioned
 surgical_dataset_partitioned_num$month <- as.numeric(as.character(surgical_dataset_partitioned_num$month))
 surgical_dataset_partitioned_num$dow <- as.numeric(as.character(surgical_dataset_partitioned_num$dow))
 
-ggplot_shiny(surgical_dataset_partitioned_num)
+# ggplot_shiny(surgical_dataset_partitioned_num)
 # dow - mientras que los lunes tan solo el 14 % de los pacientes que fueron operados sufrieron alguna complicacion
 #       los viernes el 35.2 % de los pacientes sufrieron algun problema post-operatorio.
 graph_dow <- ggplot(surgical_dataset_partitioned_num, aes(x = dow, fill = complication)) +
@@ -193,7 +193,7 @@ surgical_dataset_final <- cbind(
                                 surgical_dataset_partitioned_stnd_dummy,
                                 surgical_dataset_partitioned_stnd[, target]
                               )
-names(surgical_dataset_final)[35] <- "target"
+names(surgical_dataset_final)[37] <- "target"
 
 # Renombramos las columnas para adecuarlas a formulas
 names(surgical_dataset_final) <- make.names(colnames(surgical_dataset_final))
@@ -202,7 +202,7 @@ names(surgical_dataset_final) <- make.names(colnames(surgical_dataset_final))
 my_model <- ranger( 
   target ~ . , 
   importance = 'impurity',
-  data = surgical_dataset_final[, names(surgical_dataset_final)],
+  data = surgical_dataset_final,
   seed = 1234
 )
 # **Estimacion** del error / acierto **esperado**
@@ -238,9 +238,7 @@ surgical_dataset_final$target <- as.factor(surgical_dataset_final$target)
 test_surgical_dataset <- surgical_dataset[-partitions, ]
 
 # Aplicamos los mismos cambios al conjunto test
-test_surgical_dataset$complication_rsi    <- NULL
-test_surgical_dataset$ccsComplicationRate <- NULL
-names(test_surgical_dataset)[23] <- "target"
+names(test_surgical_dataset)[25] <- "target"
 
 test_surgical_dataset$target <- ifelse(
   test_surgical_dataset$target == 1,

@@ -28,8 +28,7 @@ target <- "target"
 
 #--- Variables de los modelos candidatos
 #--  Modelo 1
-var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", 
-                 "Age")
+var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 
 #-- Modelo 2
 var_modelo2 <- c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs")
