@@ -238,7 +238,7 @@ surgical_dataset_final$target <- as.factor(surgical_dataset_final$target)
 test_surgical_dataset <- surgical_dataset[-partitions, ]
 
 # Aplicamos los mismos cambios al conjunto test
-names(test_surgical_dataset)[25] <- "target"
+names(test_surgical_dataset)[37] <- "target"
 
 test_surgical_dataset$target <- ifelse(
   test_surgical_dataset$target == 1,

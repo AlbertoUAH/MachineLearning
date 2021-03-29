@@ -38,12 +38,14 @@ cruzada_logistica <- function(dataset, target, candidatos, nombres_candidatos, g
   fill <- "#4271AE"
   line <- "#1F3552"
   
+  union$modelo <- with(union, reorder(modelo,tasa, mean))
   print(ggplot(union, aes(x = modelo, y = tasa)) +
               geom_boxplot(fill = fill, colour = line,
                            alpha = 0.7) +
               scale_x_discrete(name = "Modelo") +
               ggtitle("Tasa de fallos por modelo"))
   
+  union$modelo <- with(union, reorder(modelo,auc, mean))
   print(ggplot(union, aes(x = modelo, y = auc)) +
               geom_boxplot(fill = fill, colour = line,
                            alpha = 0.7) +
@@ -54,21 +56,17 @@ cruzada_logistica <- function(dataset, target, candidatos, nombres_candidatos, g
 }
 
 # Funcion para obtener la matriz de confusion de las predicciones resultantes
-matriz_confusion_predicciones <- function(modelo = "glm", formula, dataset, corte) {
+matriz_confusion_predicciones <- function(modelo, formula , dataset, corte) {
   
-  if (modelo == "glm") {
-    modelo <- glm(formula,
-                  data = dataset,
-                  family = binomial(link="logit")
-    )
-  }
   pred <- predict(modelo, dataset, type = "prob")
+  
   pred_vector <- as.factor(ifelse(
     pred$No > corte,
     "No",
     "Yes"
   ))
-  matriz_confusion <- confusionMatrix(dataset$target, pred_vector)
+
+  matriz_confusion <- confusionMatrix(factor(dataset$target), pred_vector, positive = "Yes")
   return(matriz_confusion)
 }
 
@@ -222,6 +220,20 @@ review_ntrees <- function(dataset, formula, mtry, ntree, nodesize, seed) {
     return(p)
 }
 
+best_minbucket_dt <- function(dataset, formula, minbuckets, grupos, repe) {
+  set.seed(1234)
+  control<-trainControl(method = "cv",number=grupos,savePredictions = "all")
+  arbolgrid <- expand.grid(cp=c(0))
+  
+  for (minbu in minbuckets)
+  {
+    arbolcaret <- train(formula, 
+    data=dataset,method="rpart",minbucket=minbu,
+    trControl = control, tuneGrid = arbolgrid)
+    print(minbu)
+    print(arbolcaret)
+  }
+}
 
 
 
