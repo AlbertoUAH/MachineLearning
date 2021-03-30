@@ -31,7 +31,7 @@ target <- "target"
 var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 
 #-- Modelo 2
-var_modelo2 <- c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs")
+var_modelo2 <- c("mortality_rsi", "bmi", "month.8", "Age")
 
 #---- Comenzamos con el modelo 1
 #     Nota: por el momento: itera = 200
@@ -90,12 +90,12 @@ union_2_bis <- comparar_modelos_red(
 #---- Continuamos con el modelo 2
 # Si quisieramos 20 observaciones por parametro:
 # h * (k + 1) + h + 1 = 5854 / 20 ~ 292 parametros
-# Si k = 5, entonces 7 * h + 1 = 292 => 41.57, es decir, 41-42 nodos
+# Si k = 4, entonces 6 * h + 1 = 292 => 48.5, es decir, 50 nodos
 
 # Si quisieramos 30 observaciones por parametro:
 # h * (k + 1) + h + 1 = 5854 / 30 ~ 195 parametros
-# Si k = 5, entonces 7 * h + 1 = 195 => 27.71, es decir, 27-28 nodos
-size.candidato.2 <- c(5, 10, 15, 20, 25, 30, 35, 40)
+# Si k = 4, entonces 6 * h + 1 = 195 => 27.71, es decir, 32 nodos
+size.candidato.2 <- c(5, 10, 15, 20, 25, 30, 35, 40, 45)
 decay.candidato.2 <- c(0.1, 0.01, 0.001)
 
 cvnnet.candidato.2 <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
@@ -103,9 +103,9 @@ cvnnet.candidato.2 <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                        grupos=5,sinicio=1234,repe=5, size=size.candidato.2,
                                        decay=decay.candidato.2,repeticiones=5,itera=200)
 
-#-- Modelo 2: interesan nodes 40,30,25,20 y decay 0.01 (tambien vamos a echar un vistazo con 15 nodos)
-size.candidato.2 <- c(15, 20, 25, 30, 35, 40)
-decay.candidato.2 <- c(0.01, 0.01, 0.01, 0.01, 0.01, 0.01)
+#-- Modelo 2: interesan nodes 10-30 y decay 0.01 y 0.001
+size.candidato.2 <- c(10, 15, 15, 20, 25, 30)
+decay.candidato.2 <- c(0.01, 0.01, 0.001, 0.001, 0.001, 0.001)
 
 union_3 <- comparar_modelos_red(
   surgical_dataset,
@@ -117,33 +117,32 @@ union_3 <- comparar_modelos_red(
   repe = 5,
   iteraciones = 200
 )
-# A simple vista, como posibles opciones tendriamos o 20, 25 o 30 nodos en la red
-# Problema: con 30 nodos, la varianza es muy elevada en comparacion con 20 o 25 nodos
+# A simple vista, como posibles opciones tendriamos o 10, 15 o 20 nodos en la red
 
 # ¿Y si aumentamos el numero de repeticiones?
 union_3_bis_2 <- comparar_modelos_red(
   surgical_dataset,
   target,
   var_modelo2,
-  sizes = c(20, 25, 30),
-  decays = c(0.01, 0.01, 0.01),
+  sizes = c(10, 15, 15, 20),
+  decays = c(0.01, 0.01, 0.001, 0.001),
   grupos = 5,
   repe = 10,
   iteraciones = 200
 )
 
-# Nos decantamos por 20-25 nodos y decay 0.01
+# Nos decantamos por 10-15 nodos y decay 0.01 o 0.001
 
-# Tenemos dos posibles modelos candidatos para cada seleccion de variables
-# Modelo 1: 25-30 nodos
-# Modelo 2: 20-25 nodos
+# Tenemos algunos posibles modelos candidatos para cada seleccion de variables
+# Modelo 1: 15-20-25 nodos
+# Modelo 2: 10-15 nodos
 #--- Modificamos el numero de iteraciones 
 union_it_1  <- data.frame(tasa = numeric(), auc = numeric(), num_iter = character())
 for(num_iteraciones in c(100, 200, 250, 300)) {
   
   union_it_1_temp <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                       listconti=var_modelo1, listclass=c(""),
-                                      grupos=5,sinicio=1234,repe=10, size=20,
+                                      grupos=5,sinicio=1234,repe=10, size=15,
                                       decay=0.01,repeticiones=5,itera=num_iteraciones)[[1]]
   
   union_it_1_temp$num_iter <- rep(as.character(num_iteraciones), 10)
@@ -152,7 +151,7 @@ for(num_iteraciones in c(100, 200, 250, 300)) {
   
   union_it_1_1_temp <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                         listconti=var_modelo1, listclass=c(""),
-                                        grupos=5,sinicio=1234,repe=10, size=25,
+                                        grupos=5,sinicio=1234,repe=10, size=20,
                                         decay=0.01,repeticiones=5,itera=num_iteraciones)[[1]]
   
   union_it_1_1_temp$num_iter <- rep(as.character(num_iteraciones), 10)
@@ -161,7 +160,7 @@ for(num_iteraciones in c(100, 200, 250, 300)) {
   
   union_it_1_2_temp <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                         listconti=var_modelo1, listclass=c(""),
-                                        grupos=5,sinicio=1234,repe=10, size=30,
+                                        grupos=5,sinicio=1234,repe=10, size=25,
                                         decay=0.01,repeticiones=5,itera=num_iteraciones)[[1]]
   
   union_it_1_2_temp$num_iter <- rep(as.character(num_iteraciones), 10)
@@ -174,7 +173,7 @@ rm(union_it_1_temp)
 rm(union_it_1_1_temp)
 rm(union_it_1_2_temp)
 
-union_it_1$modelo <- rep(c(rep("20 nodos", 10), rep("25 nodos", 10), rep("30 nodos", 10)), 4)
+union_it_1$modelo <- rep(c(rep("15 nodos", 10), rep("20 nodos", 10), rep("25 nodos", 10)), 4)
 
 #-- Mostramos graficamente los resultados
 #-  Modelo 1
@@ -192,8 +191,8 @@ ggplot(union_it_1, aes(x = num_iter, y = auc, col = modelo)) +
 
 ggsave('./charts/avnnet/02_boxplot_nnet_modelo1_iteraciones_AUC.jpeg')
 
-# Conclusion: con el modelo 1 mantenemos 200 iteraciones
-# Me decantaria por una red de 20 nodos (las diferencias son poco significativas entre 20-25-30 nodos)
+# Conclusion: con el modelo 1 mantenemos 250 iteraciones
+# Me decantaria por una red de 15 nodos (las diferencias son poco significativas entre 20-25-30 nodos)
 
 # Modelo 2
 # Resulta que con 300 iteraciones, tanto la tasa de fallo como el AUC
@@ -202,7 +201,7 @@ union_it_2  <- data.frame(tasa = numeric(), auc = numeric(), num_iter = characte
 for(num_iteraciones in c(100, 200, 250, 300)) {
   union_it_2_temp <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                       listconti=var_modelo2, listclass=c(""),
-                                      grupos=5,sinicio=1234,repe=10, size=20,
+                                      grupos=5,sinicio=1234,repe=10, size=10,
                                       decay=0.01,repeticiones=5,itera=num_iteraciones)[[1]]
   
   union_it_2_temp$num_iter <- rep(as.character(num_iteraciones), 10)
@@ -211,7 +210,7 @@ for(num_iteraciones in c(100, 200, 250, 300)) {
   
   union_it_2_1_temp <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                         listconti=var_modelo2, listclass=c(""),
-                                        grupos=5,sinicio=1234,repe=10, size=25,
+                                        grupos=5,sinicio=1234,repe=10, size=15,
                                         decay=0.01,repeticiones=5,itera=num_iteraciones)[[1]]
   
   union_it_2_1_temp$num_iter <- rep(as.character(num_iteraciones), 10)
@@ -224,7 +223,7 @@ rm(union_it_2_temp)
 rm(union_it_2_1_temp)
 
 # Graficamos el AUC y tasa de fallo del modelo 2
-union_it_2$modelo <- rep(c(rep("20 nodos", 10), rep("25 nodos", 10)), 4)
+union_it_2$modelo <- rep(c(rep("10 nodos", 10), rep("15 nodos", 10)), 4)
 
 ggplot(union_it_2, aes(x = num_iter, y = tasa, col = modelo)) +
   geom_boxplot(alpha = 0.7) +
@@ -242,27 +241,34 @@ ggsave('./charts/avnnet/02_boxplot_nnet_modelo2_iteraciones_AUC_200_300.jpeg')
 
 ###############
 #-- Conclusiones
-#   Modelo 1: Elegimos 20 nodos y 0.01 lr (con 200 iteraciones) (alrededor de 33 obs. por param.)
+#   Modelo 1: Elegimos 15 nodos y 0.01 lr (con 250 iteraciones) (alrededor de 33 obs. por param.)
 #   Mejor AUC
-#   Modelo 2: Elegimos 20 nodos y 0.01 lr (con 250 iteraciones)
+#   Modelo 2: Elegimos 10 nodos y 0.01 lr (con 200 iteraciones)
 #   Lo empirico: menor varianza en comparacion con modelos con 25 y 30 nodos
 ###############
 #-- ¿Como varian ambas redes si aumentamos a 10 repeticiones?
 modelo1_final <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                    listconti=var_modelo1, listclass=c(""),
-                   grupos=5,sinicio=1234,repe=5, size=20,
-                   decay=0.01,repeticiones=5,itera=200)[[1]]
+                   grupos=5,sinicio=1234,repe=5, size=15,
+                   decay=0.01,repeticiones=5,itera=250)[[1]]
+
+modelo1_1_final <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
+                                  listconti=var_modelo1, listclass=c(""),
+                                  grupos=5,sinicio=1234,repe=5, size=15,
+                                  decay=0.01,repeticiones=5,itera=200)[[1]]
 
 modelo2_final <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
                                   listconti=var_modelo2, listclass=c(""),
-                                  grupos=5,sinicio=1234,repe=5, size=20,
-                                  decay=0.01,repeticiones=5,itera=250)[[1]]
+                                  grupos=5,sinicio=1234,repe=5, size=10,
+                                  decay=0.01,repeticiones=5,itera=200)[[1]]
 
-union_final <- rbind(union_it_2[union_it_2$modelo == "20 nodos" & union_it_2$num_iter == "250", c("tasa", "auc")],
-                     union_it_1[union_it_1$modelo == "20 nodos" & union_it_1$num_iter == "200", c("tasa", "auc")],
-                     modelo1_final, modelo2_final)
-union_final$modelo <- c(rep("20+250", 10), rep("20+200", 10), rep("20+200", 5), rep("20+250", 5))
-union_final$rep    <- c(rep("10", 20), rep("5", 10))
+union_final <- rbind(union_it_2[union_it_2$modelo == "10 nodos" & union_it_2$num_iter == "200", c("tasa", "auc")],
+                     union_it_1[union_it_1$modelo == "15 nodos" & union_it_1$num_iter == "250", c("tasa", "auc")],
+                     union_it_1[union_it_1$modelo == "15 nodos" & union_it_1$num_iter == "200", c("tasa", "auc")],
+                     modelo1_final, modelo1_1_final, modelo2_final)
+union_final$modelo <- c(rep("10+200", 10), rep("15+250", 10), rep("15+200", 10),
+                        rep("15+250", 5), rep("15+200", 5), rep("10+200", 5))
+union_final$rep    <- c(rep("10", 30), rep("5", 15))
 
 ggplot(union_final, aes(x = modelo, y = tasa, col = rep)) +
   geom_boxplot(alpha = 0.7) +
@@ -279,6 +285,7 @@ ggplot(union_final, aes(x = modelo, y = auc, col = rep)) +
 ggsave('./charts/avnnet/02_boxplot_nnet_modelo2_iteraciones_AUC_10_rep.jpeg')
 
 rm(modelo1_final)
+rm(modelo1_1_final)
 rm(modelo2_final)
 # Por lo general (y dado que los diagramas estan a escala), la variacion no ha sido tan notoria
 
@@ -291,37 +298,84 @@ surgical_test_data$target <- as.factor(surgical_test_data$target)
 control <- trainControl(method = "repeatedcv",number=5,repeats=10,
                       savePredictions = "all",classProbs=TRUE) 
 
-avnnetgrid_1 <-  expand.grid(size=20,decay=0.01,bag=FALSE)
+avnnetgrid_1 <-  expand.grid(size=15,decay=0.01,bag=FALSE)
 set.seed(1234)
 avnnet_1 <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, collapse = "+"))),
-                  data=surgical_dataset, method="avNNet",linout = FALSE,maxit=200,repeats=5,
+                  data=surgical_dataset, method="avNNet",linout = FALSE,maxit=250,repeats=5,
                   trControl=control,tuneGrid=avnnetgrid_1)
 
 matriz_conf_1 <- matriz_confusion_predicciones(avnnet_1, NULL, surgical_test_data, 0.5)
 
-avnnetgrid_2 <-  expand.grid(size=20,decay=0.01,bag=FALSE)
+set.seed(1234)
+avnnet_1_1 <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, collapse = "+"))),
+                  data=surgical_dataset, method="avNNet",linout = FALSE,maxit=200,repeats=5,
+                  trControl=control,tuneGrid=avnnetgrid_1)
+
+matriz_conf_1_1 <- matriz_confusion_predicciones(avnnet_1_1, NULL, surgical_test_data, 0.5)
+
+set.seed(1234)
+avnnet_1_2 <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, collapse = "+"))),
+                    data=surgical_dataset, method="avNNet",linout = FALSE,maxit=200,repeats=5,
+                    trControl=control,tuneGrid=expand.grid(size=20,decay=0.01,bag=FALSE))
+
+matriz_conf_1_2 <- matriz_confusion_predicciones(avnnet_1_2, NULL, surgical_test_data, 0.5)
+
+
+avnnetgrid_2 <-  expand.grid(size=10,decay=0.01,bag=FALSE)
 set.seed(1234)
 avnnet_2 <- train(as.formula(paste0(target, "~" , paste0(var_modelo2, collapse = "+"))),
-                  data=surgical_dataset, method="avNNet",linout = FALSE,maxit=250,repeats=5,
+                  data=surgical_dataset, method="avNNet",linout = FALSE,maxit=200,repeats=5,
                   trControl=control,tuneGrid=avnnetgrid_2)
 
 matriz_conf_2 <- matriz_confusion_predicciones(avnnet_2, NULL, surgical_test_data, 0.5)
+
+set.seed(1234)
+avnnet_2_2 <- train(as.formula(paste0(target, "~" , paste0(var_modelo2, collapse = "+"))),
+                  data=surgical_dataset, method="avNNet",linout = FALSE,maxit=200,repeats=5,
+                  trControl=control,tuneGrid=expand.grid(size=15,decay=0.01,bag=FALSE))
+
+matriz_conf_2_2 <- matriz_confusion_predicciones(avnnet_2_2, NULL, surgical_test_data, 0.5)
+rm(avnnetgrid_1)
+rm(avnnetgrid_2)
+
+
 rm(avnnetgrid_1)
 rm(avnnetgrid_2)
 
 #--- Predicciones
-#     Modelo 1
+#     Modelo 1 (con 250 iteraciones)
+#     Reference
+#     Prediction   No  Yes
+#     No         6492  102
+#     Yes        748  1439
+
+#     Modelo 1 (con 20 nodos + 200 iteraciones)
 #     Reference
 #     Prediction   No  Yes
 #     No         6529  65
 #     Yes        772  1415
 
+#     Modelo 1 (con 200 iteraciones)
+#     Reference
+#     Prediction   No  Yes
+#     No         6517  77
+#     Yes        808  1379
+
 #     Modelo 2
 #     Reference
 #     Prediction   No  Yes
-#     No         6515  79
-#     Yes        766  1421
+#     No         6542  52
+#     Yes        798  1389
 #
+
+#     Modelo 2 (con 15 nodos)
+#     Reference
+#     Prediction   No  Yes
+#     No         6532  62
+#     Yes        756  1431
+#
+
+
 
 modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx"))
 modelos_actuales$tasa <- as.numeric(modelos_actuales$tasa)
@@ -357,7 +411,7 @@ ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa)) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo (solo AVNNET)")
 
-ggsave('./charts/avnnet/02_FINAL_tasa.jpeg')
+ggsave('./charts/comparativas/02_FINAL_tasa.jpeg')
 
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                 reorder(modelo,auc, mean))
@@ -375,10 +429,10 @@ ggsave('./charts/comparativas/02_FINAL_auc.jpeg')
 
 #---- Estadisticas
 # Por tasa fallos --------------- auc
-#   avnnet modelo 1           avnnet modelo 1
-#   avnnet modelo 2           avnnet modelo 2
-#   log.   modelo 2           log.   modelo 1
-#   log.   modelo 1           log.   modelo 2
+#   avnnet modelo 2           avnnet modelo 1
+#   avnnet modelo 1           avnnet modelo 2
+#   log.   modelo 1           log.   modelo 1
+#   log.   modelo 2           log.   modelo 2
 
 #---- Detenemos el cluster
 stopCluster(cluster)

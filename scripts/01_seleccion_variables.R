@@ -150,30 +150,14 @@ union3 <- cruzada_logistica(surgical_dataset, target, candidatos_3, nombres_cand
 # Incluso dejando el modelo con 11 variables, el valor AUC es practicamente identico, aunque la varianza
 # del modelo aumenta
 
-#-- Por otro lado, ¿Que ocurriria si ejecutamos un modelo random forest inicial de 1000 arboles con
-#   las variables del candidato bic?
-rf_modelo_bic <- train_rf_model(surgical_dataset, 
-                                    as.formula(paste0("target~", paste0(candidato.bic.2, collapse = "+"))),
-                                    mtry = c(3:8), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
-                                    seed = 1234)
-
-rf_modelo_aic_2 <- train_rf_model(surgical_dataset, 
-                                as.formula(paste0("target~", paste0(candidato.aic.2, collapse = "+"))),
-                                mtry = c(3:11), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
-                                seed = 1234)
-
-rf_modelo_rfe    <- train_rf_model(surgical_dataset, 
-                                  as.formula(paste0("target~", paste0(candidato.rfe.rf, collapse = "+"))),
-                                  mtry = c(3:5), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
-                                  seed = 1234)
 
 # Importancia de las variables en un random forest
 # ¿Pueden sobrar dow.0, moonphase.0? y baseline osteoart?
 show_vars_importance(rf_modelo_bic, "Importancia variables Random Forest (modelo BIC)")
 
-show_vars_importance(rf_modelo_aic_2, "Importancia variables Random Forest (modelo AIC)")
+show_vars_importance(rf_modelo_aic_3, "Importancia variables Random Forest (modelo AIC)")
 
-show_vars_importance(rf_modelo_rfe, "Importancia variables Random Forest (modelo RFE RF TOP 5)")
+show_vars_importance(rf_modelo_rf, "Importancia variables Random Forest (modelo RFE RF TOP 5)")
 
 candidato.bic.3 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 candidato.bic.4 <- c("mortality_rsi", "bmi", "month.8", "Age")
@@ -182,17 +166,32 @@ candidato.rfe.2 <- c("Age", "mortality_rsi", "bmi", "ahrq_ccs")
 
 candidatos_4         <- list(candidato.aic, candidato.aic.2, candidato.aic.3, candidato.bic, candidato.bic.2, candidato.bic.3, 
                              candidato.bic.4,candidato.rfe.lr, candidato.rfe.lr.2, candidato.rfe.rf, candidato.rfe.2)
-nombres_candidatos_4 <- c("LOGISTICA AIC", "LOGISTICA AIC (sin 2 variables)" , "LOGISTICA AIC (TOP 5)" ,"LOGISTICA BIC", "LOGISTICA BIC (sin asa.status)" ,
-                          "LOGISTICA BIC (TOP 5)", "LOGISTICA BIC (TOP 4)", "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5", "RFE RF TOP 4")
+nombres_candidatos_4 <- c("LOG. AIC", "LOG. AIC (sin 2 variables)" , "LOG. AIC (TOP 5)" ,"LOG. BIC", "LOG. BIC (sin asa.status)" ,
+                          "LOG. BIC (TOP 5)", "LOG. BIC (TOP 4)", "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5", "RFE RF TOP 4")
 union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
                             grupos = 5, repe = 5)
+
+rf_modelo_bic <- train_rf_model(surgical_dataset, 
+                                as.formula(paste0("target~", paste0(candidato.bic.4, collapse = "+"))),
+                                mtry = c(3:4), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                seed = 1234)
+
+rf_modelo_rf   <- train_rf_model(surgical_dataset, 
+                                 as.formula(paste0("target~", paste0(candidato.rfe.2, collapse = "+"))),
+                                 mtry = c(3:4), ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                 seed = 1234)
+
+show_vars_importance(rf_modelo_bic, "Importancia variables Random Forest (modelo BIC TOP 4)")
+
+show_vars_importance(rf_modelo_rf, "Importancia variables Random Forest (modelo RFE RF TOP 4)")
+
 
 #-- De ahora en adelante probaremos con dos modelos candidatos
 #   LOGISTICA BIC (TOP 5) -> seleccion1
 #   "Age" "mortality_rsi" "ccsMort30Rate" "bmi" "month.8" 
 
-#   RFE RF TOP 5 -> seleccion2
-#   "Age" "mortality_rsi" "ccsMort30Rate" "bmi" "ahrq_ccs"
+#   LOGISTICA BIC (TOP 4) -> seleccion2
+#   "Age" "mortality_rsi" "bmi" "month.8"
 #
 
 #-- Previamente, dejamos a un lado variables como ccsComplicationRate y complication_rsi
@@ -201,11 +200,11 @@ surgical_dataset$ccsComplicationRate <- ccsComplicationRate
 surgical_dataset$complication_rsi    <- complication_rsi
 
 candidatos_final_aux         <- list(c(candidato.bic.3, "ccsComplicationRate", "complication_rsi"), candidato.bic.3,
-                                     c(candidato.rfe.rf, "ccsComplicationRate", "complication_rsi"), candidato.rfe.rf)
+                                     c(candidato.bic.4, "ccsComplicationRate", "complication_rsi"), candidato.bic.4)
 
-nombres_candidatos_final_aux <- c("LOGISTICA BIC + comp.", "LOGISTICA BIC (TOP 5)", "RFE RF + comp.", "RFE RF TOP 5")
+nombres_candidatos_final_aux <- c("LOG. BIC + comp.", "LOG. BIC (TOP 5)", "LOG. BIC TOP 4 + comp.", "LOG. BIC TOP 4")
 union_final_aux <- cruzada_logistica(surgical_dataset, target, candidatos_final_aux, nombres_candidatos_final_aux,
-                                 grupos = 5, repe = 5)
+                                 grupos = 5, repe = 10)
 rm(candidatos_final_aux)
 rm(nombres_candidatos_final_aux)
 

@@ -118,7 +118,7 @@ mostrar_err_rate <- function(train.err.rate1, train.err.rate2) {
   plot(train.err.rate1, col = 'red', type = 'l', 
        main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate', ylim = c(0.09, 0.13))
   lines(train.err.rate2, col = 'blue')
-  legend("topright", legend = c("OOB: MODELO 2","OOB: MODELO 1") , 
+  legend("top", legend = c("OOB: MODELO 2","OOB: MODELO 1") , 
          col = c('red', 'blue') , bty = "n", horiz = FALSE, 
          lty=1, cex = 0.75)
 }
