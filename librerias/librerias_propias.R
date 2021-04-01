@@ -201,20 +201,21 @@ review_ntrees <- function(dataset, formula, mtry, ntree, nodesize, seed) {
     set.seed(seed)
     rf_modelo <-randomForest(formula,
                                        data=dataset,
-                                       mtry=mtry[length(mtry)],ntree=ntree,nodesize=nodesize,replace=TRUE)
+                                       mtry=mtry[1],ntree=ntree,nodesize=nodesize,replace=TRUE)
     
     p <- data.frame(err.rate.5 = rf_modelo$err.rate[, 1])
+    if(length(mtry) > 1) {
+      plot_vectors <- list()
+      for (i in mtry[-length(mtry)]) {
+        set.seed(seed)
+        rf_modelo <-randomForest(formula,
+                                 data=dataset,
+                                 mtry=i,ntree=ntree,nodesize=nodesize,replace=TRUE)
     
-    plot_vectors <- list()
-    for (i in mtry[-length(mtry)]) {
-      set.seed(seed)
-      rf_modelo <-randomForest(formula,
-                               data=dataset,
-                               mtry=i,ntree=ntree,nodesize=nodesize,replace=TRUE)
-  
-      error_rates  <- data.frame(x = rf_modelo$err.rate[,1])
-      names(error_rates) <- paste0("err.rate.",i)
-      p <- cbind(p, error_rates)
+        error_rates  <- data.frame(x = rf_modelo$err.rate[,1])
+        names(error_rates) <- paste0("err.rate.",i)
+        p <- cbind(p, error_rates)
+      }
     }
   
     return(p)
@@ -235,7 +236,19 @@ best_minbucket_dt <- function(dataset, formula, minbuckets, grupos, repe) {
   }
 }
 
-
+rf_stats_distribution <- function(model, title.1, title.2, path.1, path.2) {
+  print(ggplot(model, aes(x=factor(sampsizes), y=tasa,
+                              colour=factor(nodesizes))) +
+    geom_point(position=position_dodge(width=0.3),size=2, shape = 18) +
+    ggtitle(title.1))
+  ggsave(path.1)
+  
+  print(ggplot(model, aes(x=factor(sampsizes), y=auc,
+                              colour=factor(nodesizes))) +
+    geom_point(position=position_dodge(width=0.3),size=2, shape = 18) +
+    ggtitle(title.2))
+  ggsave(path.2)
+}
 
 
 
