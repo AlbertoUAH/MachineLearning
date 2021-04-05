@@ -12,7 +12,7 @@ cruzadarfbin<-
  function(data=data,vardep="vardep",
   listconti="listconti",listclass="listclass",
   grupos=4,sinicio=1234,repe=5,nodesize=20,
-  mtry=2,ntree=50,replace=TRUE,sampsize=1)
+  mtry=2,ntree=50,replace=TRUE,sampsize=1, show_nrnodes = "no")
  { 
   # if  (sampsize==1)
   # {
@@ -72,7 +72,10 @@ else  if  (sampsize!=1)
    ntree=ntree)
  }
   
-  
+  if(show_nrnodes == "yes") {
+    print(rf$finalModel$forest$nrnodes)
+    print("--------------")
+  }
   print(rf$results)
   
   preditest<-rf$pred

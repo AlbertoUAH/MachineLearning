@@ -125,14 +125,14 @@ mostrar_err_rate <- function(train.err.rate1, train.err.rate2) {
 
 # Funcion para el tuneo de un modelo bagging
 tuneo_bagging <- function(dataset, target, lista.continua, nodesizes, sampsizes,
-                          mtry, ntree, grupos, repe, replace = TRUE) {
+                          mtry, ntree, grupos, repe, replace = TRUE, show_nrnodes = "no") {
   lista.rf <- list()
   for(x in apply(data.frame(expand.grid(nodesizes, sampsizes)),1,as.list)) {
     salida <- cruzadarfbin(data=dataset, vardep=target,
                            listconti=lista.continua,
                            listclass=c(""),
                            grupos=grupos,sinicio=1234,repe=repe,nodesize=x$Var1,
-                           mtry=mtry,ntree=ntree, sampsize=x$Var2, replace = replace)
+                           mtry=mtry,ntree=ntree, sampsize=x$Var2, replace = replace, show_nrnodes)
     cat(x$Var1, "+",  x$Var2 , "-> FINISHED\n")
     salida$modelo <- paste0(x$Var1, "+",  x$Var2)
     lista.rf <- c(lista.rf, list(salida))
