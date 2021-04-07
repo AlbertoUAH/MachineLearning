@@ -12,6 +12,7 @@ suppressPackageStartupMessages({
   library(caret)         # Recursive Feature Elimination
   library(randomForest)  # Seleccion del numero de arboles
   library(readxl)        # Lectura de ficheros Excel
+  library(ggrepel)       # Evita solapamientos en las etiquetas de un grafico
   
   source("./librerias/librerias_propias.R")
 })
@@ -96,12 +97,12 @@ plot(gbm_modelo2_aux, main = "Gradient Boosting Hyperparameters Tunning (Modelo 
 set.seed(1234)
 gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.2),
                                     n.minobsinnode=c(20),
-                                    n.trees=c(50, 100, 300, 500, 800, 1000, 1500, 2000, 2500, 5000),
+                                    n.trees=c(50, 100,400, 500, 800, 1000, 1500, 2000, 2500, 5000),
                                     interaction.depth=c(2))
 
 gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.3),
                                       n.minobsinnode=c(20),
-                                      n.trees=c(50, 100, 300, 500, 800, 1000, 1500, 2000, 2500, 5000),
+                                      n.trees=c(50, 100,400, 500, 800, 1000, 1500, 2000, 2500, 5000),
                                       interaction.depth=c(2))
 
 gbm_modelo1_early_stopping <- train(factor(target)~mortality_rsi+ccsMort30Rate+bmi+month.8+Age,data=surgical_dataset,
@@ -121,7 +122,37 @@ gbm_modelo1_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
   geom_line() +
   geom_text_repel(data=gbm_modelo1_es_final %>% sample_frac(0.6)) +
   ggtitle("Evolucion Accuracy Modelo 1 (Early Stopping)")
-#-- Con un shrinkage de 0.3 + 100 arboles obtiene un buen valor
+#-- Llama la atencion 100 + 0.3 ; 100 + 0.2 ; 500 + 0.2
+
+#-- Tuneo bag.fraction (fraccion de observaciones del conjunto de entrenamiento seleccionadas aleatoriamente a proponer en la construccion
+#   del siguiente arbol)
+set.seed(1234)
+gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.2),
+                                    n.minobsinnode=c(20),
+                                    n.trees=c(100),
+                                    interaction.depth=c(2))
+
+gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.3),
+                                      n.minobsinnode=c(20),
+                                      n.trees=c(100, 500),
+                                      interaction.depth=c(2))
+
+gbm_modelo1_early_stopping_bag_fraction <- data.frame()
+for(bag_fraction in c(.05, .1, .2, .3, .5, .8, 1)) {
+  temp <- train(factor(target)~mortality_rsi+ccsMort30Rate+bmi+month.8+Age,data=surgical_dataset,
+                                  method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping,
+                                  distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
+  
+  
+  temp_2 <- train(factor(target)~mortality_rsi+ccsMort30Rate+bmi+month.8+Age,data=surgical_dataset,
+                                  method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping_2,
+                                  distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
+  
+  gbm_modelo1_early_stopping_bag_fraction <- rbind(gbm_modelo1_early_stopping_bag_fraction, temp$results, temp_2$results)
+}
+rm(temp); rm(temp_2)
+gbm_modelo1_early_stopping_bag_fraction$bag.fraction <- c(rep(0.05,4), rep(.1,4), rep(.2,4), rep(.3,4), rep(.5,4), rep(.8,4), rep(1,4))
+
 
 #  Modelo 2
 gbm_modelo2_early_stopping <- train(factor(target)~mortality_rsi+bmi+month.8+Age,data=surgical_dataset,
@@ -141,7 +172,96 @@ gbm_modelo2_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
   geom_line() +
   geom_text_repel(data=gbm_modelo2_es_final %>% sample_frac(0.6)) +
   ggtitle("Evolucion Accuracy Modelo 2 (Early Stopping)")
+#-- Llama la atencion 100 + 0.3 ; 200 + 0.3 ; 100 + 0.2 ; 500 + 0.2
+#-- Tuneo bag.fraction
+set.seed(1234)
+gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.2),
+                                    n.minobsinnode=c(20),
+                                    n.trees=c(100, 500),
+                                    interaction.depth=c(2))
 
-#-- Nuevamente, parece una buena opcion emplear 0.3 de shrinkage y 100 arboles
+gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.3),
+                                      n.minobsinnode=c(20),
+                                      n.trees=c(100, 200),
+                                      interaction.depth=c(2))
+
+gbm_modelo2_early_stopping_bag_fraction <- data.frame()
+for(bag_fraction in c(.05, .1, .2, .3, .5, .8, 1)) {
+  temp <- train(factor(target)~mortality_rsi+bmi+month.8+Age,data=surgical_dataset,
+                method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping,
+                distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
+  
+  
+  temp_2 <- train(factor(target)~mortality_rsi+bmi+month.8+Age,data=surgical_dataset,
+                  method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping_2,
+                  distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
+  
+  gbm_modelo2_early_stopping_bag_fraction <- rbind(gbm_modelo2_early_stopping_bag_fraction, temp$results, temp_2$results)
+}
+gbm_modelo2_early_stopping_bag_fraction$bag.fraction <- c(rep(0.05, 4), rep(.1, 4), rep(.2, 4), rep(.3, 4), rep(.5, 4), rep(.8, 4), rep(1, 4))
+rm(temp); rm(temp_2); rm(bag_fraction)
+
+#-- Analicemos el modelo 1
+graph <- ggplot(gbm_modelo1_early_stopping_bag_fraction, aes(x = n.trees, y = Accuracy, colour = bag.fraction)) +
+  geom_point() +
+  facet_grid( . ~ shrinkage )+
+  facet_wrap(. ~ shrinkage, ncol = 2, scales = "free_x")
+labs(colour = 'bag.fraction') +
+  theme_grey() +
+  theme(
+    legend.position = 'right'
+  )
+graph
+# Como podemos observar, a diferencia de los modelos Bagging y Random Forest, no basta con "sortear" menos de un 10 % de la observaciones de entrenamiento
+# sino que sorteando un 80-50 % de las observaciones es suficiente
+# ¿Y el modelo 2?
+graph_2 <- ggplot(gbm_modelo2_early_stopping_bag_fraction, aes(x = n.trees, y = Accuracy, colour = bag.fraction)) +
+  geom_point() +
+  facet_grid( . ~ shrinkage )+
+  facet_wrap(. ~ shrinkage, ncol = 2, scales = "free_x")
+labs(colour = 'bag.fraction') +
+  theme_grey() +
+  theme(
+    legend.position = 'right'
+  )
+graph_2
+#-- Desde un punto de vista general, en ambos modelos llama la atencion que con un 80-50 % de la muestra
+#   sorteada se obtienen resultados muy similares que con el dataset completo
+# Como consecuencia, con 100 arboles, minobsinnode 20, shrinkage 0.2,0.3 y bag.fraction 0.5-0.8-1
+
+#-- Comparacion modelos candidatos
+#   Modelo 1
+tuneo_gradient_boosting_modelo1 <- tuneo_gradient_boosting(
+  dataset = surgical_dataset, lista.continua = var_modelo1, target = target,
+  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 0.8, 1), shrinkage = c(0.2, 0.3),
+  interaction.depth = 2, grupos = 5, repe = 5, path.1 = "./charts/gradient_boosting/modelo1/05_tasa_fallos_modelo1_5rep.png",
+  path.2 = "./charts/gradient_boosting/modelo1/05_auc_modelo1_5rep.png"
+)
+
+# ¿Y si elevamos a 10 el numero de repeticiones?
+tuneo_gradient_boosting_modelo1_10rep <- tuneo_gradient_boosting(
+  dataset = surgical_dataset, lista.continua = var_modelo1, target = target,
+  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 0.8, 1), shrinkage = c(0.2, 0.3),
+  interaction.depth = 2, grupos = 5, repe = 10)
+
+
+tuneo_modelo1 <- rbind(tuneo_gradient_boosting_modelo1, tuneo_gradient_boosting_modelo1_10rep)
+tuneo_modelo1$rep <- c(rep("5", 30), rep("10", 60))
+
+tuneo_modelo1$modelo <- with(tuneo_modelo1, reorder(modelo,tasa, mean))
+ggplot(tuneo_modelo1, aes(x = modelo, y = tasa, col = rep)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("Tasa de fallos por modelo")
+ggsave("./charts/gradient_boosting/modelo1/05_tasa_fallos_modelo1_10rep.png")
+
+tuneo_modelo1$modelo <- with(tuneo_modelo1, reorder(modelo,auc, mean))
+ggplot(tuneo_modelo1, aes(x = modelo, y = auc, col = rep)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("Tasa de fallos por modelo")
+ggsave("./charts/gradient_boosting/modelo1/05_auc_modelo1_10rep.png")
+
+
 
 

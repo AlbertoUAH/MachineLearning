@@ -8,6 +8,7 @@ suppressPackageStartupMessages({
   
   source("./librerias/cruzadas avnnet y log binaria.R")
   source("./librerias/cruzada rf binaria.R")
+  source("./librerias/cruzada gbm binaria.R")
 })
 
 # libreria para EDA
@@ -249,6 +250,53 @@ rf_stats_distribution <- function(model, title.1, title.2, path.1, path.2) {
     ggtitle(title.2))
   ggsave(path.2)
 }
+
+# Funcion para el tuneo de un modelo bagging
+tuneo_gradient_boosting <- function(dataset, target, lista.continua, n.trees, shrinkage, n.minobsinnode,
+                                    bag.fraction, interaction.depth, grupos, repe, path.1 = "", path.2 = "") {
+  lista.gb <- list()
+  for(x in apply(data.frame(expand.grid(n.trees, shrinkage, n.minobsinnode, bag.fraction, interaction.depth)),1,as.list)) {
+    salida <- cruzadagbmbin(data=dataset, vardep=target,
+                           listconti=lista.continua,
+                           listclass=c(""),
+                           grupos=grupos,sinicio=1234,repe=repe,n.trees=x$Var1,shrinkage=x$Var2,
+                           n.minobsinnode=x$Var3,bag.fraction=x$Var4,interaction.depth=x$Var5)
+    cat("shrinkage: ", x$Var2, "; bag.fraction: ", x$Var4, " -> FINISHED\n")
+    salida$modelo <- paste0("shrink: ", x$Var2, "+ bag.fract: ", x$Var4)
+    lista.gb <- c(lista.gb, list(salida))
+  }
+  
+  union <- do.call(rbind.data.frame, lista.gb)
+  
+  fill <- "#4271AE"
+  line <- "#1F3552"
+  print(colnames(union))
+  union$modelo <- with(union,reorder(modelo,tasa, mean))
+  print(ggplot(union, aes(x = modelo, y = tasa)) +
+          geom_boxplot(fill = fill, colour = line,
+                       alpha = 0.7) +
+          scale_x_discrete(name = "Modelo") +
+          ggtitle("Tasa de fallos por modelo"))
+  
+  if(path.1 != "") {
+    ggsave(filename = path.1)
+  }
+  
+  union$modelo <- with(union,reorder(modelo,auc, mean))
+  print(ggplot(union, aes(x = modelo, y = auc)) +
+          geom_boxplot(fill = fill, colour = line,
+                       alpha = 0.7) +
+          scale_x_discrete(name = "Modelo") +
+          ggtitle("AUC por modelo"))
+  
+  if(path.2 != "") {
+    ggsave(filename = path.2)
+  }
+  
+  return(union)
+}
+
+
 
 
 
