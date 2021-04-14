@@ -476,12 +476,12 @@ bagging_modelo_sin_reemp <- tuneo_bagging(surgical_dataset, target = target,
                                           ntree = 2000, grupos = 5, repe = 10, replace = FALSE)
 bagging_modelo_sin_reemp$modelo <- "RF. MODELO 1 (no reemp)"
 modelos_actuales <- rbind(modelos_actuales, bagging_modelo_sin_reemp)
+modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("BAGGING", 20), rep("RANDOM FOREST", 30))
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = tasa)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
+ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo")
 
@@ -489,9 +489,8 @@ ggsave('./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = auc)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
+ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo")
 
@@ -502,9 +501,9 @@ modelos_actuales_zoomed <- modelos_actuales[modelos_actuales$modelo %in% c("BAG.
                                                                            "RF. MODELO 2", "RF. MODELO 1 (no reemp)"), ]
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                        reorder(modelo,tasa, mean))
-ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
+
+ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo (solo BAGGING)")
 
@@ -512,9 +511,8 @@ ggsave('./charts/random_forest/03_FINAL_tasa.jpeg')
 
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                        reorder(modelo,auc, mean))
-ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
+ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo (solo BAGGING)")
 

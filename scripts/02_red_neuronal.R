@@ -380,12 +380,12 @@ rm(avnnetgrid_2)
 modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx"))
 modelos_actuales$tasa <- as.numeric(modelos_actuales$tasa)
 modelos_actuales$auc <- as.numeric(modelos_actuales$auc)
+modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20))
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = tasa)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
+ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo")
 
@@ -393,9 +393,8 @@ ggsave('./charts/comparativas/02_log_avnnet_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = auc)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
+ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo")
 
