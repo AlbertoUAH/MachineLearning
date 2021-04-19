@@ -589,7 +589,7 @@ rm(rfgrid.2)
 #     Yes         782  1405
 
 #-- Los resultados son muy similares en ambas situaciones
-#   Elegiria un modelo con 10 nodesize y sampsize 1000
+#   Elegiria un modelo con 20 nodesize y sampsize 1000
 
 modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx",
                                              sheet = "bagging"))

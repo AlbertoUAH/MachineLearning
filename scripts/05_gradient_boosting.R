@@ -97,12 +97,12 @@ plot(gbm_modelo2_aux, main = "Gradient Boosting Hyperparameters Tunning (Modelo 
 # Diria entre 0.2, 0.3, 0.4 y 100 arboles
 #-- Estudio del Early Stopping
 #   Modelo 1
-gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.3),
+gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.2),
                                     n.minobsinnode=c(20),
                                     n.trees=c(50, 100,400, 500, 800, 1000, 1500, 2000, 2500, 5000),
                                     interaction.depth=c(2))
 
-gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.4),
+gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.3),
                                       n.minobsinnode=c(20),
                                       n.trees=c(50, 100,400, 500, 800, 1000, 1500, 2000, 2500, 5000),
                                       interaction.depth=c(2))
@@ -116,23 +116,22 @@ gbm_modelo1_early_stopping_2 <- train(factor(target)~mortality_rsi+ccsMort30Rate
                                       distribution="bernoulli", bag.fraction=1,verbose=FALSE)
 
 gbm_modelo1_es_final <- rbind(gbm_modelo1_early_stopping$results, gbm_modelo1_early_stopping_2$results)
-gbm_modelo1_es_final$shrinkage <- c(rep("0.3", 10), rep("0.4", 10))
+gbm_modelo1_es_final$shrinkage <- c(rep("0.2", 10), rep("0.3", 10))
 
 gbm_modelo1_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
                                     group = shrinkage, col = shrinkage)) + 
   geom_point() +
   geom_line() +
-  geom_text_repel(data=gbm_modelo1_es_final %>% sample_frac(0.6)) +
   ggtitle("Evolucion Accuracy Modelo 1 (Early Stopping)")
-#-- Llama la atencion 100 + 0.3 ; 100 + 0.4
+#-- Llama la atencion 100 + 0.2 ; 100 + 0.3
 
 #  Modelo 2
-gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.3),
+gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.2),
                                     n.minobsinnode=c(20),
                                     n.trees=c(50, 100,400, 500, 800, 1000, 1500, 2000, 2500, 5000),
                                     interaction.depth=c(2))
 
-gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.4),
+gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.3),
                                       n.minobsinnode=c(20),
                                       n.trees=c(50, 100,400, 500, 800, 1000, 1500, 2000, 2500, 5000),
                                       interaction.depth=c(2))
@@ -146,13 +145,12 @@ gbm_modelo2_early_stopping_2 <- train(factor(target)~mortality_rsi+bmi+month.8+A
                                       distribution="bernoulli", bag.fraction=1,verbose=FALSE)
 
 gbm_modelo2_es_final <- rbind(gbm_modelo2_early_stopping$results, gbm_modelo2_early_stopping_2$results)
-gbm_modelo2_es_final$shrinkage <- c(rep("0.3", 10), rep("0.4", 10))
+gbm_modelo2_es_final$shrinkage <- c(rep("0.2", 10), rep("0.3", 10))
 
 gbm_modelo2_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
                                     group = shrinkage, col = shrinkage)) + 
   geom_point() +
   geom_line() +
-  geom_text_repel(data=gbm_modelo2_es_final %>% sample_frac(0.6)) +
   ggtitle("Evolucion Accuracy Modelo 2 (Early Stopping)")
 
 # Nuevamente, nos encontramos que con 100 iteraciones parece una buena alternativa
@@ -161,15 +159,10 @@ gbm_modelo2_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
 
 #-- Tuneo bag.fraction (fraccion de observaciones del conjunto de entrenamiento seleccionadas aleatoriamente a proponer en la construccion
 #   del siguiente arbol) modelo 1
-gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.3),
+gbmgrid_early_stopping<-expand.grid(shrinkage=c(0.2),
                                     n.minobsinnode=c(20),
                                     n.trees=c(100),
                                     interaction.depth=c(2))
-
-gbmgrid_early_stopping_2<-expand.grid(shrinkage=c(0.4),
-                                      n.minobsinnode=c(20),
-                                      n.trees=c(100),
-                                      interaction.depth=c(2))
 
 gbm_modelo1_early_stopping_bag_fraction <- data.frame()
 for(bag_fraction in c(.05, .1, .2, .3, .5, .8, 1)) {
@@ -178,15 +171,10 @@ for(bag_fraction in c(.05, .1, .2, .3, .5, .8, 1)) {
                                   method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping,
                                   distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
   
-  set.seed(1234)
-  temp_2 <- train(factor(target)~mortality_rsi+ccsMort30Rate+bmi+month.8+Age,data=surgical_dataset,
-                                  method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping_2,
-                                  distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
-  
-  gbm_modelo1_early_stopping_bag_fraction <- rbind(gbm_modelo1_early_stopping_bag_fraction, temp$results, temp_2$results)
+  gbm_modelo1_early_stopping_bag_fraction <- rbind(gbm_modelo1_early_stopping_bag_fraction, temp$results)
 }
-rm(temp); rm(temp_2)
-gbm_modelo1_early_stopping_bag_fraction$bag.fraction <- c(rep(0.05,2), rep(.1,2), rep(.2,2), rep(.3,2), rep(.5,2), rep(.8,2), rep(1,2))
+rm(temp)
+gbm_modelo1_early_stopping_bag_fraction$bag.fraction <- c(0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1)
 
 
 #-- Llama la atencion 100 + 0.3 ; 200 + 0.3 ; 100 + 0.2 ; 500 + 0.2
@@ -198,15 +186,10 @@ for(bag_fraction in c(.05, .1, .2, .3, .5, .8, 1)) {
                 method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping,
                 distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
   
-  set.seed(1234)
-  temp_2 <- train(factor(target)~mortality_rsi+bmi+month.8+Age,data=surgical_dataset,
-                  method="gbm",trControl=control,tuneGrid=gbmgrid_early_stopping_2,
-                  distribution="bernoulli",bag.fraction=bag_fraction,verbose=FALSE)
-  
-  gbm_modelo2_early_stopping_bag_fraction <- rbind(gbm_modelo2_early_stopping_bag_fraction, temp$results, temp_2$results)
+  gbm_modelo2_early_stopping_bag_fraction <- rbind(gbm_modelo2_early_stopping_bag_fraction, temp$results)
 }
-gbm_modelo2_early_stopping_bag_fraction$bag.fraction <- c(rep(0.05, 2), rep(.1, 2), rep(.2, 2), rep(.3, 2), rep(.5, 2), rep(.8, 2), rep(1, 2))
-rm(temp); rm(temp_2); rm(bag_fraction)
+gbm_modelo2_early_stopping_bag_fraction$bag.fraction <- c(0.05, 0.1, 0.2, 0.3, 0.5, 0.8, 1)
+rm(temp); rm(bag_fraction)
 
 #-- Analicemos el modelo 1
 gbm_modelo1_early_stopping_bag_fraction$bag.fraction <- as.factor(gbm_modelo1_early_stopping_bag_fraction$bag.fraction)
@@ -244,28 +227,28 @@ graph_2
 #   Modelo 1
 tuneo_gradient_boosting_modelo1 <- tuneo_gradient_boosting(
   dataset = surgical_dataset, lista.continua = var_modelo1, target = target,
-  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.3),
+  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.2),
   interaction.depth = 2, grupos = 5, repe = 5, path.1 = "",
   path.2 = ""
 )
 
 tuneo_gradient_boosting_modelo1_10rep <- tuneo_gradient_boosting(
   dataset = surgical_dataset, lista.continua = var_modelo1, target = target,
-  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.3),
+  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.2),
   interaction.depth = 2, grupos = 5, repe = 10, path.1 = "",
   path.2 = ""
 )
 
 tuneo_gradient_boosting_modelo2 <- tuneo_gradient_boosting(
   dataset = surgical_dataset, lista.continua = var_modelo2, target = target,
-  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.3),
+  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.2),
   interaction.depth = 2, grupos = 5, repe = 5, path.1 = "",
   path.2 = ""
 )
 
 tuneo_gradient_boosting_modelo2_10_rep <- tuneo_gradient_boosting(
   dataset = surgical_dataset, lista.continua = var_modelo2, target = target,
-  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.3),
+  n.trees = 100, n.minobsinnode = 20, bag.fraction = c(0.5, 1), shrinkage = c(0.2),
   interaction.depth = 2, grupos = 5, repe = 10, path.1 = "",
   path.2 = ""
 )
@@ -316,7 +299,7 @@ control <- trainControl(method = "repeatedcv",number=5,repeats=10,
                         savePredictions = "all",classProbs=TRUE) 
 set.seed(1234)
 gbm_modelo1_final <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, collapse = "+"))),
-                     data=surgical_dataset, method="gbm", trControl = control,tuneGrid = expand.grid(shrinkage=c(0.3), 
+                     data=surgical_dataset, method="gbm", trControl = control,tuneGrid = expand.grid(shrinkage=c(0.2), 
                                                                                                     n.minobsinnode=c(20),
                                                                                                     n.trees=c(100),
                                                                                                     interaction.depth=c(2)),
@@ -324,7 +307,7 @@ gbm_modelo1_final <- train(as.formula(paste0(target, "~" , paste0(var_modelo1, c
 
 set.seed(1234)
 gbm_modelo2_final <- train(as.formula(paste0(target, "~" , paste0(var_modelo2, collapse = "+"))),
-                           data=surgical_dataset, method="gbm", trControl = control,tuneGrid = expand.grid(shrinkage=c(0.3), 
+                           data=surgical_dataset, method="gbm", trControl = control,tuneGrid = expand.grid(shrinkage=c(0.2), 
                                                                                                            n.minobsinnode=c(20),
                                                                                                            n.trees=c(100),
                                                                                                            interaction.depth=c(2)),
@@ -336,14 +319,14 @@ matriz_conf_2 <- matriz_confusion_predicciones(gbm_modelo2_final, NULL, surgical
 
 # Modelo 1
 # Prediction   No   Yes
-# No          6461  133
-# Yes         697   1490
+# No          6457  137
+# Yes         715   1472
 
 # Modelo 2
 # Reference
 # Prediction  No  Yes
-# No         6447 147
-# Yes        699 1488
+# No         6477 117
+# Yes         715 1472
 
 modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx",
                                              sheet = "gradient_boosting"))
