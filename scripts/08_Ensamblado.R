@@ -108,11 +108,32 @@ medias_xgboost$modelo <-"XGboost"
 pred_xgboost      <- as.data.frame(xgboost[2])
 pred_xgboost$logi <- pred_xgboost$Yes
 
+svm_lineal <- cruzadaSVMbin(data=surgical_dataset, vardep=target, listconti=var_modelo2,
+                            listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
+                            C=0.01, replace=TRUE)
 
+medias_svm_lineal    <- as.data.frame(svm_lineal[1])
+medias_svm_lineal$modelo <-"SVM_Lin"
+pred_svm_lineal      <- as.data.frame(svm_lineal[2])
+pred_svm_lineal$logi <- pred_svm_lineal$Yes
 
+svm_poly   <- cruzadaSVMbinPoly(data=surgical_dataset, vardep=target, listconti=var_modelo2,
+                            listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
+                            C=0.01, degree=2, scale=0.1)
 
+medias_svm_poly    <- as.data.frame(svm_poly[1])
+medias_svm_poly$modelo <-"SVM_Poly"
+pred_svm_poly      <- as.data.frame(svm_poly[2])
+pred_svm_poly$logi <- pred_svm_poly$Yes
 
+svm_rbf   <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target, listconti=var_modelo2,
+                              listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
+                              C=1, sigma=5)
 
+medias_svm_rbf    <- as.data.frame(svm_rbf[1])
+medias_svm_rbf$modelo <-"SVM_RBF"
+pred_svm_rbf      <- as.data.frame(svm_rbf[2])
+pred_svm_rbf$logi <- pred_svm_rbf$Yes
 
 
 
