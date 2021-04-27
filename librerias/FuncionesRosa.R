@@ -1,4 +1,4 @@
-#Cuenta el número de valores diferentes para las numéricas
+#Cuenta el n?mero de valores diferentes para las num?ricas
 cuentaDistintos<-function(matriz){
   sapply(Filter(is.numeric, matriz),function(x) length(unique(x)))
 }
@@ -23,14 +23,14 @@ hist_targetbinaria<-function(var,target,nombreEje){
     xlab(nombreEje)
 }
 
-# Gráfico mosaico para las variables cualitativas y variable objetivo binaria
+# Gr?fico mosaico para las variables cualitativas y variable objetivo binaria
 mosaico_targetbinaria<-function(var,target,nombreEje){
   ds <- table(var, target)
   ord <- order(apply(ds, 1, sum), decreasing=TRUE)
   mosaicplot(ds[ord,], color=c("darkturquoise","indianred1"), las=2, main="",xlab=nombreEje)
 }
 
-# Gráfico de barras para las variables cualitativas y variable objetivo binaria
+# Gr?fico de barras para las variables cualitativas y variable objetivo binaria
 barras_targetbinaria<-function(var,target,nombreEje){
   dataaux<-data.frame(variable=var,target=target)
   ggplot(dataaux, aes(x="All",y = (..count..)/sum(..count..))) +
@@ -39,7 +39,7 @@ barras_targetbinaria<-function(var,target,nombreEje){
     ylab("Frecuencia relativa")+xlab(nombreEje)
 }
 
-# Gráfico correlaciones, código de Rattle
+# Gr?fico correlaciones, c?digo de Rattle
 graficoCorrelacion<-function(target,matriz){
   panel.hist <- function(x, ...)
   {
@@ -68,7 +68,7 @@ graficoCorrelacion<-function(target,matriz){
         lower.panel=panel.cor)
 }
 
-# Cuenta el número de atípicos y los transforma en missings
+# Cuenta el n?mero de at?picos y los transforma en missings
 atipicosAmissing<-function(varaux){
   if (abs(skew(varaux))<1){
     criterio1<-abs((varaux-mean(varaux,na.rm=T))/sd(varaux,na.rm=T))>3
@@ -82,7 +82,7 @@ atipicosAmissing<-function(varaux){
   return(list(varaux,sum(criterio1&criterio2,na.rm=T)))
 }
 
-# Borras las observaciones completas si son atípicas
+# Borras las observaciones completas si son at?picas
 obsAtipicasBorrar<-function(varaux){
   if (abs(skew(varaux))<1){
     criterio1<-abs((varaux-mean(varaux,na.rm=T))/sd(varaux,na.rm=T))>3
@@ -95,7 +95,7 @@ obsAtipicasBorrar<-function(varaux){
   !(criterio1&criterio2)
 }
 
-# Imputación variables cuantitativas
+# Imputaci?n variables cuantitativas
 ImputacionCuant<-function(vv,tipo){#tipo debe tomar los valores media, mediana o aleatorio
   if (tipo=="media"){
     vv[is.na(vv)]<-round(mean(vv,na.rm=T),4)
@@ -108,7 +108,7 @@ ImputacionCuant<-function(vv,tipo){#tipo debe tomar los valores media, mediana o
   vv
 }
 
-# Imputación variables cualitativas
+# Imputaci?n variables cualitativas
 ImputacionCuali<-function(vv,tipo){#tipo debe tomar los valores moda o aleatorio
   if (tipo=="moda"){
     vv[is.na(vv)]<-names(sort(table(vv),decreasing = T))[1]
@@ -118,7 +118,7 @@ ImputacionCuali<-function(vv,tipo){#tipo debe tomar los valores moda o aleatorio
   vv
 }
 
-# Busca la transformación de variables input de intervalo que maximiza la correlación con la objetivo continua
+# Busca la transformaci?n de variables input de intervalo que maximiza la correlaci?n con la objetivo continua
 mejorTransfCorr<-function(vv,target){
   vv<-scale(vv)
   vv<-vv+abs(min(vv,na.rm=T))*1.0001
@@ -138,7 +138,7 @@ Vcramer<-function(v,target){
 }
 
 
-# Busca la transformación de variables input de intervalo que maximiza la V de Cramer con la objetivo binaria
+# Busca la transformaci?n de variables input de intervalo que maximiza la V de Cramer con la objetivo binaria
 mejorTransfVcramer<-function(vv,target){
   vv<-scale(vv)
   vv<-vv+abs(min(vv,na.rm=T))*1.0001
@@ -146,7 +146,7 @@ mejorTransfVcramer<-function(vv,target){
   return(list(colnames(posiblesTransf)[which.max(apply(posiblesTransf,2,function(x) Vcramer(x,target)))],posiblesTransf[,which.max(apply(posiblesTransf,2,function(x) Vcramer(x,target)))]))
 }
 
-# Detecta el tipo de variable objetivo y busca la mejor transformación de las variables input continuas automáticamente
+# Detecta el tipo de variable objetivo y busca la mejor transformaci?n de las variables input continuas autom?ticamente
 Transf_Auto<-function(matriz,target){
     if (is.numeric(target)){
     aux<-data.frame(apply(matriz,2,function(x) mejorTransfCorr(x,target)[[2]]))
@@ -160,7 +160,7 @@ Transf_Auto<-function(matriz,target){
   return(aux)
 }
 
-# Gráfico con el V de cramer de todas las variables input para saber su importancia
+# Gr?fico con el V de cramer de todas las variables input para saber su importancia
 graficoVcramer<-function(matriz, target){
   salidaVcramer<-sapply(matriz,function(x) Vcramer(x,target))
   barplot(sort(salidaVcramer,decreasing =T),las=2,ylim=c(0,1))
@@ -175,7 +175,7 @@ Rsq<-function(modelo,varObj,datos){
   1 - sse/sst
 }
 
-#Para evaluar el pseudo-R2 en regr. logística en cualquier conjunto de datos
+#Para evaluar el pseudo-R2 en regr. log?stica en cualquier conjunto de datos
 pseudoR2<-function(modelo,dd,nombreVar){
   pred.out.link <- predict(modelo, dd, type = "response")
   mod.out.null <- glm(as.formula(paste(nombreVar,"~1")), family = binomial, data = dd)
@@ -184,7 +184,7 @@ pseudoR2<-function(modelo,dd,nombreVar){
     sum((dd[,nombreVar]==1)*log(pred.out.linkN)+log(1 -pred.out.linkN)*(1-(dd[,nombreVar]==1)))
 }
 
-#Gráfico con la importancia de las variables en regr. logística
+#Gr?fico con la importancia de las variables en regr. log?stica
 impVariablesLog<-function(modelo,nombreVar,dd=data_train){
   null<-glm(as.formula(paste(nombreVar,"~1")),data=dd,family=binomial)
   aux2<-capture.output(aux<-step(modelo, scope=list(lower=null, upper=modelo), direction="backward",k=0,steps=1))
@@ -195,10 +195,11 @@ impVariablesLog<-function(modelo,nombreVar,dd=data_train){
 
 #Calcula medidas de calidad para un punto de corte dado
 sensEspCorte<-function(modelo,dd,nombreVar,ptoCorte,evento){
-  probs <-predict(modelo,newdata=dd,type="response")
-  cm<-confusionMatrix(data=factor(ifelse(probs>ptoCorte,1,0)), reference=dd[,nombreVar],positive=evento)
+  probs <-predict(modelo,newdata=dd,type="prob")
+  data=factor(ifelse(probs$Yes>ptoCorte,"Yes","No"))
+  cm<-confusionMatrix(data=data, reference=dd$target,positive=evento)
   c(cm$overall[1],cm$byClass[1:4])
-} 
+}
 
 #Generar todas las posibles interacciones
 formulaInteracciones<-function(data,posicion){

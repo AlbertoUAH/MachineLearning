@@ -10,6 +10,7 @@ suppressPackageStartupMessages({
   source("./librerias/cruzada rf binaria.R")
   source("./librerias/cruzada gbm binaria.R")
   source("./librerias/cruzada xgboost binaria.R")
+  source("./librerias/cruzada SVM binaria RBF.R")
 })
 
 # libreria para EDA
