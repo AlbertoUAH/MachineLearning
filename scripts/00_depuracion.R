@@ -29,17 +29,15 @@ dim(surgical_dataset) # Filas x columnas
 # Para ello, recurrimos a createDataPartition
 set.seed(1234)
 partitions <- createDataPartition(surgical_dataset$complication, p = 0.40, list = FALSE)
-surgical_dataset_partitioned <- surgical_dataset[partitions, ]
+surgical_dataset_partitioned <- surgical_dataset
 
-#--- EDA (Exploratory Data Analysis)
+#-- Codificamos como variables categoricas: target + variables categoricas
 surgical_dataset_partitioned$complication <- as.factor(surgical_dataset_partitioned$complication)
-make_eda_report(surgical_dataset_partitioned, "complication", "First EDA Report", 
-                "00_EDA_initial_report.html", "./reports")
 
 # Por numerico de valores unicos (y por la documentacion), codificamos las siguientes variables como categoricas
 cat_columns <- c("gender", "race", "asa_status", "baseline_cancer", "baseline_cvd", "baseline_dementia",
                  "baseline_diabetes", "baseline_digestive", "baseline_osteoart", "baseline_psych",
-                 "baseline_pulmonary", "dow", "month", "moonphase", "mort30")
+                 "baseline_pulmonary", "dow", "month", "moonphase", "mort30", "complication")
 surgical_dataset_partitioned[,cat_columns] <- lapply(surgical_dataset_partitioned[, cat_columns], factor)
 
 # Problema: complication_rsi y ccsComplicationRate se calculan a partir de la variable objetivo
@@ -66,7 +64,7 @@ target      <- "complication"
 # -> moonphase (cuando hay luna nueva, hay un menor numero de pacientes que sufren complicaciones)
 # -> mort30 (cuando mort30 = 1, especialmente, hay un mayor numero de pacientes que sufren complicaciones)
 # -> race (aunque no muy relevante, la categoria "others" es la raza que mayor numero de complicaciones sufre)
-make_eda_report(surgical_dataset_partitioned, target, "Second EDA Report", 
+make_eda_report(surgical_dataset_partitioned, target, "First EDA Report: Surgical Dataset", 
                 "00_EDA_report_with_factors.html", "./reports")
 
 # ¿Y el criterio del Valor de la Informacion o IV?

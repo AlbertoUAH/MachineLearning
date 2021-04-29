@@ -184,7 +184,7 @@ show_vars_importance <- function(modelo, title) {
   tabla$vars <- factor(vars, levels=unique(vars))
   rownames(tabla) <- NULL
   
-  print(tabla %>% arrange(.,-MeanDecreaseAccuracy))
+  print(tabla %>% arrange(.,-MeanDecreaseGini))
   
   tabla %>% arrange(.,-MeanDecreaseAccuracy) %>% 
     ggplot(aes(MeanDecreaseAccuracy, vars)) +

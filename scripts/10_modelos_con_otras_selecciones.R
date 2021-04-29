@@ -55,29 +55,26 @@ sinicio <- 1234; grupos <- 5; repe <- 10
 #   Bagging, XGboost, Random Forest, GBM, Avnnet y SVM RBF
 
 #-- Seleccion de variables empleadas
-modelo_1 <- list("modelo1" = c("mortality_rsi", "ahrq_ccs", "bmi", "month.8", "Age"))
-modelo_2 <- list("modelo2" = c("Age", "mortality_rsi", "bmi", "ahrq_ccs"))
+modelo_1 <- list("modelo1" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age"))
+modelo_2 <- list("modelo2" = c("mortality_rsi", "bmi", "month.8", "Age"))
 
 #-- Recordemos las selecciones que desctartamos al comienzo
-candidato_aic <- list("candidato_aic" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "baseline_cvd", 
-                   "baseline_charlson", "asa_status.0", "baseline_osteoart", "moonphase.0", 
-                   "Age", "dow.0", "month.0", "baseline_diabetes", "ahrq_ccs"))
+candidato_aic_2 <- list("candidato_aic_2" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", 
+                                            "dow.0", "Age", "moonphase.0", "month.0", "baseline_osteoart", 
+                                            "baseline_charlson", "ahrq_ccs"))
 
-candidato_bic <- list("candidato_bic" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0", 
-                   "Age", "moonphase.0", "baseline_osteoart", "asa_status.0"))
+candidato_aic_3 <- list("candidato_aic_3" = c("mortality_rsi", "ahrq_ccs", "bmi", "month.8", "Age"))
 
-candidato_aic_depurado <- list("candidato_aic_depurado" = c("mortality_rsi", "ahrq_ccs", "bmi", "month.8", "Age"))
+candidato_bic_2 <- list("candidato_bic_2" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0",           
+                                              "Age", "moonphase.0", "baseline_osteoart"))
 
-candidato_rfe_lr <- list("candidato_rfe_lr" = c("ccsMort30Rate", "mortality_rsi", "bmi", "month.8", "Age", "dow.0", "baseline_osteoart", 
-                        "baseline_cvd", "moonphase.0", "month.0", "baseline_charlson", "asa_status.0", 
-                        "baseline_diabetes", "ahrq_ccs", "baseline_pulmonary", "baseline_dementia", "race.0", 
-                        "baseline_cancer"))
+candidato_bic_4 <- list("candidato_bic_4" = c("mortality_rsi", "baseline_osteoart", "bmi", "month.8", "Age"))
 
 candidato_rfe_lr_top3 <- list("candidato_rfe_lr_top3" = c("ccsMort30Rate", "mortality_rsi", "bmi"))
 
 candidato_rfe_rf      <- list("candidato_rfe_rf" = c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs"))
 
-sel_variables <- list(modelo_1, modelo_2, candidato_aic, candidato_bic, candidato_aic_depurado, candidato_rfe_lr,
+sel_variables <- list(modelo_1, modelo_2, candidato_aic_2, candidato_aic_3, candidato_bic_2, candidato_bic_4,
                    candidato_rfe_lr_top3, candidato_rfe_rf)
 
 

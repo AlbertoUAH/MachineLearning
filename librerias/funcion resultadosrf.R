@@ -1,5 +1,5 @@
 
-resultadosrf<-function(dataf=dataf,vardep=vardep,mtry=2,ntree=100,sampsize=400,nodesize=20,corte=0.5,sinicio=1234)
+resultadosrf<-function(dataf=dataf,vardep=vardep,listconti,mtry=2,ntree=100,sampsize=400,nodesize=20,corte=0.5,sinicio=1234)
 
 {
 library(caret)
@@ -40,7 +40,7 @@ totalmin<-round(min(cosa$Freq),2)
 
 dataf[vardep]<-ifelse(dataf[vardep]==minoritaria,"Yes","No")
 
-formu1<-paste("factor(",vardep,")~.")
+formu1<-paste("factor(",vardep,")~",paste0(listconti, collapse = "+"))
 
 
 if (sampsize>nrow(dataf)/4) {sampsize=floor(nrow(dataf)/4-1)}
