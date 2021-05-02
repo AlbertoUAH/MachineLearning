@@ -118,7 +118,7 @@ comparar_modelos_red <- function(dataset, target, lista.continua, sizes,
 
 # Funcion para mostrar el err. rate en Bagging
 mostrar_err_rate <- function(train.err.rate1, train.err.rate2) {
-  plot(train.err.rate1, col = 'red', type = 'l', 
+  ggplot(train.err.rate1, col = 'red', type = 'l', 
        main = 'Error rate by nº trees', xlab = 'Number of trees', ylab = 'Error rate', ylim = c(0.09, 0.13))
   lines(train.err.rate2, col = 'blue')
   legend("top", legend = c("OOB: MODELO 2","OOB: MODELO 1") , 
@@ -179,23 +179,25 @@ train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
 show_vars_importance <- function(modelo, title) {
   final<-modelo$finalModel
   tabla<-as.data.frame(final$importance)
-  tabla<-tabla[order(tabla$MeanDecreaseAccuracy),]
+  tabla<-tabla[order(tabla$MeanDecreaseGini),]
   vars <- rownames(tabla)
   tabla$vars <- factor(vars, levels=unique(vars))
   rownames(tabla) <- NULL
   
   print(tabla %>% arrange(.,-MeanDecreaseGini))
   
-  tabla %>% arrange(.,-MeanDecreaseAccuracy) %>% 
-    ggplot(aes(MeanDecreaseAccuracy, vars)) +
+  s <- tabla %>% arrange(.,-MeanDecreaseGini) %>% 
+    ggplot(aes(MeanDecreaseGini, vars)) +
     geom_col() +
-    geom_text(aes(label=round(MeanDecreaseAccuracy, 3), x=0.5*MeanDecreaseAccuracy), size=3, colour="white") +
+    geom_label(aes(label=round(MeanDecreaseGini,1), x=MeanDecreaseGini+50), size=4, colour="blue", fontface = "bold") +
     scale_x_continuous(expand=expansion(c(0,0.04))) +
     ggtitle(title) +
     theme_bw() +
     theme(panel.grid.minor=element_blank(),
           panel.grid.major=element_blank(),
-          axis.title=element_blank())
+          axis.title=element_blank(),
+          text = element_text(size=17, face = "bold"))
+  return(s)
 }
 
 

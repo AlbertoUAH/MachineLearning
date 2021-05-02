@@ -81,7 +81,17 @@ salida.rfe.lr
 salida.rfe.lr$optVariables
 # Top 5: "ccsMort30Rate", "mortality_rsi", "bmi", "month.8", "Age" 
 # Las variables obtenidas en la interseccion anterior se situan practicamente entre las primeras del RFE - LR
-ggplot(salida.rfe.lr) + ggtitle("Variable importance Logistic Regression RFE")
+colors <- c("Dataset original" = "red", "Subconjunto (40 %)" = "darkgreen")
+
+ggplot(NULL, aes(x = Variables, y = Accuracy)) +
+  geom_line(data = salida.rfe.lr$results, aes(color = "Dataset original")) +
+  geom_point(data = salida.rfe.lr$results) +
+  geom_line(data = salida.rfe.lr1$results, aes(color = "Subconjunto (40 %)")) +
+  geom_point(data = salida.rfe.lr1$results) +
+  ggtitle("Variable importance Logistic Regression RFE") +
+  scale_color_manual(values = colors) + 
+  labs(color='Dataset')+
+  theme(text = element_text(size=14, face = "bold"))
 ggsave('./charts/01_feature_selection_RFE_LR_whole_dataset.png')
 
 # Sin embargo, con tan solo 3 variables el modelo alcanza un accuracy de 0.77 en logistica
@@ -99,7 +109,15 @@ salida.rfe.rf <- rfe(surgical_dataset[, vars], surgical_dataset[, target],
 # Con el dataset completo, con 4 variables se obtiene un 0.9040 (sin ahrq_ccs)
 salida.rfe.rf$optVariables
 # Top 5: Age, mortality_rsi, ccsMort30Rate, bmi, ahrq_ccs
-ggplot(salida.rfe.rf) + ggtitle("Variable importance Random Forest RFE")
+ggplot(NULL, aes(x = Variables, y = Accuracy)) +
+  geom_line(data = salida.rfe.rf$results, aes(color = "Dataset original")) +
+  geom_point(data = salida.rfe.rf$results) +
+  geom_line(data = salida.rfe.rf1$results, aes(color = "Subconjunto (40 %)")) +
+  geom_point(data = salida.rfe.rf1$results) +
+  ggtitle("Variable importance Random Forest RFE") +
+  scale_color_manual(values = colors) + 
+  labs(color='Dataset')  +
+  theme(text = element_text(size=14, face = "bold"))
 ggsave('./charts/01_feature_selection_RFE_RF_whole_dataset.png')
 
 # Con un Random Forest, dadas las relaciones no lineales entre las variables
@@ -112,11 +130,32 @@ candidato.rfe.rf <- salida.rfe.rf$optVariables
 # ************************************
 # Candidatos a seleccion de variables: 
 # step aic, bic, RFE LR, RFE RF
-candidatos         <- list(candidato.aic, candidato.bic, candidato.rfe.lr, candidato.rfe.lr.2, candidato.rfe.rf)
-nombres_candidatos <- c("LOGISTICA AIC", "LOGISTICA BIC", "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5")
+candidatos         <- list(candidato.aic, candidato.bic, candidato.rfe.lr.2, candidato.rfe.rf)
+nombres_candidatos <- c("LOGISTICA AIC", "LOGISTICA BIC", "RFE LR TOP 3", "RFE RF")
 
 union1 <- cruzada_logistica(surgical_dataset, target, candidatos, nombres_candidatos,
                             grupos = 5, repe = 5)
+
+union_final <- rbind(union1, union_subset)
+
+union_final$Dataset <- c(rep("Dataset original", 20), rep("Subconjunto (40 %)", 20))
+t <- ggplot(union_final, aes(x = modelo, y = tasa, color = Dataset)) +
+  geom_boxplot() +
+  ggtitle("Comparacion (tasa fallos)") +
+  scale_color_manual(values = colors) + 
+  labs(color='Dataset')  +
+  theme(text = element_text(size=12, face = "bold"))
+
+a <- ggplot(union_final, aes(x = modelo, y = auc, color = Dataset)) +
+  geom_boxplot() +
+  ggtitle("Comparacion (AUC)") +
+  scale_color_manual(values = colors) + 
+  labs(color='Dataset')  +
+  theme(text = element_text(size=12, face = "bold"))
+
+ggpubr::ggarrange(t, a, common.legend = TRUE)
+ggsave('./charts/01_feature_selection_primera_comparacion.png')
+
 # Conclusion
 # llaman la atencion los candidatos bic y rfe rf top 5
 # RFE TOP 5 presenta un menor valor AUC, aunque el random forest nos ha dado indicios de la
@@ -142,11 +181,29 @@ candidato.aic.2 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8",
                      "dow.0", "Age", "moonphase.0", "month.0", "baseline_osteoart", 
                      "baseline_charlson", "ahrq_ccs")
 
-candidatos_3         <- list(candidato.aic, candidato.aic.2, candidato.bic, candidato.bic.2, 
-                             candidato.rfe.lr, candidato.rfe.lr.2, candidato.rfe.rf)
-nombres_candidatos_3 <- c("LOGISTICA AIC", "LOGISTICA AIC (sin 3 variables)" ,"LOGISTICA BIC", "LOGISTICA BIC (sin asa.status)" , "RFE LR TOP 18", "RFE LR TOP 3", "RFE RF TOP 5")
+candidatos_3         <- list(candidato.aic, candidato.aic.2, candidato.bic, candidato.bic.2, candidato.rfe.lr.2, candidato.rfe.rf)
+nombres_candidatos_3 <- c("LOGISTICA AIC", "LOGISTICA AIC (11 vars)" ,"LOGISTICA BIC", "LOGISTICA BIC (8 vars)" , "RFE LR TOP 3", "RFE RF TOP 5")
 union3 <- cruzada_logistica(surgical_dataset, target, candidatos_3, nombres_candidatos_3,
                             grupos = 5, repe = 5)
+
+union3$modelo <- with(union3, reorder(modelo,tasa, mean))
+t <- ggplot(union3, aes(x = modelo, y = tasa)) +
+  geom_boxplot() +
+  ggtitle("Comparacion (tasa fallos)") +
+  labs(color='Dataset')  +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+
+union3$modelo <- with(union3, reorder(modelo,auc, mean))
+a <- ggplot(union3, aes(x = modelo, y = auc)) +
+  geom_boxplot() +
+  ggtitle("Comparacion (AUC)") +
+  labs(color='Dataset')  +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+
+ggpubr::ggarrange(t, a, common.legend = TRUE)
+ggsave('./charts/01_feature_selection_segunda_comparacion.png')
+
+
 
 # Incluso dejando el modelo con 11 variables, el valor AUC es practicamente identico, aunque la varianza
 # del modelo aumenta
@@ -163,22 +220,38 @@ rf_modelo_aic   <- train_rf_model(surgical_dataset,
 
 # Importancia de las variables en un random forest
 # ¿Pueden sobrar dow.0, moonphase.0? y baseline osteoart?
-show_vars_importance(rf_modelo_bic, "Importancia variables Random Forest (modelo BIC)")
+imp1 <- show_vars_importance(rf_modelo_aic, "Importancia variables (AIC)")
+imp2 <- show_vars_importance(rf_modelo_bic, "Importancia variables (BIC)")
+ggpubr::ggarrange(imp1, imp2, common.legend = TRUE)
+ggsave('./charts/01_feature_selection_comparacion_random_forest.png')
 
-show_vars_importance(rf_modelo_aic, "Importancia variables Random Forest (modelo AIC)")
+top4 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate")
+candidato.aic.top5 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate", "ahrq_ccs")
+candidato.bic.4 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate", "baseline_osteoart")
+candidato.bic.5 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate", "month.8")
 
-candidato.bic.3 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
-candidato.bic.4 <- c("mortality_rsi", "baseline_osteoart", "bmi", "month.8", "Age")
-candidato.bic.5 <- c("mortality_rsi", "bmi", "month.8", "Age")
-candidato.aic.3 <- c("mortality_rsi", "ahrq_ccs", "bmi", "month.8", "Age")
-
-candidatos_4         <- list(candidato.aic.2, candidato.aic.3, candidato.bic.2, candidato.bic.3, 
-                             candidato.bic.4,candidato.bic.5, candidato.rfe.lr.2, candidato.rfe.rf)
-nombres_candidatos_4 <- c("LOG. AIC (sin 2 variables)" , "LOG. AIC (TOP 5)", "LOG. BIC (sin asa.status)" ,
-                          "LOG. BIC (ccsMort30Rate)","LOG. BIC (baseline_osteoart)", "LOG. BIC (TOP 4)", "RFE LR TOP 3", "RFE RF TOP 5")
+candidatos_4         <- list(candidato.aic, candidato.bic, top4, candidato.rfe.rf, 
+                             candidato.bic.4, candidato.bic.5)
+nombres_candidatos_4 <- c("AIC" , "BIC" , "AIC-BIC-TOP 4", "RFE RF TOP 5 (AIC TOP 5)",
+                          "BIC (TOP 5 - baseline_osteoart)", "BIC (TOP 5 - month.8)")
 union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
                             grupos = 5, repe = 5)
+union4$modelo <- with(union4, reorder(modelo,tasa, mean))
+t <- ggplot(union4, aes(x = modelo, y = tasa)) +
+  geom_boxplot() +
+  ggtitle("Comparacion (tasa fallos)") +
+  labs(color='Dataset')  +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 
+union4$modelo <- with(union4, reorder(modelo,auc, mean))
+a <- ggplot(union4, aes(x = modelo, y = auc)) +
+  geom_boxplot() +
+  ggtitle("Comparacion (AUC)") +
+  labs(color='Dataset')  +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+
+ggpubr::ggarrange(t, a, common.legend = TRUE)
+ggsave('./charts/01_feature_selection_comparacion_final.png')
 
 #-- De ahora en adelante probaremos con dos modelos candidatos
 #   LOGISTICA BIC (TOP 5) -> seleccion1
@@ -190,31 +263,36 @@ union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_cand
 write.csv(surgical_dataset, "data/surgical_dataset_final.csv", row.names = FALSE)
 
 #-- Nota: de cara a las comparaciones con el resto de modelos, aumentamos el numero de repeticiones a 10
-candidatos_final         <- list(candidato.bic.3, candidato.bic.5)
-nombres_candidatos_final <- c("LOG. BIC (ccsMort30Rate)", "LOG. BIC (TOP 4)")
+candidatos_final         <- list(candidato.bic.5, top4)
+nombres_candidatos_final <- c("BIC (TOP 5 - month.8)", "AIC-BIC-TOP 4")
 union_final <- cruzada_logistica(surgical_dataset, target, candidatos_final, nombres_candidatos_final,
                             grupos = 5, repe = 10)
 rm(candidatos_final)
 rm(nombres_candidatos_final)
 
-union_10_rep <- rbind(union4[union4$modelo %in% c("LOG. BIC (ccsMort30Rate)", "LOG. BIC (TOP 4)"), ], union_final)
+union_10_rep <- rbind(union4[union4$modelo %in% c("BIC (TOP 5 - month.8)", "AIC-BIC-TOP 4"), ], union_final)
 union_10_rep$rep <- c(rep("5", 10), rep("10", 20))
 
 # Tasa de fallos
-ggplot(union_10_rep, aes(x = modelo, y = tasa, col = rep)) +
+p <- ggplot(union_10_rep, aes(x = modelo, y = tasa, col = rep)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
-
+  ggtitle("Tasa de fallos por modelo") +
+  theme(text = element_text(size=13, face = "bold"))
+p
 ggsave('./charts/01_boxplot_log_modelo1_error_10rep.jpeg')
 
 # AUC
-ggplot(union_10_rep, aes(x = modelo, y = auc, col = rep)) +
+g <- ggplot(union_10_rep, aes(x = modelo, y = auc, col = rep)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
-
+  ggtitle("AUC por modelo") +
+  theme(text = element_text(size=13, face = "bold"))
+g
 ggsave('./charts/01_boxplot_log_modelo1_auc_10rep.jpeg')
+
+ggpubr::ggarrange(p, g, common.legend = TRUE)
+ggsave('./charts/01_feature_selection_comparacion_5_10_rep.png')
 
 surgical_test_data <- fread("./data/surgical_test_data.csv", data.table = FALSE)
 

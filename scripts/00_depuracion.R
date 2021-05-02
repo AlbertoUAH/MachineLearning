@@ -29,6 +29,8 @@ dim(surgical_dataset) # Filas x columnas
 # Para ello, recurrimos a createDataPartition
 set.seed(1234)
 partitions <- createDataPartition(surgical_dataset$complication, p = 0.40, list = FALSE)
+partitions_2 <- createDataPartition(surgical_dataset$complication, p = 0.40, list = FALSE)
+
 surgical_dataset_partitioned <- surgical_dataset
 
 #-- Codificamos como variables categoricas: target + variables categoricas

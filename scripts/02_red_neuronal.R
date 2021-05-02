@@ -385,19 +385,19 @@ modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20))
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
-
+       geom_boxplot(alpha = 0.7) +
+       scale_x_discrete(name = "Modelo") +
+       ggtitle("Tasa de fallos por modelo") +
+       theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 ggsave('./charts/comparativas/02_log_avnnet_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
-
+       geom_boxplot(alpha = 0.7) +
+       scale_x_discrete(name = "Modelo") +
+       ggtitle("AUC por modelo") +
+       theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 ggsave('./charts/comparativas/02_log_avnnet_auc.jpeg')
 
 #-- Si hacemos zoom sobre los modelos avnnet...
@@ -408,7 +408,7 @@ ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa)) +
   geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
                alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo (solo AVNNET)")
+  ggtitle("Tasa de fallos por modelo (solo AVNNET)") 
 
 ggsave('./charts/comparativas/02_FINAL_tasa.jpeg')
 
@@ -418,7 +418,8 @@ ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc)) +
   geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
                alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo (solo AVNNET)")
+  ggtitle("AUC por modelo (solo AVNNET)") +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 
 ggsave('./charts/comparativas/02_FINAL_auc.jpeg')
 
