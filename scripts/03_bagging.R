@@ -168,7 +168,7 @@ bagging_modelo1_4 <- tuneo_bagging(surgical_dataset, target = target,
 # 30 + 1: 353 ; 30 + 500: 67 ; 30 + 1000: 119 ; 30 + 1500: 153 ; 30 + 2000: 205 ; 30 + 2500: 227
 
 # ¿Merece la pena aumentar el nodesize a 50? ¿O disminuirlo a 5?
-nodesizes.1 <- list(5)
+nodesizes.1 <- list(50)
 sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500)
 bagging_modelo1_5 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
@@ -181,7 +181,7 @@ rm(bagging_modelo1_5)
 # 5 + 1: 767 ; 5 + 500: 153 ; 5 + 1000: 253 ; 5 + 1500: 329 ; 5 + 2000: 391 ; 5 + 2500: 461
 # 1 + 1: 1053 ; 1 + 500: 191 ; 1 + 1000: 317 ; 1 + 1500: 443 ; 1 + 2000: 523 ; 1 + 2500: 617
 
-bagging_comp1 <- rbind(bagging_modelo1_3, bagging_modelo1_5); bagging_comp1$nodesize <- c(rep("20", 30), rep("5", 30)) 
+bagging_comp1 <- rbind(bagging_modelo1_3, bagging_modelo1_5); bagging_comp1$nodesize <- c(rep("20", 60), rep("50", 60)) 
 bagging_comp1$modelo <- with(bagging_comp1, reorder(modelo,tasa, mean))
 p <- ggplot(bagging_comp1, aes(x = factor(modelo), y = tasa, colour = nodesize, group = modelo)) +
             geom_boxplot(alpha = 0.7) +
@@ -193,9 +193,10 @@ t <- ggplot(bagging_comp1, aes(x = factor(modelo), y = auc, colour = nodesize, g
             scale_x_discrete(name = "Modelo") +
             ggtitle("AUC por modelo") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45))
 ggpubr::ggarrange(p, t, common.legend = TRUE)
-ggsave('./charts/03_distribucion_auc_tasa_fallos_modelo1_comp.png')
+ggsave('./charts/03_distribucion_auc_tasa_fallos_modelo1_comp_50rep.png')
 randomForestSRC::tune.nodesize(formula = as.formula(paste0("target~", paste0(var_modelo1, collapse = "+"))), surgical_dataset,
-                                                    nodesizeTry = c(5, 10, 20, 30, 50), mtryStart = 5, sampsize = 500, seed = 1234,nsplit = 5)
+                                                    nodesizeTry = c(5, 10, 20, 30, 50), mtryStart = 5, ntreeTry = 900,
+                                                    sampsize = 500, seed = 1234, stepFactor=0)
 # $nsize.opt
 # [1] 5
 # 
@@ -208,7 +209,7 @@ randomForestSRC::tune.nodesize(formula = as.formula(paste0("target~", paste0(var
 # 5       50 0.2210454
 
 randomForestSRC::tune.nodesize(formula = as.formula(paste0("target~", paste0(var_modelo1, collapse = "+"))), surgical_dataset,
-                               nodesizeTry = c(5, 10, 20, 30, 50), mtryStart = 5, sampsize = 1000)
+                               nodesizeTry = c(5, 10, 20, 30, 50), mtryStart = 5, ntreeTry = 900, sampsize = 1000, seed = 1234, stepFactor=0)
 # $nsize.opt
 # [1] 5
 # 
@@ -348,19 +349,29 @@ bagging_modelo2 <- tuneo_bagging(surgical_dataset, target = target,
 bagging_modelo2$nodesizes <- as.numeric(c(data.frame(strsplit(bagging_modelo2$modelo, '+', fixed = T))[1,]))
 bagging_modelo2$sampsizes <- as.numeric(c(data.frame(strsplit(bagging_modelo2$modelo, '+', fixed = T))[2,]))
 
+bagging_modelo2_temp <- bagging_modelo2 %>% group_by(modelo, sampsizes, nodesizes) %>% summarise(tasa_fallos_media = mean(tasa))
 #-- Distribucion de la tasa de error
-ggplot(bagging_modelo2, aes(x=factor(sampsizes), y=tasa,
-                            colour=factor(nodesizes))) +
-  geom_point(position=position_dodge(width=0.3),size=2, shape = 18) +
-  ggtitle("Distribucion de la tasa por sampsizes y nodesizes (Modelo 2)")
+p <- ggplot(bagging_modelo2_temp, aes(x=factor(sampsizes), y=tasa_fallos_media,
+                                      colour=factor(nodesizes))) +
+  geom_point(position=position_dodge(width=0.3),size=2.5, shape = 20) +
+  scale_colour_manual(values=rainbow(7))+
+  ggtitle("Tasa de fallos (Modelo 2)") +
+  theme(text = element_text(size=13, face = "bold"))
 ggsave("./charts/bagging/distribuciones/03_distribucion_tasa_error_modelo2.png")
 
 #-- Distribucion del AUC
-ggplot(bagging_modelo2, aes(x=factor(sampsizes), y=auc,
-                            colour=factor(nodesizes))) +
-  geom_point(position=position_dodge(width=0.3),size=2, shape = 18) +
-  ggtitle("Distribucion del AUC por sampsizes y nodesizes (Modelo 2)")
+bagging_modelo2_temp <- bagging_modelo2 %>% group_by(modelo, sampsizes, nodesizes) %>% summarise(auc_medio = mean(auc))
+#-- Distribucion de la tasa de error
+t <- ggplot(bagging_modelo2_temp, aes(x=factor(sampsizes), y=auc_medio,
+                                      colour=factor(nodesizes))) +
+  geom_point(position=position_dodge(width=0.3),size=2.5, shape = 20) +
+  scale_colour_manual(values=rainbow(7))+
+  ggtitle("AUC (Modelo 2)") +
+  theme(text = element_text(size=13, face = "bold"))
 ggsave("./charts/bagging/distribuciones/03_distribucion_auc_modelo2.png")
+
+ggpubr::ggarrange(p, t, common.legend = TRUE)
+ggsave('./charts/03_distribucion_auc_tasa_fallos_modelo2.png')
 
 # Del mismo modo que sucedia con el modelo 1, con sampsize 500-2000 se obtienen unos modelos cuyos valores
 # de error y AUC son muy similares a los obtenidos con el conjunto total de observaciones. Ademas, podemos
@@ -406,7 +417,7 @@ bagging_modelo2_4 <- tuneo_bagging(surgical_dataset, target = target,
 
 
 # ¿Mereceria la pena aumentar nodesize a 50? ¿O disminuir nodesize a 5?
-nodesizes.2 <- list(1)
+nodesizes.2 <- list(50)
 sampsizes.2 <- list(1, 500, 1000, 1500, 2000, 2500)
 bagging_modelo2_5 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo2,
@@ -418,6 +429,20 @@ rm(bagging_modelo2_5)
 # 50 + 1: 277; 50 + 500: 53; 50 + 1000: 87; 50 + 1500: 123; 50 + 2000: 143; 50 + 2500: 167
 # 5 + 1: 783;  5 + 500: 147; 5 + 1000: 239; 5 + 1500: 329;  5 + 2000: 403;  5 + 2500: 453
 # 1 + 1: 1111; 1 + 500: 195; 1 + 1000: 315; 1 + 1500: 429;  1 + 2000: 537;  1 + 2500: 641
+bagging_comp2 <- rbind(bagging_modelo2_3, bagging_modelo2_5); bagging_comp2$nodesize <- c(rep("20", 60), rep("5", 60)) 
+bagging_comp2$modelo <- with(bagging_comp2, reorder(modelo,tasa, mean))
+p <- ggplot(bagging_comp2, aes(x = factor(modelo), y = tasa, colour = nodesize, group = modelo)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("Tasa de fallos por modelo") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45))
+bagging_comp2$modelo <- with(bagging_comp2, reorder(modelo,auc, mean))
+t <- ggplot(bagging_comp2, aes(x = factor(modelo), y = auc, colour = nodesize, group = modelo)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("AUC por modelo") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45))
+ggpubr::ggarrange(p, t, common.legend = TRUE)
+ggsave('./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep.png')
+
 
 # Aumentando o disminuyendo el nodesize a 5 0 50, respectivamente, el modelo no mejora practicamente
 # ni en tasa de fallos ni en AUC
@@ -426,17 +451,12 @@ rm(bagging_modelo2_5)
 #-- Posible candidato:   nodesize 20 y sampsize 500-1000-1500
 #-- ¿Por qué modelo bagging nos decantamos?
 union_bagging_modelo2 <- rbind(
-  bagging_modelo2_2[bagging_modelo2_2$modelo == "10+1", ],
-  bagging_modelo2_2[bagging_modelo2_2$modelo == "10+500", ],
-  bagging_modelo2_2[bagging_modelo2_2$modelo == "10+1000", ],
-  bagging_modelo2_2[bagging_modelo2_2$modelo == "10+1500", ],
   bagging_modelo2_3[bagging_modelo2_3$modelo == "20+1", ],
   bagging_modelo2_3[bagging_modelo2_3$modelo == "20+500", ],
-  bagging_modelo2_3[bagging_modelo2_3$modelo == "20+1000", ],
-  bagging_modelo2_3[bagging_modelo2_3$modelo == "20+1500", ]
+  bagging_modelo2_3[bagging_modelo2_3$modelo == "20+1000", ]
 )
 
-union_bagging_modelo2$config <- rep("5_folds-10_rep", 80)
+union_bagging_modelo2$config <- rep("5_folds-10_rep", 15)
 
 #-- Distribucion de la tasa de error
 #   Modelos candidatos: 
@@ -483,17 +503,12 @@ rm(nodesizes.1)
 
 #-- ¿Por qué modelo bagging nos decantamos?
 union_bagging_modelo2_10folds <- rbind(
-  bagging_modelo2_2_10folds[bagging_modelo2_2_10folds$modelo == "10+1", ],
-  bagging_modelo2_2_10folds[bagging_modelo2_2_10folds$modelo == "10+500", ],
-  bagging_modelo2_2_10folds[bagging_modelo2_2_10folds$modelo == "10+1000", ],
-  bagging_modelo2_2_10folds[bagging_modelo2_2_10folds$modelo == "10+1500", ],
   bagging_modelo2_3_10folds[bagging_modelo2_3_10folds$modelo == "20+1", ],
   bagging_modelo2_3_10folds[bagging_modelo2_3_10folds$modelo == "20+500", ],
-  bagging_modelo2_3_10folds[bagging_modelo2_3_10folds$modelo == "20+1000", ],
-  bagging_modelo2_3_10folds[bagging_modelo2_3_10folds$modelo == "20+1500", ]
+  bagging_modelo2_3_10folds[bagging_modelo2_3_10folds$modelo == "20+1000", ]
 )
 
-union_bagging_modelo2_10folds$config <- rep("10_folds-20_rep", 80)
+union_bagging_modelo2_10folds$config <- rep("10_folds-20_rep", 30)
 union_bagging_modelo2_final          <- rbind(union_bagging_modelo2,
                                               union_bagging_modelo2_10folds)
 
@@ -501,21 +516,24 @@ union_bagging_modelo2_final          <- rbind(union_bagging_modelo2,
 #   Modelos candidatos: 20+1000
 union_bagging_modelo2_final$modelo <- with(union_bagging_modelo2_final,
                                      reorder(modelo,tasa, mean))
-ggplot(union_bagging_modelo2_final, aes(x = modelo, y = tasa, col = config)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
+p <- ggplot(union_bagging_modelo2_final, aes(x = modelo, y = tasa, col = config)) +
+            geom_boxplot(alpha = 0.7) +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("Tasa de fallos por modelo") + theme(text = element_text(size=13, face = "bold"))
 ggsave("./charts/bagging/bis_03_comparacion_final_tasa_modelo2_10rep.png")
 
 #-- Distribucion del AUC
 #   
 union_bagging_modelo2_final$modelo <- with(union_bagging_modelo2_final,
                                      reorder(modelo,auc, mean))
-ggplot(union_bagging_modelo2_final, aes(x = modelo, y = auc, col = config)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
+t <- ggplot(union_bagging_modelo2_final, aes(x = modelo, y = auc, col = config)) +
+            geom_boxplot(alpha = 0.7) +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("AUC por modelo") + theme(text = element_text(size=13, face = "bold"))
 ggsave("./charts/bagging/bis_03_comparacion_final_auc_modelo2_10rep.png")
+
+ggpubr::ggarrange(p, t, common.legend = TRUE)
+ggsave("./charts/bagging/bis_03_comparacion_final_modelo2_5_10_folds.png")
 
 # ¿Se mantienen dichas distribuciones con 10 repeticiones?
 # Por lo general, si. Por ello, elegimos como modelos candidatos 20 + 1000
@@ -637,47 +655,44 @@ bagging_modelo_sin_reemp <- tuneo_bagging(surgical_dataset, target = target,
                                    ntree = n.trees.1, grupos = 5, repe = 10, replace = FALSE)
 bagging_modelo_sin_reemp$modelo <- "BAG. MODELO 1 (no reemp)"
 modelos_actuales <- rbind(modelos_actuales, bagging_modelo_sin_reemp)
-modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("BAGGING", 30))
+modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("BAGGING", 20))
                           
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
-
+       geom_boxplot(alpha = 0.7) +
+       scale_x_discrete(name = "Modelo") +
+       ggtitle("Tasa de fallos por modelo") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 ggsave('./charts/comparativas/03_log_avnnet_bagging_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
-
+       geom_boxplot(alpha = 0.7) +
+       scale_x_discrete(name = "Modelo") +
+       ggtitle("AUC por modelo") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 ggsave('./charts/comparativas/03_log_avnnet_bagging_auc.jpeg')
 
 #-- Si hacemos zoom sobre los modelos bagging...
 modelos_actuales_zoomed <- modelos_actuales[modelos_actuales$modelo %in% c("BAG. MODELO 1", "BAG. MODELO 2", "BAG. MODELO 1 (no reemp)"), ]
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                        reorder(modelo,tasa, mean))
-ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo (solo BAGGING)")
-
+p <- ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa)) +
+            geom_boxplot() +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("Tasa de fallos (solo BAGGING)") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45))
 ggsave('./charts/bagging/03_FINAL_tasa.jpeg')
 
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                        reorder(modelo,auc, mean))
-ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc)) +
-  geom_boxplot(fill =  "#4271AE", colour = "#1F3552",
-               alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo (solo BAGGING)")
-
+t <- ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc)) +
+            geom_boxplot() +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("AUC (solo BAGGING)") + theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45))
 ggsave('./charts/bagging/03_FINAL_auc.jpeg')
+
+ggpubr::ggarrange(p, t, common.legend = TRUE)
+ggsave('./charts/bagging/03_comparacion_final_bagging.png')
 
 #---- Estadisticas
 # Por tasa fallos --------------- auc

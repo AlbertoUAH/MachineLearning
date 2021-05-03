@@ -1744,6 +1744,17 @@ sus resultados}:
 \caption{Comparacion AUC log-avnnet}\label{fig:unnamed-chunk-63}
 \end{figure}
 
+\textbf{RESUMEN red neuronal}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelo 1: \emph{size} = 15 y \emph{decay} = 0.01.
+\item
+  modelo 2: \emph{size} = 10 y \emph{decay} = 0.01.
+\end{enumerate}
+
 \hypertarget{bagging}{%
 \section{7. Bagging}\label{bagging}}
 
@@ -1802,6 +1813,12 @@ del cual se detectan ciertas fluctuaciones (subidas o bajadas en el
 error), aunque de forma aleatoria}. Por tanto, \textbf{para ambos
 modelos escogemos 900 como número de árboles}.
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{n.trees}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\DecValTok{900}\NormalTok{; n.trees}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\DecValTok{900}
+\end{Highlighting}
+\end{Shaded}
+
 \hypertarget{modelo-1}{%
 \subsection{7.2 Modelo 1}\label{modelo-1}}
 
@@ -1840,6 +1857,7 @@ tamaño máximo de muestra que podemos probar:
 
 \begin{Shaded}
 \begin{Highlighting}[]
+\NormalTok{mtry}\FloatTok{.1}\NormalTok{      <{-}}\StringTok{ }\DecValTok{5}
 \CommentTok{\#{-}{-} Redondeamos 4683 a 4600}
 \NormalTok{sampsizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{2000}\NormalTok{, }\DecValTok{3000}\NormalTok{, }\DecValTok{4600}\NormalTok{)}
 \NormalTok{nodesizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DecValTok{30}\NormalTok{, }\DecValTok{40}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{)}
@@ -1861,7 +1879,7 @@ mostramos el promedio tanto de la tasa de fallos como de AUC:
 
 }
 
-\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (I)}\label{fig:unnamed-chunk-68}
+\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (I)}\label{fig:unnamed-chunk-69}
 \end{figure}
 
 En un primer análisis, caben destacar fundamentalmente dos aspectos:
@@ -1910,12 +1928,12 @@ repeticiones para observar mejor su efecto:
 \NormalTok{nodesizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{20}\NormalTok{)}
 \CommentTok{\#{-}{-} Probamos con un sampsize entre 500 y 2000 observaciones (1 = todas las observaciones)}
 \NormalTok{sampsizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{1500}\NormalTok{, }\DecValTok{2000}\NormalTok{)}
-\NormalTok{bagging\_modelo1\_}\DecValTok{5}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{tuneo\_bagging}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
-                                   \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo1,}
-                                   \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.1}\NormalTok{,}
-                                   \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.1}\NormalTok{, }\DataTypeTok{mtry =}\NormalTok{ mtry}\FloatTok{.1}\NormalTok{,}
-                                   \DataTypeTok{ntree =}\NormalTok{ n.trees}\FloatTok{.1}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{10}\NormalTok{,}
-                                   \DataTypeTok{show\_nrnodes =} \StringTok{"yes"}\NormalTok{)}
+\NormalTok{bagging\_modelo1\_v2 <{-}}\StringTok{ }\KeywordTok{tuneo\_bagging}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                    \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo1,}
+                                    \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.1}\NormalTok{,}
+                                    \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.1}\NormalTok{, }\DataTypeTok{mtry =}\NormalTok{ mtry}\FloatTok{.1}\NormalTok{,}
+                                    \DataTypeTok{ntree =}\NormalTok{ n.trees}\FloatTok{.1}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{10}\NormalTok{,}
+                                    \DataTypeTok{show\_nrnodes =} \StringTok{"yes"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -1925,7 +1943,7 @@ repeticiones para observar mejor su efecto:
 
 }
 
-\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (II)}\label{fig:unnamed-chunk-70}
+\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (II)}\label{fig:unnamed-chunk-71}
 \end{figure}
 
 Nuevamente, sin fijarnos en la escala del eje, una posible opción a
@@ -1940,6 +1958,26 @@ fallos en torno a 0.10 y un AUC de 0.91, por lo que la diferencia es del
 de los modelos se ve reducida en comparación con usar todas las
 observaciones, aunque la diferencia (por las escalas del eje) sea menor.
 
+Sin embargo, ¿Y si aumentamos \emph{nodesize} a 50?
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/03_distribucion_auc_tasa_fallos_modelo1_comp_50rep} 
+
+}
+
+\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (III)}\label{fig:unnamed-chunk-72}
+\end{figure}
+
+A simple vista, \textbf{los resultados obtenidos son muy similares en
+ambos casos}, especialmente en \emph{AUC}, donde la diferencia entre el
+mejor modelo (20 + 1500) y el peor (50 + 500) es de tan solo 0.01. Sin
+embargo, y en relación con la tasa de fallos, para alcanzar un valor en
+torno al 10 \% con un \emph{nodesize} = 50, se requiere por lo general
+un mayor tamaño de submuestra, dado que la complejidad del árbol es
+menor. Sin embargo, con un valor \emph{nodesize} menor (20), se
+requieren menos observaciones.
+
 Por tanto, dada la poca ganancia que presentan los modelos complejos,
 \textbf{nos decantamos por un modelo \emph{bagging} con \emph{nodesize}
 = 20 y un tamaño de muestra en torno a 500 y 1000}. Sobre ambos
@@ -1952,7 +1990,7 @@ probamos con una validación cruzada de 10 grupos y 20 repeticiones:
 
 }
 
-\caption{Distribucion de la tasa de fallos y AUC (Modelo 1) aumentando grupos y repeticiones}\label{fig:unnamed-chunk-71}
+\caption{Distribucion de la tasa de fallos y AUC (Modelo 1) aumentando grupos y repeticiones}\label{fig:unnamed-chunk-73}
 \end{figure}
 
 Por lo general, incluso aumentando el número de grupos y repeticiones,
@@ -1961,9 +1999,583 @@ como en AUC. Por tanto, de los dos posibles modelos candidatos (con
 \emph{sampsize} 500 o 1000), aunque la diferencia entre ambos, así como
 el sesgo y varianza no sean muy significativas (dada la escala de los
 ejes), \textbf{nos decantamos por un modelo con un tamaño de 1000
-submuestras}.
+submuestras}, es decir, con tan solo el 1000 / 5854 \textasciitilde{} 17
+\% de las observaciones.
 
 \hypertarget{modelo-2}{%
 \subsection{7.3 Modelo 2}\label{modelo-2}}
+
+Del mismo modo, realizamos los mismos pasos con el segundo \emph{set} de
+cuatro variables, comenzando con el tuneo tanto de \emph{nodesize} como
+de \emph{sampsize}, obteniendo el promedio en tasa de fallos y AUC con 5
+repeticiones:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mtry}\FloatTok{.2}\NormalTok{      <{-}}\StringTok{ }\DecValTok{4}
+\NormalTok{sampsizes}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{2000}\NormalTok{, }\DecValTok{3000}\NormalTok{, }\DecValTok{4600}\NormalTok{)}
+\NormalTok{nodesizes}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DecValTok{30}\NormalTok{, }\DecValTok{40}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+
+\NormalTok{bagging\_modelo1 <{-}}\StringTok{ }\KeywordTok{tuneo\_bagging}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                 \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo2,}
+                                 \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.2}\NormalTok{,}
+                                 \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.2}\NormalTok{, }\DataTypeTok{mtry =}\NormalTok{ mtry}\FloatTok{.2}\NormalTok{,}
+                                 \DataTypeTok{ntree =}\NormalTok{ n.trees}\FloatTok{.2}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/03_distribucion_auc_tasa_fallos_modelo2} 
+
+}
+
+\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 2) (I)}\label{fig:unnamed-chunk-75}
+\end{figure}
+
+Nuevamente, nos encontramos con un comportamiento similar al obtenido
+con el primer modelo: por un lado, con un valor \emph{nodesize}
+moderado/alto (en torno a 20), obtienen buenos resultados, por lo que no
+es necesario utilizar árboles demasiado complejos, pues la ganancia
+tanto en tasa de fallos como en AUC es ínfima. Por otro lado, y en
+relación con \emph{sampsize}, \textbf{no es necesario emplear todas las
+observaciones}, sino que con tan solo 500 o 1000 muestras, el modelo
+obtiene buenos resultados.
+
+Por tanto, y del mismo modo que en el primer \emph{set} de variables,
+\_\_comparamos la diferencia entre un modelo de mayor complejidad (
+\emph{nodesize} = 5 ) y de menor complejidad ( \emph{nodesize} = 20 ),
+utilizando diferentes tamaños de \emph{sampsize}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nodesizes}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{20}\NormalTok{)}
+\CommentTok{\#{-}{-} Probamos con un sampsize entre 500 y 2000 observaciones (1 = todas las observaciones)}
+\NormalTok{sampsizes}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{1500}\NormalTok{, }\DecValTok{2000}\NormalTok{)}
+\NormalTok{bagging\_modelo1\_v2 <{-}}\StringTok{ }\KeywordTok{tuneo\_bagging}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                    \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo2,}
+                                    \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.2}\NormalTok{,}
+                                    \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.2}\NormalTok{, }\DataTypeTok{mtry =}\NormalTok{ mtry}\FloatTok{.2}\NormalTok{,}
+                                    \DataTypeTok{ntree =}\NormalTok{ n.trees}\FloatTok{.2}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{10}\NormalTok{,}
+                                    \DataTypeTok{show\_nrnodes =} \StringTok{"yes"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/03_distribucion_auc_tasa_fallos_modelo2_comp} 
+
+}
+
+\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 2) (II)}\label{fig:unnamed-chunk-77}
+\end{figure}
+
+De nuevo, el hecho de aumentar la complejidad de los árboles (reduciendo
+el valor de \emph{nodesize}), no supone una mejoría relevante al modelo.
+A modo de ejemplo, la diferencia en la tasa de fallos entre un modelo
+con \emph{nodesize} 5 (5 + 2000) y un modelo con \emph{nodesize} 20 (20
++ 2500), es de apenas unas milésimas de diferencia (del mismo modo
+sucede con AUC) ¿Y si aumentamos el valor a 50?
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep} 
+
+}
+
+\caption{Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 2) (III)}\label{fig:unnamed-chunk-78}
+\end{figure}
+
+En base a la escala de los ejes, la diferencia no es muy significativa.
+Sin embargo y por lo general, con un \emph{nodesize} = 50 se requiere un
+mayor número de observaciones, al ser árboles de menor complejidad,
+mientras que con un \emph{nodesize} menor, en torno a 20, con tan solo
+500 o 1000 observaciones se obtienen prácticamente los mismos
+resultados.
+
+Por tanto, y del mismo modo que en el primer \emph{set} de variables,
+nos decantamos por un \emph{nodesize} de 20 y un tamaño de muestra en
+torno a 500-1000 observaciones. Sobre ambos candidatos, probamos de
+nuevo con una validación cruzada de 10 grupos y 20 repeticiones:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/bagging/bis_03_comparacion_final_modelo2_5_10_folds} 
+
+}
+
+\caption{Distribucion de la tasa de fallos y AUC (Modelo 2) aumentando grupos y repeticiones}\label{fig:unnamed-chunk-79}
+\end{figure}
+
+Incluso aumentando el número de grupos, el orden de los modelos se
+mantiene prácticamente igual. En conclusión, \textbf{nos decantamos por
+la misma configuración que con el primer \emph{set} de variables}:
+\emph{nodesize} 20 y \emph{sampsize} 1000.
+
+\textbf{RESUMEN \emph{bagging}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelo 1: \emph{nodesize} = 20 y \emph{sampsize} = 1000.
+\item
+  modelo 2: \emph{nodesize} = 20 y \emph{sampsize} = 1000.
+\end{enumerate}
+
+\hypertarget{modelo-sin-reemplazamiento}{%
+\subsection{7.4 Modelo sin
+reemplazamiento}\label{modelo-sin-reemplazamiento}}
+
+Una vez tuneados ambos \emph{sets} de variables, veamos la diferencia
+entre un modelo con \emph{sampsize} con reemplazamiento y sin
+reemplazamiento:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} ¿Y si lo probamos sin reemplazamiento? Probamos con el mejor modelo en terminos de AUC (modelo 1)}
+\NormalTok{bagging\_modelo\_sin\_reemp <{-}}\StringTok{ }\KeywordTok{tuneo\_bagging}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                   \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo1, }\DataTypeTok{nodesizes =} \DecValTok{20}\NormalTok{, }
+                                   \DataTypeTok{sampsizes =} \DecValTok{1000}\NormalTok{, }\DataTypeTok{mtry =}\NormalTok{ mtry}\FloatTok{.1}\NormalTok{, }\DataTypeTok{ntree =}\NormalTok{ n.trees}\FloatTok{.1}\NormalTok{, }
+                                   \DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{10}\NormalTok{, }\DataTypeTok{replace =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/bagging/03_comparacion_final_bagging} 
+
+}
+
+\caption{Distribucion de la tasa de fallos y AUC con y sin reemplazamiento}\label{fig:unnamed-chunk-81}
+\end{figure}
+
+A simple vista, no existe diferencia entre modelos con o sin
+reemplazamiento en \emph{sampsize}. Por otro lado, y del mismo modo que
+sucedía con el modelo de red, no existe apenas diferencia entre el
+primer \emph{set} con 5 variables y el segundo \emph{set} con 4, tan
+solo de 0.01 en el caso del AUC.
+
+\hypertarget{comparaciuxf3n-final-1}{%
+\subsection{7.5 Comparación final}\label{comparaciuxf3n-final-1}}
+
+Finalmente, realizamos la comparación final de ambos modelos
+\emph{bagging} con los datos \emph{test}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)    0.9010       0.9214        0.8966         0.6589
+## 2     Modelo 2 (top 4)    0.9019       0.9468        0.8928         0.6424
+##   valor_pred_neg
+## 1         0.9813
+## 2         0.9880
+\end{verbatim}
+
+Por lo general, la estadísticas de las predicciones mejoran ligeramente,
+aunque se mantienen en la misma línea del modelo de red neuronal: altos
+porcentajes de sensibilidad, especificidad y valor predictivo negativo,
+aunque el valor predictivo positivo se sitúa en torno al 64-65 \%,
+aproximadamente, lo cual es un indicativo de la presencia de un alto
+número de falsos positivos en las predicciones. Además, la diferencia
+entre el primer modelo \emph{bagging} (con 5 variables \emph{input}) y
+el segundo (con tan solo 4), no es muy relevante en base a las
+estadísticas anteriores.
+
+Además, si observamos la distribución de la tasa de fallos y AUC en los
+modelos:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/03_log_avnnet_bagging_tasa} 
+
+}
+
+\caption{Comparacion tasa fallos log-avnnet-bagging}\label{fig:unnamed-chunk-83}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/03_log_avnnet_bagging_auc} 
+
+}
+
+\caption{Comparacion AUC log-avnnet-bagging}\label{fig:unnamed-chunk-84}
+\end{figure}
+
+De nuevo, la relación no lineal entre las variables \emph{input} se ve
+reflejado en los resultados obtenidos tanto en modelos de red como
+\emph{bagging}, siendo este último caso el que obtiene mejores
+resultados tanto en tasa de fallos como en AUC, aunque la diferencia
+(dada la escala de los ejes) no sea muy relevante.
+
+\hypertarget{random-forest}{%
+\section{8. Random Forest}\label{random-forest}}
+
+\hypertarget{selecciuxf3n-del-nuxfamero-de-uxe1rboles-y-mtry}{%
+\subsection{8.1 Selección del número de árboles y
+mtry}\label{selecciuxf3n-del-nuxfamero-de-uxe1rboles-y-mtry}}
+
+Una vez elaborados los modelos \emph{bagging}, y dado que \emph{Random
+Forest} si realiza el sorteo de variables por cada división del árbol
+¿Con 900 árboles es suficiente? Para comprobarlo, analicemos en ambos
+\emph{sets} la evolución del \emph{ratio} de error al variar el
+parámetro \emph{mtry}:
+
+\hypertarget{modelo-1-1}{%
+\subsubsection{8.1.1 Modelo 1}\label{modelo-1-1}}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/error_rates/error_rate_1} 
+
+}
+
+\caption{Error rate (Modelo 1) en función de mtry}\label{fig:unnamed-chunk-85}
+\end{figure}
+
+En primera instancia, observamos que el error (para cualquier
+\emph{mtry}) se estabiliza prácticamente a partir de 2000 árboles,
+momento en el que el error \emph{Out of bag} es estable con \emph{mtry}
+= 2. Sin embargo, con otros valores \emph{mtry}, es decir,
+\textbf{sorteando un mayor número de variables}, el error se estabiliza
+con antelación:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{mtry} = 3: también a partir de 2000 árboles, aproximadamente.
+\item
+  \emph{mtry} = 4: a partir de 1500 árboles, aproximadamente.
+\item
+  \emph{mtry} = 5: a partir de 900 árboles (caso del modelo
+  \emph{bagging}).
+\end{enumerate}
+
+Tras una primera impresión, y utilizando 2000 árboles, \textbf{lanzamos
+los primeros modelos \emph{random forest}}, utilizando los diferentes
+valores \emph{mtry}. En relación con el resto de parámetros como
+\emph{nodesize} o \emph{sampsize}, \textbf{utilizamos los empleados en
+el modelo \emph{bagging}}: 20 + 1000.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} 2500: numero de arboles a partir del cual se estabiliza con mtry = 2}
+\CommentTok{\#   Inicialmente, probamos con 5 repeticiones}
+\NormalTok{mtry}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{4}\NormalTok{,}\DecValTok{5}\NormalTok{) }\CommentTok{\# mtry = 5 {-}> modelo bagging}
+\NormalTok{primera.imp <{-}}\StringTok{ }\KeywordTok{tuneo\_rf}\NormalTok{(surgical\_dataset, }\DataTypeTok{target=}\NormalTok{target,}\DataTypeTok{lista.continua=}\NormalTok{var\_modelo1,}
+                        \DataTypeTok{grupos=}\DecValTok{5}\NormalTok{,}\DataTypeTok{repe=}\DecValTok{5}\NormalTok{,}\DataTypeTok{nodesizes=}\DecValTok{20}\NormalTok{,}\DataTypeTok{mtry=}\NormalTok{mtry}\FloatTok{.1}\NormalTok{,}\DataTypeTok{ntree=}\DecValTok{2000}\NormalTok{,}\DataTypeTok{replace=}\OtherTok{TRUE}\NormalTok{, }
+                        \DataTypeTok{sampsizes=}\DecValTok{1000}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_inicial_mtry_modelo1} 
+
+}
+
+\caption{Tasa de fallos y AUC en funcion de mtry - Modelo 1}\label{fig:unnamed-chunk-87}
+\end{figure}
+
+A simple vista, \textbf{podemos comprobar que no es realmente necesario
+sortear todas las variables en cada nivel del árbol, sino que con un
+tamaño menor, moderado, en torno a 3, se obtienen los mismos resultados,
+aunque con una ganancia en la tasa de fallos muy pequeña} (0.107-0.108
+frente a 0.102 del modelo \emph{bagging}). Bien es cierto que con un
+\emph{mtry} = 2, la tasa de fallos aumenta (aunque no demasiado) hasta
+0.12. Por tanto, y como primera impresión, \textbf{nos decantamos por un
+valor \emph{mtry} moderado (3), pero sin llegar a utilizar todas las
+variables}.
+
+\hypertarget{modelo-2-1}{%
+\subsubsection{8.1.2 Modelo 2}\label{modelo-2-1}}
+
+Del mismo modo, realizamos los mismos pasos para el segundo \emph{set}
+candidato, comenzando con el número de árboles:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/error_rates/error_rate_2} 
+
+}
+
+\caption{Error rate (Modelo 2) en función de mtry}\label{fig:unnamed-chunk-88}
+\end{figure}
+
+Al igual que en el primer modelo, a excepción de \emph{mtry} = 4
+(correspondiente con un modelo \emph{bagging}), para estabilizar el
+error \textbf{se requieren un mayor número de árboles}, en torno a 2000
+aproximadamente tanto para \emph{mtry} = 2 como \emph{mtry} = 3. A
+continuación, echemos un primer vistazo al comportamiento de los
+modelos, tanto en sesgo como en varianza, utilizando los diferentes
+valores \emph{mtry}, así como 2000 árboles y el mejor valor \emph{mtry}
+y \emph{nodesize} obtenidos en \emph{bagging} para el segundo \emph{set}
+de variables (20 + 1000):
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_inicial_mtry_modelo2} 
+
+}
+
+\caption{Tasa de fallos y AUC en funcion de mtry - Modelo 2}\label{fig:unnamed-chunk-89}
+\end{figure}
+
+En primera instancia, una posibilidad sería decantarse por un modelo con
+\emph{mtry} = 3, sin llegar a utilizar todas las variables. Sin embargo,
+y en base a la escala del eje Y, \textbf{el error y varianza que
+presenta el modelo con \emph{mtry} = 2 no es tan pronunciado}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  En el caso de la tasa de fallos, la diferencia es 0.005 (de 0.1025 en
+  el caso de \emph{mtry} = 4 a 0.1075 en el caso de \emph{mtry} = 2).
+  Además, la varianza que presenta en torno al modelo, teniendo en
+  cuenta la escala del eje, es del orden de milésimas.
+\item
+  En el caso del área bajo la curva ROC, la diferencia también se sitúa
+  en torno a las milésimas (de 0.906 en el caso de \emph{mtry} = 4 a
+  0.904 en el caso de \emph{mtry} = 2).
+\end{enumerate}
+
+Dicha diferencia puede ser debida a numerosos factores: estructura de
+remuestreo, selección de observaciones con \emph{sampsize}, valor de la
+semilla etc. Por tanto, dado que la diferencia no es apenas relevante,
+con el segundo \emph{set} de variables \textbf{nos decantamos por un
+valor \emph{mtry} = 2}.
+
+\hypertarget{modelo-1-2}{%
+\subsection{8.2 Modelo 1}\label{modelo-1-2}}
+
+En un primer comienzo, con un valor \emph{mtry} = 3 y el mismo
+\emph{nodesize} y \emph{sampsize} que en el modelo \emph{bagging},
+obtenemos muy buenos resultados. No obstante, hemos considera un valor
+de \emph{nodesize} y \emph{sampsize} por defecto, esto es, los mejores
+parámetros obtenidos en \emph{bagging}. Por tanto, ¿Puede llegar a ser
+influyente el hecho de aumentar o reducir el valor \emph{nodesize}, o
+más importante aún, el tamaño de la submuestra en \emph{sampsize}? Del
+mismo modo que en \emph{bagging}, analicemos la importancia de ambos
+parámetros, tuneando el modelo con diferentes valores (comenzando con
+tan solo 5 repeticiones):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sampsizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{2000}\NormalTok{, }\DecValTok{3000}\NormalTok{, }\DecValTok{4600}\NormalTok{)}
+\NormalTok{nodesizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DecValTok{30}\NormalTok{, }\DecValTok{40}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+
+\CommentTok{\# Tuneamos nuevamente tanto nodesizes como sampsizes}
+\CommentTok{\# sampsize maximo: (4/5) * 5854 \textasciitilde{} 4600 observaciones}
+\NormalTok{bagging\_modelo1\_mtry3 <{-}}\StringTok{  }\KeywordTok{tuneo\_rf}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                   \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo1,}
+                                   \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.1}\NormalTok{,}
+                                   \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.1}\NormalTok{, }\DataTypeTok{mtry =} \DecValTok{3}\NormalTok{,}
+                                   \DataTypeTok{ntree =} \DecValTok{2000}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_tasa_auc_modelo1} 
+
+}
+
+\caption{Tasa de fallos y AUC en funcion de nodesize y sampsize - Modelo 1}\label{fig:unnamed-chunk-91}
+\end{figure}
+
+Analizando el promedio de cada modelo, detectamos prácitcamente las
+mismas características que en el modelo \emph{bagging}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Aumentar la complejidad del árbol, con un \emph{nodesize}
+  menor, la ganancia que supone tanto en tasa de fallos como en AUC no
+  es muy relevante}, por lo que podemos mantener 20 como tamaño mínimo
+  de cada nodo.
+\item
+  Además, a simple vista \textbf{un valor \emph{sampsize} en torno a
+  500-1000 vuelve a ser una buena opción, obteniendo los mismos
+  resultados que con el conjunto total de las observaciones}, lo que
+  permite la construcción de árboles mucho más diferentes entre si
+  gracias al sorteo de menos muestras. No obstante, analicemos más en
+  detalle tanto el sesgo como la varianza al variar el tamaño de la
+  muestra (manteniendo el valor \emph{nodesize} a 20 y aumentando a el
+  número de repeticiones a 10):
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nodesizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{20}\NormalTok{)}
+\CommentTok{\# Probamos con un tamaño sampsize entre 500 y 3000 (1 = todas las observaciones)}
+\NormalTok{sampsizes}\FloatTok{.1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{2000}\NormalTok{, }\DecValTok{3000}\NormalTok{)}
+
+\NormalTok{bagging\_modelo1\_mtry3 <{-}}\StringTok{  }\KeywordTok{tuneo\_rf}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                   \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo1,}
+                                   \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.1}\NormalTok{,}
+                                   \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.1}\NormalTok{, }\DataTypeTok{mtry =} \DecValTok{3}\NormalTok{,}
+                                   \DataTypeTok{ntree =} \DecValTok{2000}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_tasa_auc_modelo1_sampsizes} 
+
+}
+
+\caption{Tasa de fallos y AUC en funcion de  sampsize - Modelo 1}\label{fig:unnamed-chunk-93}
+\end{figure}
+
+Incluso sorteando variables, los resultados obtenido \textbf{no difieren
+demasiado de un modelo \emph{bagging}}: mientras que con 500
+observaciones la tasa de fallos aumenta hasta 0.12 y el AUC se reduce a
+0.90, a partir de un tamaño de 1000 muestras (lo que supone alrededor
+del 17 \% del total), \textbf{no solo iguala en AUC al resto de modelos
+con \emph{sampsizes} mayores (en torno a 0.91), sino que además la
+ganancia de error es de tan solo unas milésimas}: entre un
+\emph{sampsize} = 1000 y 2000-3000 observaciones, la diferencia es de
+0.107 - 0.102 = 0.005. Por tanto, \textbf{aumentar demasiado el tamaño
+de las submuestras no aporta una mejoría significativa al modelo}, por
+lo que nos decantamos por un valor de 1000.
+
+Por último, para observar en mejor medida el efecto del parámetro
+\emph{sampsize}, aumentamos a 10 grupos y 20 repeticiones:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_tasa_auc_modelo1_10_folds} 
+
+}
+
+\caption{Tasa de fallos y AUC aumentando a 10 grupos y 20 repeticiones - Modelo 1}\label{fig:unnamed-chunk-94}
+\end{figure}
+
+Incluso aumentando a 10 grupos y 20 repeticiones, tanto el sesgo como la
+varianza se mantienen prácticamente idénticos.
+
+\hypertarget{modelo-2-2}{%
+\subsection{8.2 Modelo 2}\label{modelo-2-2}}
+
+A continuación, realizamos los mismos pasos con el segundo \emph{set} de
+variables, parametrizando en primer lugar tanto \emph{nodesize} como
+\emph{sampsize}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{sampsizes}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{100}\NormalTok{, }\DecValTok{500}\NormalTok{, }\DecValTok{1000}\NormalTok{, }\DecValTok{2000}\NormalTok{, }\DecValTok{3000}\NormalTok{, }\DecValTok{4600}\NormalTok{)}
+\NormalTok{nodesizes}\FloatTok{.2}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{, }\DecValTok{20}\NormalTok{, }\DecValTok{30}\NormalTok{, }\DecValTok{40}\NormalTok{, }\DecValTok{50}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+
+\CommentTok{\# Tuneamos nuevamente tanto sampsizes como nodesizes}
+\NormalTok{bagging\_modelo2\_mtry2 <{-}}\StringTok{  }\KeywordTok{tuneo\_rf}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                   \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo2,}
+                                   \DataTypeTok{nodesizes =}\NormalTok{ nodesizes}\FloatTok{.2}\NormalTok{,}
+                                   \DataTypeTok{sampsizes =}\NormalTok{ sampsizes}\FloatTok{.2}\NormalTok{, }\DataTypeTok{mtry =} \DecValTok{2}\NormalTok{,}
+                                   \DataTypeTok{ntree =} \DecValTok{2000}\NormalTok{, }\DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_tasa_auc_modelo2} 
+
+}
+
+\caption{Tasa de fallos y AUC en funcion de nodesize y sampsize - Modelo 2}\label{fig:unnamed-chunk-96}
+\end{figure}
+
+Del mismo modo que sucede con el primer \emph{set} de variables, tanto
+con un \emph{nodesize} en torno a 20 como un valor \emph{sampsize} entre
+500 y 1000, parece una buena opción. Además, si analizamos tanto el
+sesgo como la varianza al variar este último parámetro, aumentando a 10
+el número de repeticiones:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes} 
+
+}
+
+\caption{Tasa de fallos y AUC en funcion de  sampsize - Modelo 2}\label{fig:unnamed-chunk-97}
+\end{figure}
+
+Tenemos el mismo comportamiento que el primer \emph{set} de variables:
+\textbf{a partir de un tamaño en torno a 1000 observaciones, la
+diferencia tanto en la tasa de fallos como en \emph{AUC} es muy
+pequeña}, por lo que no merece la pena aumentar aun más el tamaño de la
+muestra. Incluso si aumentamos el número de grupos y repeticiones a 10 y
+20, respectivamente:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes2_10_folds} 
+
+}
+
+\caption{Tasa de fallos y AUC aumentando a 10 grupos y 20 repeticiones - Modelo 2}\label{fig:unnamed-chunk-98}
+\end{figure}
+
+El orden de los modelos se mantiene idéntico. Por tanto, dado que el
+valor AUC es prácticamente el mismo, además de que la ganancia de la
+tasa de fallos es muy pequeña (dada la escala del eje), nos decantamos
+nuevamente por un modelo con \emph{sampsize} = 1000.
+
+\textbf{RESUMEN \emph{random forest}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelo 1: \emph{mtry} = 3, \emph{nodesize} = 20 y \emph{sampsize} =
+  1000.
+\item
+  modelo 2: \emph{mtry} = 2, \emph{nodesize} = 20 y \emph{sampsize} =
+  1000.
+\end{enumerate}
+
+\hypertarget{modelo-sin-reemplazamiento-1}{%
+\subsection{8.3 Modelo sin
+reemplazamiento}\label{modelo-sin-reemplazamiento-1}}
+
+Una vez tuneados ambos \emph{sets} de variables, veamos la diferencia
+entre un modelo con \emph{sampsize} con reemplazamiento y sin
+reemplazamiento:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} ¿Y si lo probamos sin reemplazamiento? Probamos con el mejor modelo en terminos de AUC (modelo 1)}
+\NormalTok{bagging\_modelo\_sin\_reemp <{-}}\StringTok{ }\KeywordTok{tuneo\_rf}\NormalTok{(surgical\_dataset, }\DataTypeTok{target =}\NormalTok{ target,}
+                                     \DataTypeTok{lista.continua =}\NormalTok{ var\_modelo1, }\DataTypeTok{nodesizes =} \DecValTok{20}\NormalTok{, }
+                                     \DataTypeTok{sampsizes =} \DecValTok{1000}\NormalTok{, }\DataTypeTok{mtry =} \DecValTok{3}\NormalTok{, }\DataTypeTok{ntree =} \DecValTok{2000}\NormalTok{, }
+                                     \DataTypeTok{grupos =} \DecValTok{5}\NormalTok{, }\DataTypeTok{repe =} \DecValTok{10}\NormalTok{, }\DataTypeTok{replace =} \OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/03_rf_con_sin_reemp} 
+
+}
+
+\caption{Comparación Random Forest con o sin reemplazamiento}\label{fig:unnamed-chunk-100}
+\end{figure}
+
+Como podemos comprobar, el hecho de seleccionar muestras con o sin
+reemplazamiento \textbf{no aporta mejoría alguna al modelo}.
+
+\hypertarget{comparaciuxf3n-final-2}{%
+\subsection{8.4 Comparación final}\label{comparaciuxf3n-final-2}}
+
+Por último, realizamos la comparación final de ambos modelos
+\emph{random forest} con los datos \emph{test}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)    0.8990       0.9052        0.8976         0.6639
+## 2     Modelo 2 (top 4)    0.8964       0.9117        0.8931         0.6465
+##   valor_pred_neg
+## 1         0.9769
+## 2         0.9792
+\end{verbatim}
 
 \end{document}

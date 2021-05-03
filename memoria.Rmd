@@ -924,6 +924,11 @@ knitr::include_graphics("./charts/comparativas/02_log_avnnet_tasa.jpeg")
 knitr::include_graphics("./charts/comparativas/02_log_avnnet_auc.jpeg")
 ```
 
+__RESUMEN red neuronal__:
+
+1. modelo 1: _size_ = 15 y _decay_ = 0.01.
+2. modelo 2: _size_ = 10 y _decay_ = 0.01.
+
 # 7. Bagging
 
 ## 7.1 Selección del número de árboles
@@ -956,6 +961,10 @@ knitr::include_graphics("./charts/OOB_2.png")
 
 Observamos como a partir de 200-250 árboles, el error comienza a situarse por debajo de 0.10. Sin embargo, __no es hasta los 900-1000 árboles cuando el error prácticamente se estabiliza, a partir del cual se detectan ciertas fluctuaciones (subidas o bajadas en el error), aunque de forma aleatoria__. Por tanto, __para ambos modelos escogemos 900 como número de árboles__.
 
+```{r, eval=FALSE}
+n.trees.1 <- 900; n.trees.2 <- 900
+```
+
 ## 7.2 Modelo 1
 
 En un primer comienzo, hagamos un repaso previo de los parámetros a tunear en un modelo _bagging_, junto con el número de árboles:
@@ -973,6 +982,7 @@ Dado que _mtry_ debe corresponder con el número de variables _input_ y el núme
 Antes de tunear _sampsize_, y dado que estamos trabajando con validación cruzada, __dispondremos de menos observaciones para construir el modelo, de forma que debemos establecer un tamaño máximo sobre dicho parámetro__. Concretamente, dado que disponemos de 5854 observaciones y 5 grupos de validación cruzada, cada grupo tendrá disponible 5854 * (4/5) ~ 4683 observaciones, siendo el tamaño máximo de muestra que podemos probar:
 
 ```{r, eval=FALSE}
+mtry.1      <- 5
 #-- Redondeamos 4683 a 4600
 sampsizes.1 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
 nodesizes.1 <- list(5, 10, 20, 30, 40, 50, 100)
@@ -1002,12 +1012,12 @@ Es decir, para obtener un buen modelo _bagging_ __no es necesario emplear todas 
 nodesizes.1 <- list(5, 20)
 #-- Probamos con un sampsize entre 500 y 2000 observaciones (1 = todas las observaciones)
 sampsizes.1 <- list(1, 500, 1000, 1500, 2000)
-bagging_modelo1_5 <- tuneo_bagging(surgical_dataset, target = target,
-                                   lista.continua = var_modelo1,
-                                   nodesizes = nodesizes.1,
-                                   sampsizes = sampsizes.1, mtry = mtry.1,
-                                   ntree = n.trees.1, grupos = 5, repe = 10,
-                                   show_nrnodes = "yes")
+bagging_modelo1_v2 <- tuneo_bagging(surgical_dataset, target = target,
+                                    lista.continua = var_modelo1,
+                                    nodesizes = nodesizes.1,
+                                    sampsizes = sampsizes.1, mtry = mtry.1,
+                                    ntree = n.trees.1, grupos = 5, repe = 10,
+                                    show_nrnodes = "yes")
 ```
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (II)", echo=FALSE}
@@ -1016,14 +1026,305 @@ knitr::include_graphics('./charts/03_distribucion_auc_tasa_fallos_modelo1_comp.p
 
 Nuevamente, sin fijarnos en la escala del eje, una posible opción a decantarse sería elegir un modelo con _nodesize_ 5 y _sampsize_ 1000, pues presenta el mayor valor AUC y una tasa de fallos baja. No obstante, los valores del eje pueden llevarnos a engaño. Por ejemplo, la diferencia entre este modelo y uno mucho más sencillo como es el caso de _nodesize_ 20 y _sampsize_ en torno a 500-1000 (20 + 500 o 20 + 1000) es muy pequeña (hablamos de una tasa de fallos en torno a 0.10 y un AUC de 0.91, por lo que la diferencia es del órden de milésimas), incluso con un menor número de muestras la varianza de los modelos se ve reducida en comparación con usar todas las observaciones, aunque la diferencia (por las escalas del eje) sea menor.
 
+Sin embargo, ¿Y si aumentamos _nodesize_ a 50? 
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 1) (III)", echo=FALSE}
+knitr::include_graphics('./charts/03_distribucion_auc_tasa_fallos_modelo1_comp_50rep.png')
+```
+
+A simple vista, __los resultados obtenidos son muy similares en ambos casos__, especialmente en _AUC_, donde la diferencia entre el mejor modelo (20 + 1500) y el peor (50 + 500) es de tan solo 0.01. Sin embargo, y en relación con la tasa de fallos, para alcanzar un valor en torno al 10 % con un _nodesize_ = 50, se requiere por lo general un mayor tamaño de submuestra, dado que la complejidad del árbol es menor. Sin embargo, con un valor _nodesize_ menor (20), se requieren menos observaciones.
+
 Por tanto, dada la poca ganancia que presentan los modelos complejos, __nos decantamos por un modelo _bagging_ con _nodesize_ = 20 y un tamaño de muestra en torno a 500 y 1000__. Sobre ambos candidatos, para controlar mejor el tamaño óptimo de la muestra, probamos con una validación cruzada de 10 grupos y 20 repeticiones:
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC (Modelo 1) aumentando grupos y repeticiones", echo=FALSE}
 knitr::include_graphics('./charts/bagging/bis_03_comparacion_final_modelo1_5_10_folds.png')
 ```
 
-Por lo general, incluso aumentando el número de grupos y repeticiones, el orden de los modelos se mantiene idéntico, tanto en tasa de fallos como en AUC. Por tanto, de los dos posibles modelos candidatos (con _sampsize_ 500 o 1000), aunque la diferencia entre ambos, así como el sesgo y varianza no sean muy significativas (dada la escala de los ejes), __nos decantamos por un modelo con un tamaño de 1000 submuestras__.
+Por lo general, incluso aumentando el número de grupos y repeticiones, el orden de los modelos se mantiene idéntico, tanto en tasa de fallos como en AUC. Por tanto, de los dos posibles modelos candidatos (con _sampsize_ 500 o 1000), aunque la diferencia entre ambos, así como el sesgo y varianza no sean muy significativas (dada la escala de los ejes), __nos decantamos por un modelo con un tamaño de 1000 submuestras__, es decir, con tan solo el 1000 / 5854 ~ 17 % de las observaciones.
 
 ## 7.3 Modelo 2
+
+Del mismo modo, realizamos los mismos pasos con el segundo _set_ de cuatro variables, comenzando con el tuneo tanto de _nodesize_ como de _sampsize_, obteniendo el promedio en tasa de fallos y AUC con 5 repeticiones:
+
+```{r, eval=FALSE}
+mtry.2      <- 4
+sampsizes.2 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
+nodesizes.2 <- list(5, 10, 20, 30, 40, 50, 100)
+
+bagging_modelo1 <- tuneo_bagging(surgical_dataset, target = target,
+                                 lista.continua = var_modelo2,
+                                 nodesizes = nodesizes.2,
+                                 sampsizes = sampsizes.2, mtry = mtry.2,
+                                 ntree = n.trees.2, grupos = 5, repe = 5)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 2) (I)", echo=FALSE}
+knitr::include_graphics('./charts/03_distribucion_auc_tasa_fallos_modelo2.png')
+```
+
+Nuevamente, nos encontramos con un comportamiento similar al obtenido con el primer modelo: por un lado, con un valor _nodesize_ moderado/alto (en torno a 20), obtienen buenos resultados, por lo que no es necesario utilizar árboles demasiado complejos, pues la ganancia tanto en tasa de fallos como en AUC es ínfima. Por otro lado, y en relación con _sampsize_, __no es necesario emplear todas las observaciones__, sino que con tan solo 500 o 1000 muestras, el modelo obtiene buenos resultados.
+
+Por tanto, y del mismo modo que en el primer _set_ de variables, __comparamos la diferencia entre un modelo de mayor complejidad ( _nodesize_ = 5 ) y de menor complejidad ( _nodesize_ = 20 ), utilizando diferentes tamaños de _sampsize_:
+
+```{r, eval=FALSE}
+nodesizes.2 <- list(5, 20)
+#-- Probamos con un sampsize entre 500 y 2000 observaciones (1 = todas las observaciones)
+sampsizes.2 <- list(1, 500, 1000, 1500, 2000)
+bagging_modelo1_v2 <- tuneo_bagging(surgical_dataset, target = target,
+                                    lista.continua = var_modelo2,
+                                    nodesizes = nodesizes.2,
+                                    sampsizes = sampsizes.2, mtry = mtry.2,
+                                    ntree = n.trees.2, grupos = 5, repe = 10,
+                                    show_nrnodes = "yes")
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 2) (II)", echo=FALSE}
+knitr::include_graphics('./charts/03_distribucion_auc_tasa_fallos_modelo2_comp.png')
+```
+
+De nuevo, el hecho de aumentar la complejidad de los árboles (reduciendo el valor de _nodesize_), no supone una mejoría relevante al modelo. A modo de ejemplo, la diferencia en la tasa de fallos entre un modelo con _nodesize_ 5 (5 + 2000) y un modelo con _nodesize_ 20 (20 + 2500), es de apenas unas milésimas de diferencia (del mismo modo sucede con AUC) ¿Y si aumentamos el valor a 50?
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC por sampsize y nodesize (Modelo 2) (III)", echo=FALSE}
+knitr::include_graphics('./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep.png')
+```
+
+En base a la escala de los ejes, la diferencia no es muy significativa. Sin embargo y por lo general, con un _nodesize_ = 50 se requiere un mayor número de observaciones, al ser árboles de menor complejidad, mientras que con un _nodesize_ menor, en torno a 20, con tan solo 500 o 1000 observaciones se obtienen prácticamente los mismos resultados.
+
+Por tanto, y del mismo modo que en el primer _set_ de variables, nos decantamos por un _nodesize_ de 20 y un tamaño de muestra en torno a 500-1000 observaciones. Sobre ambos candidatos, probamos de nuevo con una validación cruzada de 10 grupos y 20 repeticiones:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC (Modelo 2) aumentando grupos y repeticiones", echo=FALSE}
+knitr::include_graphics('./charts/bagging/bis_03_comparacion_final_modelo2_5_10_folds.png')
+```
+
+Incluso aumentando el número de grupos, el orden de los modelos se mantiene prácticamente igual. En conclusión, __nos decantamos por la misma configuración que con el primer _set_ de variables__: _nodesize_ 20 y _sampsize_ 1000.
+
+__RESUMEN _bagging___:
+
+1. modelo 1: _nodesize_ = 20 y _sampsize_ = 1000.
+2. modelo 2: _nodesize_ = 20 y _sampsize_ = 1000.
+
+## 7.4  Modelo sin reemplazamiento
+
+Una vez tuneados ambos _sets_ de variables, veamos la diferencia entre un modelo con _sampsize_ con reemplazamiento y sin reemplazamiento:
+
+```{r, eval=FALSE}
+#-- ¿Y si lo probamos sin reemplazamiento? Probamos con el mejor modelo en terminos de AUC (modelo 1)
+bagging_modelo_sin_reemp <- tuneo_bagging(surgical_dataset, target = target,
+                                   lista.continua = var_modelo1, nodesizes = 20, 
+                                   sampsizes = 1000, mtry = mtry.1, ntree = n.trees.1, 
+                                   grupos = 5, repe = 10, replace = FALSE)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribucion de la tasa de fallos y AUC con y sin reemplazamiento", echo=FALSE}
+knitr::include_graphics('./charts/bagging/03_comparacion_final_bagging.png')
+```
+
+A simple vista, no existe diferencia entre modelos con o sin reemplazamiento en _sampsize_. Por otro lado, y del mismo modo que sucedía con el modelo de red, no existe apenas diferencia entre el primer _set_ con 5 variables y el segundo _set_ con 4, tan solo de 0.01 en el caso del AUC.
+
+## 7.5 Comparación final
+
+Finalmente, realizamos la comparación final de ambos modelos _bagging_ con los datos _test_:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.901, 0.9019),
+           sensibilidad = c(0.9214, 0.9468), especificidad = c(0.8966, 0.8928),
+           valor_pred_pos = c(0.6589, 0.6424), valor_pred_neg = c(0.9813, 0.9880))
+```
+
+Por lo general, la estadísticas de las predicciones mejoran ligeramente, aunque se mantienen en la misma línea del modelo de red neuronal: altos porcentajes de sensibilidad, especificidad y valor predictivo negativo, aunque el valor predictivo positivo se sitúa en torno al 64-65 %, aproximadamente, lo cual es un indicativo de la presencia de un alto número de falsos positivos en las predicciones. Además, la diferencia entre el primer modelo _bagging_ (con 5 variables _input_) y el segundo (con tan solo 4), no es muy relevante en base a las estadísticas anteriores. 
+
+Además, si observamos la distribución de la tasa de fallos y AUC en los modelos: 
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/03_log_avnnet_bagging_tasa.jpeg")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC log-avnnet-bagging", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/03_log_avnnet_bagging_auc.jpeg")
+```
+
+De nuevo, la relación no lineal entre las variables _input_ se ve reflejado en los resultados obtenidos tanto en modelos de red como _bagging_, siendo este último caso el que obtiene mejores resultados tanto en tasa de fallos como en AUC, aunque la diferencia (dada la escala de los ejes) no sea muy relevante.
+
+# 8. Random Forest
+
+## 8.1 Selección del número de árboles y mtry
+
+Una vez elaborados los modelos _bagging_, y dado que _Random Forest_ si realiza el sorteo de variables por cada división del árbol ¿Con 900 árboles es suficiente? Para comprobarlo, analicemos en ambos _sets_ la evolución del _ratio_ de error al variar el parámetro _mtry_:
+
+### 8.1.1 Modelo 1
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Error rate (Modelo 1) en función de mtry", echo=FALSE}
+knitr::include_graphics("./charts/random_forest/error_rates/error_rate_1.png")
+```
+
+En primera instancia, observamos que el error (para cualquier _mtry_) se estabiliza prácticamente a partir de 2000 árboles, momento en el que el error _Out of bag_ es estable con _mtry_ = 2. Sin embargo, con otros valores _mtry_, es decir, __sorteando un mayor número de variables__, el error se estabiliza con antelación:
+
+1. _mtry_ = 3: también a partir de 2000 árboles, aproximadamente.
+2. _mtry_ = 4: a partir de 1500 árboles, aproximadamente.
+3. _mtry_ = 5: a partir de 900 árboles (caso del modelo _bagging_).
+
+Tras una primera impresión, y utilizando 2000 árboles, __lanzamos los primeros modelos _random forest___, utilizando los diferentes valores _mtry_. En relación con el resto de parámetros como _nodesize_ o _sampsize_, __utilizamos los empleados en el modelo _bagging___: 20 + 1000.
+
+```{r, eval=FALSE}
+#-- 2500: numero de arboles a partir del cual se estabiliza con mtry = 2
+#   Inicialmente, probamos con 5 repeticiones
+mtry.1 <- c(2,3,4,5) # mtry = 5 -> modelo bagging
+primera.imp <- tuneo_rf(surgical_dataset, target=target,lista.continua=var_modelo1,
+                        grupos=5,repe=5,nodesizes=20,mtry=mtry.1,ntree=2000,replace=TRUE, 
+                        sampsizes=1000)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en funcion de mtry - Modelo 1", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_inicial_mtry_modelo1.png')
+```
+
+A simple vista, __podemos comprobar que no es realmente necesario sortear todas las variables en cada nivel del árbol, sino que con un tamaño menor, moderado, en torno a 3, se obtienen los mismos resultados, aunque con una ganancia en la tasa de fallos muy pequeña__ (0.107-0.108 frente a 0.102 del modelo _bagging_). Bien es cierto que con un _mtry_ = 2, la tasa de fallos aumenta (aunque no demasiado) hasta 0.12. Por tanto, y como primera impresión, __nos decantamos por un valor _mtry_ moderado (3), pero sin llegar a utilizar todas las variables__.
+
+### 8.1.2 Modelo 2
+
+Del mismo modo, realizamos los mismos pasos para el segundo _set_ candidato, comenzando con el número de árboles:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Error rate (Modelo 2) en función de mtry", echo=FALSE}
+knitr::include_graphics("./charts/random_forest/error_rates/error_rate_2.png")
+```
+
+Al igual que en el primer modelo, a excepción de _mtry_ = 4 (correspondiente con un modelo _bagging_), para estabilizar el error __se requieren un mayor número de árboles__, en torno a 2000 aproximadamente tanto para _mtry_ = 2 como _mtry_ = 3. A continuación, echemos un primer vistazo al comportamiento de los modelos, tanto en sesgo como en varianza, utilizando los diferentes valores _mtry_, así como 2000 árboles y el mejor valor _mtry_ y _nodesize_ obtenidos en _bagging_ para el segundo _set_ de variables (20 + 1000):
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en funcion de mtry - Modelo 2", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_inicial_mtry_modelo2.png')
+```
+
+En primera instancia, una posibilidad sería decantarse por un modelo con _mtry_ = 3, sin llegar a utilizar todas las variables. Sin embargo, y en base a la escala del eje Y, __el error y varianza que presenta el modelo con _mtry_ = 2 no es tan pronunciado__:
+
+1. En el caso de la tasa de fallos, la diferencia es 0.005 (de 0.1025 en el caso de _mtry_ = 4 a 0.1075 en el caso de _mtry_ = 2). Además, la varianza que presenta en torno al modelo, teniendo en cuenta la escala del eje, es del orden de milésimas.
+
+2. En el caso del área bajo la curva ROC, la diferencia también se sitúa en torno a las milésimas (de 0.906 en el caso de _mtry_ = 4 a 0.904 en el caso de _mtry_ = 2).
+
+Dicha diferencia puede ser debida a numerosos factores: estructura de remuestreo, selección de observaciones con _sampsize_, valor de la semilla etc. Por tanto, dado que la diferencia no es apenas relevante, con el segundo _set_ de variables __nos decantamos por un valor _mtry_ = 2__.
+
+## 8.2 Modelo 1
+
+En un primer comienzo, con un valor _mtry_ = 3 y el mismo _nodesize_ y _sampsize_ que en el modelo _bagging_, obtenemos muy buenos resultados. No obstante, hemos considera un valor de _nodesize_ y _sampsize_ por defecto, esto es, los mejores parámetros obtenidos en _bagging_. Por tanto, ¿Puede llegar a ser influyente el hecho de aumentar o reducir el valor _nodesize_, o más importante aún, el tamaño de la submuestra en _sampsize_? Del mismo modo que en _bagging_, analicemos la importancia de ambos parámetros, tuneando el modelo con diferentes valores (comenzando con tan solo 5 repeticiones):
+
+```{r, eval=FALSE}
+sampsizes.1 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
+nodesizes.1 <- list(5, 10, 20, 30, 40, 50, 100)
+
+# Tuneamos nuevamente tanto nodesizes como sampsizes
+# sampsize maximo: (4/5) * 5854 ~ 4600 observaciones
+bagging_modelo1_mtry3 <-  tuneo_rf(surgical_dataset, target = target,
+                                   lista.continua = var_modelo1,
+                                   nodesizes = nodesizes.1,
+                                   sampsizes = sampsizes.1, mtry = 3,
+                                   ntree = 2000, grupos = 5, repe = 5)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en funcion de nodesize y sampsize - Modelo 1", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_tasa_auc_modelo1.png')
+```
+
+Analizando el promedio de cada modelo, detectamos prácitcamente las mismas características que en el modelo _bagging_:
+
+1. __Aumentar la complejidad del árbol, con un _nodesize_ menor, la ganancia que supone tanto en tasa de fallos como en AUC no es muy relevante__, por lo que podemos mantener 20 como tamaño mínimo de cada nodo.
+
+2. Además, a simple vista __un valor _sampsize_ en torno a 500-1000 vuelve a ser una buena opción, obteniendo los mismos resultados que con el conjunto total de las observaciones__, lo que permite la construcción de árboles mucho más diferentes entre si gracias al sorteo de menos muestras. No obstante, analicemos más en detalle tanto el sesgo como la varianza al variar el tamaño de la muestra (manteniendo el valor _nodesize_ a 20 y aumentando a el número de repeticiones a 10):
+
+```{r, eval=FALSE}
+nodesizes.1 <- list(20)
+# Probamos con un tamaño sampsize entre 500 y 3000 (1 = todas las observaciones)
+sampsizes.1 <- list(1, 500, 1000, 2000, 3000)
+
+bagging_modelo1_mtry3 <-  tuneo_rf(surgical_dataset, target = target,
+                                   lista.continua = var_modelo1,
+                                   nodesizes = nodesizes.1,
+                                   sampsizes = sampsizes.1, mtry = 3,
+                                   ntree = 2000, grupos = 5, repe = 10)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en funcion de  sampsize - Modelo 1", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_tasa_auc_modelo1_sampsizes.png')
+```
+
+Incluso sorteando variables, los resultados obtenido __no difieren demasiado de un modelo _bagging___: mientras que con 500 observaciones la tasa de fallos aumenta hasta 0.12 y el AUC se reduce a 0.90, a partir de un tamaño de 1000 muestras (lo que supone alrededor del 17 % del total), __no solo iguala en AUC al resto de modelos con _sampsizes_ mayores (en torno a 0.91), sino que además la ganancia de error es de tan solo unas milésimas__: entre un _sampsize_ = 1000 y 2000-3000 observaciones, la diferencia es de 0.107 - 0.102 = 0.005. Por tanto, __aumentar demasiado el tamaño de las submuestras no aporta una mejoría significativa al modelo__, por lo que nos decantamos por un valor de 1000.
+
+Por último, para observar en mejor medida el efecto del parámetro _sampsize_, aumentamos a 10 grupos y 20 repeticiones:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC aumentando a 10 grupos y 20 repeticiones - Modelo 1", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_tasa_auc_modelo1_10_folds.png')
+```
+
+Incluso aumentando a 10 grupos y 20 repeticiones, tanto el sesgo como la varianza se mantienen prácticamente idénticos.
+
+## 8.2 Modelo 2
+
+A continuación, realizamos los mismos pasos con el segundo _set_ de variables, parametrizando en primer lugar tanto _nodesize_ como _sampsize_:
+
+```{r, eval=FALSE}
+sampsizes.2 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
+nodesizes.2 <- list(5, 10, 20, 30, 40, 50, 100)
+
+# Tuneamos nuevamente tanto sampsizes como nodesizes
+bagging_modelo2_mtry2 <-  tuneo_rf(surgical_dataset, target = target,
+                                   lista.continua = var_modelo2,
+                                   nodesizes = nodesizes.2,
+                                   sampsizes = sampsizes.2, mtry = 2,
+                                   ntree = 2000, grupos = 5, repe = 5)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en funcion de nodesize y sampsize - Modelo 2", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_tasa_auc_modelo2.png')
+```
+
+Del mismo modo que sucede con el primer _set_ de variables, tanto con un _nodesize_ en torno a 20 como un valor _sampsize_ entre 500 y 1000, parece una buena opción. Además, si analizamos tanto el sesgo como la varianza al variar este último parámetro, aumentando a 10 el número de repeticiones:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en funcion de  sampsize - Modelo 2", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes.png')
+```
+
+Tenemos el mismo comportamiento que el primer _set_ de variables: __a partir de un tamaño en torno a 1000 observaciones, la diferencia tanto en la tasa de fallos como en _AUC_ es muy pequeña__, por lo que no merece la pena aumentar aun más el tamaño de la muestra. Incluso si aumentamos el número de grupos y repeticiones a 10 y 20, respectivamente:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC aumentando a 10 grupos y 20 repeticiones - Modelo 2", echo=FALSE}
+knitr::include_graphics('./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes2_10_folds.png')
+```
+
+El orden de los modelos se mantiene idéntico. Por tanto, dado que el valor AUC es prácticamente el mismo, además de que la ganancia de la tasa de fallos es muy pequeña (dada la escala del eje), nos decantamos nuevamente por un modelo con _sampsize_ = 1000.
+
+__RESUMEN _random forest___:
+
+1. modelo 1: _mtry_ = 3, _nodesize_ = 20 y _sampsize_ = 1000.
+2. modelo 2: _mtry_ = 2, _nodesize_ = 20 y _sampsize_ = 1000.
+
+## 8.3  Modelo sin reemplazamiento
+
+Una vez tuneados ambos _sets_ de variables, veamos la diferencia entre un modelo con _sampsize_ con reemplazamiento y sin reemplazamiento:
+
+```{r, eval=FALSE}
+#-- ¿Y si lo probamos sin reemplazamiento? Probamos con el mejor modelo en terminos de AUC (modelo 1)
+bagging_modelo_sin_reemp <- tuneo_rf(surgical_dataset, target = target,
+                                     lista.continua = var_modelo1, nodesizes = 20, 
+                                     sampsizes = 1000, mtry = 3, ntree = 2000, 
+                                     grupos = 5, repe = 10, replace = FALSE)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparación Random Forest con o sin reemplazamiento", echo=FALSE}
+knitr::include_graphics('./charts/comparativas/03_rf_con_sin_reemp.png')
+```
+
+Como podemos comprobar, el hecho de seleccionar muestras con o sin reemplazamiento __no aporta mejoría alguna al modelo__.
+
+## 8.4 Comparación final
+
+Por último, realizamos la comparación final de ambos modelos _random forest_ con los datos _test_:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.899, 0.8964),
+           sensibilidad = c(0.9052, 0.9117), especificidad = c(0.8976, 0.8931),
+           valor_pred_pos = c(0.6639, 0.6465), valor_pred_neg = c(0.9769, 0.9792))
+```
+
+
+
+
 
 
