@@ -2578,4 +2578,706 @@ Por último, realizamos la comparación final de ambos modelos
 ## 2         0.9792
 \end{verbatim}
 
+En base a los resultados obtenidos, no se diferencia demasiado de un
+modelo \emph{bagging}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)    0.9010       0.9214        0.8966         0.6589
+## 2     Modelo 2 (top 4)    0.9019       0.9468        0.8928         0.6424
+##   valor_pred_neg
+## 1         0.9813
+## 2         0.9880
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \textbf{Precisión}: de 0.901 y 0.9019 a 0.899 y 0.8964 en ambos
+  \emph{sets} de variables, respectivamente.
+\item
+  \textbf{Sensibilidad}: de 0.9214 y 0.9468 a 0.9052 y 0.9117,
+  respectivamente (empeora ligeramente).
+\item
+  \textbf{Especificidad}: tanto en \emph{bagging} como en \emph{random
+  forest} se sitúa en torno a 0.89.
+\item
+  \textbf{Valor predictivo positivo}: continúa situándose en torno a
+  0.64-0.65-0.66.
+\item
+  \textbf{Valor predictivo negativo}: continúa situándose en torno a
+  0.97-0.98.
+\end{enumerate}
+
+Es decir, \textbf{añadiendo el sorteo de variables al modelo (mtry), la
+variación que experimenta en el conjunto \emph{test} es muy pequeña}. De
+hecho, si observamos la distribución de la tasa de fallos y AUC:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/03_log_avnnet_bagging_rf_tasa} 
+
+}
+
+\caption{Comparacion tasa fallos log-avnnet-bagging-rf}\label{fig:unnamed-chunk-103}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/03_log_avnnet_bagging_rf_auc} 
+
+}
+
+\caption{Comparacion AUC log-avnnet-bagging-rf}\label{fig:unnamed-chunk-104}
+\end{figure}
+
+En relación al resto de modelos, \emph{random forest} se situa a la
+misma altura que modelos como \emph{bagging} o \emph{avnnet}. De hecho,
+si hacemos ``zoom'' sobre los modelos de árbol:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/random_forest/comparacion_bagging_rf} 
+
+}
+
+\caption{Comparacion modelos bagging y rf}\label{fig:unnamed-chunk-105}
+\end{figure}
+
+Comprobamos que la diferencia entre ambos no es muy significativa, como
+es el caso de la tasa de fallos, donde la escala del eje puede llevar a
+engaño, ya que la diferencia entre ambos modelos es de apenas unas
+milésimas (de 0.1000 - 0.1025 en el caso de \emph{bagging} a
+0.1050-0.1075 en \emph{random forest}). Además, aunque la varianza en
+este último parezca aumentar, dada la escala del eje no es tan
+pronunciada.
+
+De nuevo, no existe demasiada diferencia entre ambos \emph{sets} de
+variables, tanto en tasa de fallos como en AUC, pese a la diferencia de
+una variable \emph{input}.
+
+\hypertarget{gradient-boosting}{%
+\section{\texorpdfstring{9. \emph{Gradient
+Boosting}}{9. Gradient Boosting}}\label{gradient-boosting}}
+
+Hasta el momento, hemos comprobado como la variación en el
+\emph{accuracy}, tasa de error o AUC con los ambos \emph{sets}
+candidatos no resulta ser relevante, incluso en numerosas ocasiones los
+parámetros finales acaban siendo los mismos para ambos candidatos. Por
+tanto, de cara al resto de modelos como \emph{grandient boosting},
+\emph{xgboost} o \emph{svm}, veamos si es posible poner en común un
+mismo tuneo de hipérparametros para ambos \emph{sets}, en lugar de
+``tunear'' por separado cada uno de ellos.
+
+\hypertarget{tuneo-de-hipuxe9rparuxe1metros}{%
+\subsection{9.1 Tuneo de
+hipérparámetros}\label{tuneo-de-hipuxe9rparuxe1metros}}
+
+En primer lugar, comenzando con el tuneo de los diferentes
+hiperparámetrosm en ambos modelos, con tan solo cinco repeticiones:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{shrinkage}: parámetro de regularización.
+\item
+  \emph{n.minobsinnode}: tamaño máximo de nodos finales (parámetro
+  encargado de medir la complejidad).
+\item
+  \emph{n.trees}: número de iteraciones (árboles).
+\item
+  \emph{bag.fraction}: fracción de observaciones del conjunto de
+  entrenamiento seleccionadas aleatoriamente para la construcción del
+  siguiente árbol.
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Ejemplo de tuneo con el primer set de variables}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1234}\NormalTok{)}
+\CommentTok{\#{-}{-} El valor maximo de shrinkage suele estar en torno a 0.2 (probamos con 0.3 y 0.4 tambien)}
+\NormalTok{gbmgrid<{-}}\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{shrinkage=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.4}\NormalTok{,}\FloatTok{0.3}\NormalTok{,}\FloatTok{0.2}\NormalTok{,}\FloatTok{0.1}\NormalTok{,}\FloatTok{0.05}\NormalTok{,}\FloatTok{0.03}\NormalTok{,}\FloatTok{0.01}\NormalTok{,}\FloatTok{0.001}\NormalTok{),}
+                     \DataTypeTok{n.minobsinnode=}\KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{,}\DecValTok{10}\NormalTok{,}\DecValTok{20}\NormalTok{),}
+                     \DataTypeTok{n.trees=}\KeywordTok{c}\NormalTok{(}\DecValTok{100}\NormalTok{,}\DecValTok{500}\NormalTok{,}\DecValTok{1000}\NormalTok{,}\DecValTok{5000}\NormalTok{),}
+                     \DataTypeTok{interaction.depth=}\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{))}
+
+\CommentTok{\#{-}{-} De momento, mantenemos bag.fraction a 1 (todas las observaciones)}
+\NormalTok{control<{-}}\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method=}\StringTok{"repeatedcv"}\NormalTok{,}\DataTypeTok{number=}\DecValTok{5}\NormalTok{,}\DataTypeTok{savePredictions =} \StringTok{"all"}\NormalTok{, }
+                      \DataTypeTok{repeats=}\DecValTok{5}\NormalTok{,}\DataTypeTok{classProbs=}\OtherTok{TRUE}\NormalTok{)}
+\NormalTok{gbm\_modelo1 <{-}}\StringTok{ }\KeywordTok{train}\NormalTok{(formula\_modelo\_}\DecValTok{1}\NormalTok{,}\DataTypeTok{data=}\NormalTok{surgical\_dataset,}
+                     \DataTypeTok{method=}\StringTok{"gbm"}\NormalTok{,}\DataTypeTok{trControl=}\NormalTok{control,}\DataTypeTok{tuneGrid=}\NormalTok{gbmgrid,}
+                     \DataTypeTok{distribution=}\StringTok{"bernoulli"}\NormalTok{, }\DataTypeTok{bag.fraction=}\DecValTok{1}\NormalTok{,}\DataTypeTok{verbose=}\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/gradient_boosting/05_gbm_hyperparameters_modelo1} 
+
+}
+
+\caption{Comparacion hiperparámetros gbm modelo 1}\label{fig:unnamed-chunk-107}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/gradient_boosting/05_gbm_hyperparameters_modelo2} 
+
+}
+
+\caption{Comparación hiperparámetros gbm modelo 2}\label{fig:unnamed-chunk-108}
+\end{figure}
+
+¿Qué sucede en ambos \emph{sets} de variables? En primer lugar,
+analicemos las recomendaciones de \emph{caret} para ambos \emph{sets}:
+
+\begin{verbatim}
+Modelo 1: n.trees = 500,  shrinkage = 0.1,  n.minobsinnode = 20. Accuracy: 0.9055354
+Modelo 2: n.trees = 5000, shrinkage = 0.01, n.minobsinnode = 20. Accuracy: 0.9039292
+\end{verbatim}
+
+En función de lo recomendado por el propio paquete, existe un contraste
+entre ambos modelos: por un lado, con cinco variables \emph{input}
+recomienda 500 iteraciones, un valor de regularización alto y
+\emph{n.minobsinnode} alto (20), es decir, modelos más simples. Por el
+contrario, con una variable \emph{input} menos, recomienda muchos más
+árboles (5000) y un valor de regularización más bajo.
+
+Desde un punto de vista numérico, con estos parámetros se han obtenido
+el \emph{accuracy} máximo (incluso también por la estructura de
+remuestreo, valor de la semilla, etc.). Sin embargo, ¿Es una
+configuración óptima? O aún más importante ¿Podrían obtenerse resultados
+similares con modelos más sencillos? Para responder a ambas preguntas,
+\textbf{debemos analizar los posibles patrones que presenta el modelo en
+ambos \emph{sets}}, de forma que podamos decantarnos por una opción
+mucho más sencilla.
+
+Concretamente, destacamos tres grandes patrones de comportamiento:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Por un lado, \textbf{un bajo número de iteraciones (en torno a 100),
+  junto con un valor de regularización alto ( \emph{shrinkage} superior
+  o igual a 0.2-0.3, aproximadamente)}.
+\item
+  Por el contrario, también es posible obtener un máximo \emph{accuracy}
+  \textbf{con un valor \emph{shrinkage} bajo (inferior a 0.1), pero con
+  un elevado número de iteraciones, en torno a 500, 1000 o 5000}.
+\item
+  Además, el comportamiento de \emph{n.minobsinnode} en ambos
+  \emph{sets} es el mismo tanto para un valor de 5, como de 10 o 20,
+  \textbf{por lo que un valor alto (20) es una buena opción a
+  decantarse: a un mayor valor \emph{n.minosinnode}, obtenemos modelos
+  más simples y con menos posibilidad de sobreajuste}.
+\end{enumerate}
+
+En conclusión, \textbf{no es necesario tunear exageradamente el modelo
+en ambos casos}, sino que aparentemente con un número de árboles bajo
+(100), un valor de regularización alto (en torno a 0.2-0.3) y
+\emph{n.minobsinnode} = 20 se obtienen de por sí buenos resultados, sin
+necesidad de complicar aún más el modelo.
+
+\hypertarget{estudio-del-early-stopping}{%
+\subsubsection{\texorpdfstring{9.1.1 Estudio del \emph{Early
+Stopping}}{9.1.1 Estudio del Early Stopping}}\label{estudio-del-early-stopping}}
+
+Continuando con la línea anterior, para ambos \emph{set} de variables
+\textbf{probamos a fijar \emph{n.minobsinnode} = 20 y \emph{shrinkage} =
+0.2 y 0.3}, observando no solo qué número de iteraciones/árboles sería
+adecuado utilizar, sino además si con un valor de regularización de 0.2
+es suficiente o si aumentando su valor obtenemos mejores resultados, ya
+que en el gráfico anterior se detectó un ligero ascenso en el valor de
+\emph{accuracy} en 0.3 (normalmente el valor máximo suele ser 0.2):
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/gradient_boosting/05_early_stopping} 
+
+}
+
+\caption{Estudio Early Stopping Modelos 1 y 2}\label{fig:unnamed-chunk-109}
+\end{figure}
+
+En ambos \emph{sets}, \textbf{observamos que con 100 árboles se obtiene
+un buen \emph{accuracy}}, mientras que a partir de 400-500 iteraciones,
+el modelo comienza a sobreajustarse y, como consecuencia, disminuye su
+precisión. Por otro lado, en relación con el parámetro \emph{shrinkage}
+no existe apenas diferencia entre un valor 0.2 y 0.3, por lo que
+\textbf{nos decantamos por 0.2}.
+
+\hypertarget{estudio-de-bag.fraction}{%
+\subsubsection{\texorpdfstring{9.1.2 Estudio de
+\emph{bag.fraction}}{9.1.2 Estudio de bag.fraction}}\label{estudio-de-bag.fraction}}
+
+Hasta el momento, hemos tuneado los modelos \emph{gbm} \textbf{con el
+conjunto total de las observaciones, esto es, con \emph{bag.fraction} =
+1}. Sin embargo, \emph{caret} por defecto \textbf{no sortea todas las
+observaciones, sino que por defecto escoge el 50 \% aleatoriamente
+(0.5)} \footnote{\emph{caret} emplea internamente el paquete \emph{gbm},
+  cuyo valor \emph{bag.fraction} por defecto es 0.5.
+  \url{https://cran.r-project.org/web/packages/gbm/gbm.pdf}}
+
+Como consecuencia, sobre ambos \emph{sets} \textbf{estudiamos la
+variabilidad del modelo con respecto a dicho parámetro}, aumentando a 10
+el número de repeticiones para observar mejor su efecto. Dado que la
+función \emph{cruzadagbmbin} nos dispone de dicho parámetro, se ha
+incluido internamente en la función \emph{train} de \emph{caret}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} bag.fraction no se permite tunear desde expand.grid...}
+\NormalTok{gbmgrid <{-}}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{n.minobsinnode=}\NormalTok{n.minobsinnode, }\DataTypeTok{shrinkage=}\NormalTok{shrinkage,}
+                      \DataTypeTok{n.trees=}\NormalTok{n.trees, }\DataTypeTok{interaction.depth=}\NormalTok{interaction.depth)}
+\CommentTok{\#{-}{-} Por lo que lo incluimos dentro de train  }
+\NormalTok{gbm    <{-}}\StringTok{ }\KeywordTok{train}\NormalTok{(formu,}\DataTypeTok{data=}\NormalTok{databis, }\DataTypeTok{method=}\StringTok{"gbm"}\NormalTok{,}\DataTypeTok{trControl=}\NormalTok{control,}
+                \DataTypeTok{bag.fraction=}\NormalTok{bag.fraction, }\DataTypeTok{tuneGrid=}\NormalTok{gbmgrid,}\DataTypeTok{distribution=}\StringTok{"bernoulli"}\NormalTok{,}
+                \DataTypeTok{verbose=}\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/gradient_boosting/05_gbm_bag_fraction} 
+
+}
+
+\caption{Estudio bag.fraction modelos 1 y 2}\label{fig:unnamed-chunk-111}
+\end{figure}
+
+En un primer análisis, la diferencia entre \emph{bag.fraction} = 0.5 y
+\emph{bag.fraction} = 1 es pequeña, ya que tanto en sesgo como en
+varianza presentan resultados similares, salvo en la tasa de fallos
+donde aumenta ligeramente, pero no demasiado dada la escala de los ejes
+(por ejemplo, en el modelo 1 la varianza se sitúa entre 0.099 y 0.104,
+considerando los \emph{outliers}). Por tanto, \textbf{no existe apenas
+diferencia entre utilizar el 100 \% de las observaciones y tan solo el
+50 \%}, por lo que podemos mantener dicho parámetro por defecto en
+\emph{bag.fraction}.
+
+\textbf{RESUMEN \emph{gradient boosting}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelos 1 y 2: \emph{n.trees} = 100, \emph{shrinkage} = 0.2,
+  \emph{n.minobsinnode} = 20 y \emph{bag.fraction} = 0.5.
+\end{enumerate}
+
+\hypertarget{comparaciuxf3n-final-3}{%
+\subsection{9.2 Comparación final}\label{comparaciuxf3n-final-3}}
+
+A continuación, con los modelos obtenidos realizamos la predicción sobre
+el conjunto \emph{test}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)    0.9030       0.9149        0.9003         0.6731
+## 2     Modelo 2 (top 4)    0.9052       0.9264        0.9006         0.6731
+##   valor_pred_neg
+## 1         0.9792
+## 2         0.9823
+\end{verbatim}
+
+Como podemos comprobar, \emph{gradient boosting} se sitúa prácticamente
+en la misma línea que el resto de modelos basados en árbol: \textbf{alta
+precisión, sensibilidad, especificidad y valor predictivo negativo, pero
+con un valor predictivo positivo menor, en torno al 67 \%}:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa} 
+
+}
+
+\caption{Comparacion tasa fallos log-avnnet-bagging-rf-gbm}\label{fig:unnamed-chunk-113}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc} 
+
+}
+
+\caption{Comparacion AUC log-avnnet-bagging-rf-gbm}\label{fig:unnamed-chunk-114}
+\end{figure}
+
+De hecho, aunque la tasa de fallos en \emph{gradient boosting} sea
+ligeramente menor, \textbf{modelos como \emph{random forest} o
+\emph{bagging} continuan siendo una mejor alternativa}.
+
+\hypertarget{support-vector-machines}{%
+\section{\texorpdfstring{10. \emph{Support Vector
+Machines}}{10. Support Vector Machines}}\label{support-vector-machines}}
+
+\hypertarget{svm-lineal}{%
+\subsection{10.1 SVM Lineal}\label{svm-lineal}}
+
+A continuación, continuamos con los modelos \emph{svm}, comenzando por
+el \emph{kernel} más sencillo: el lineal, del cual solo necesitamos
+tunear el parámetro de regularización \textbf{C} (por el momento,
+empleamos 5 repeticiones):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Probamos desde C = 0.01 hasta C = 10}
+\NormalTok{C\_binaria <{-}}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{C=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{,}\FloatTok{0.05}\NormalTok{,}\FloatTok{0.1}\NormalTok{,}\FloatTok{0.2}\NormalTok{,}\FloatTok{0.5}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{10}\NormalTok{))}
+
+\CommentTok{\#{-}{-} Ejemplo con el primer set de variables (5 variables input)}
+\KeywordTok{cruzadaSVMbin}\NormalTok{(}\DataTypeTok{data=}\NormalTok{surgical\_dataset, }\DataTypeTok{vardep=}\NormalTok{target,}
+                           \DataTypeTok{listconti =}\NormalTok{ var\_modelo1, }\DataTypeTok{listclass=}\KeywordTok{c}\NormalTok{(}\StringTok{""}\NormalTok{),}
+                           \DataTypeTok{grupos=}\DecValTok{5}\NormalTok{,}\DataTypeTok{sinicio=}\DecValTok{1234}\NormalTok{,}\DataTypeTok{repe=}\DecValTok{5}\NormalTok{,}\DataTypeTok{C=}\NormalTok{C\_binaria)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/SVM/06_svm_lineal_modelo1_2} 
+
+}
+
+\caption{Distribución SVM Lineal Modelos 1 y 2}\label{fig:unnamed-chunk-116}
+\end{figure}
+
+\begin{verbatim}
+Recomendado por caret
+Modelo 1: C = 0.01. Accuracy: 0.7746143
+Modelo 2: C = 0.01. Accuracy: 0.7466688
+\end{verbatim}
+
+A diferencia del resto de modelos no lineales, con el primer \emph{set}
+de variables (5 variables \emph{input} incluyendo \emph{ccsMort30Rate}),
+obtenemos un \emph{accuracy} en torno al 77 \%, mientras que con tan
+solo 4 variables desciende al 74 \%, de nuevo un indicativo de la
+relación lineal de dicha variable con la variable objetivo. Pese a ello,
+\textbf{los modelos basados en árbol o \emph{boosting} continuan siendo
+mejor en términos de \emph{accuracy} (89-90 \%)}.
+
+En relación con la constante C, dada la escala de los ejes \textbf{no se
+aprecia una diferencia relevante entre los diferentes valores}, ya que
+apenas varían en unas milésimas. Sin embargo, si se tuviera que indica
+un posible patrón, diríamos que a medida que se reduce la constance C,
+aumenta ligeramente el \emph{accuracy}. Podríamos incluso probar a
+reducir aún más el parámetro de regularización:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Probamos a reducir C entre 0.1 y 0.001}
+\NormalTok{C\_binaria <{-}}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{C=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.001}\NormalTok{,}\FloatTok{0.005}\NormalTok{,}\FloatTok{0.01}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Pero tan solo aumenta en 0.0001 en ambos \emph{sets}:
+
+\begin{verbatim}
+Modelo 1: C: 0.01 -> 0.7746143 ; C: 0.001 -> 0.7749898
+Modelo 2: C: 0.01 -> 0.7466688 ; C: 0.001 -> 0.7749898
+\end{verbatim}
+
+Por tanto, y dado que la diferencia no es muy significativa, \textbf{nos
+decantamos por el máximo \emph{accuracy}, correspondiente con C = 0.01},
+recomendado por \emph{caret}, un valor no demasiado alto, lo que se
+traduce en un menor riesgo por sobreajuste (márgenes de separación mucho
+mayores).
+
+\hypertarget{svm-polinomial}{%
+\subsection{10.2 SVM Polinomial}\label{svm-polinomial}}
+
+A continuación, proseguimos con el \emph{kernel} polinomial,
+\textbf{tuneando tanto la constante C de regularización como la escala}
+(nuevamente, con cinco repeticiones):
+
+\textbf{NOTA: dado que los polinomios de grado 3 tardaban demasiado
+tiempo en procesar (incluso con una sola repetición +
+\emph{doParallel}), se ha utilizado únicamente grado 2}.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Probamos con C desde 0.01 hasta 10}
+\NormalTok{C\_poly      <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{, }\FloatTok{0.05}\NormalTok{, }\FloatTok{0.1}\NormalTok{, }\FloatTok{0.2}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{)}
+\NormalTok{degree\_poly <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{2}\NormalTok{)}
+\CommentTok{\#{-}{-} Probamos desde una escala pequeña (0.1) hasta 5}
+\NormalTok{scale\_poly  <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.1}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{)}
+
+\CommentTok{\#{-}{-} Ejemplo con el primer set de variables (5 variables input)}
+\NormalTok{svm\_pol\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{cruzadaSVMbinPoly}\NormalTok{(}\DataTypeTok{data=}\NormalTok{surgical\_dataset, }\DataTypeTok{vardep=}\NormalTok{target,}
+                               \DataTypeTok{listconti =}\NormalTok{ var\_modelo1, }\DataTypeTok{listclass=}\KeywordTok{c}\NormalTok{(}\StringTok{""}\NormalTok{),}
+                               \DataTypeTok{grupos=}\DecValTok{5}\NormalTok{,}\DataTypeTok{sinicio=}\DecValTok{1234}\NormalTok{,}\DataTypeTok{repe=}\DecValTok{5}\NormalTok{,}\DataTypeTok{C =}\NormalTok{ C\_poly,}
+                               \DataTypeTok{degree =}\NormalTok{ degree\_poly, }\DataTypeTok{scale =}\NormalTok{ scale\_poly)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/SVM/06_svm_poly_modelo1_2} 
+
+}
+
+\caption{Distribución SVM Polinomial Modelos 1 y 2 (I)}\label{fig:unnamed-chunk-119}
+\end{figure}
+
+\begin{verbatim}
+Recomendado por caret
+Modelo 1: C = 5   ; degree = 2; scale = 0.1. Accuracy: 0.7766301
+Modelo 2: C = 0.01; degree = 2; scale = 0.1. Accuracy: 0.7766992
+\end{verbatim}
+
+En base a la respuesta del paquete \emph{caret}, con el primer
+\emph{set} recomienda una escala en torno a 0.1 y una constance C alta
+(5), mientras que en el caso del segundo \emph{set} de variables, la
+constante C recomendada es más baja, en torno a 0.01. No obstante, y
+dado que \textbf{no podemos dejarnos llevar por valores puntuales (pues
+puede conducir al sobreajuste), analicemos los patrones existentes}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  En el caso del primer \emph{set} de variables, nos encontramos con dos
+  posibles extremos: \textbf{o bien una constante C alta (entre 5 y 10)
+  y una escala moderada/pequeña (en torno a 0.1-0.5-1) o una constante C
+  pequeña y una escala mayor (1, 2 o 5)}.
+\item
+  En el segundo \emph{set}, por otro lado, \textbf{llama la atención
+  modelos con una constante C pequeña (menor a 0.01) y una escala baja
+  (0.1-0.5, principalmente)}.
+\end{enumerate}
+
+Por tanto, analicemos si mejoran los resultados en caso de, en el primer
+\emph{set}, aumentar la constante C a 15 y 20, así como disminuirlo a
+0.005 y 0.001. Por otro lado, probamos también a reducir C a 0.005 y
+0.001 en el segundo \emph{set} de variables:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/SVM/polinomica/svm_polinomial_parte2} 
+
+}
+
+\caption{Distribución SVM Polinomial Modelos 1 y 2 (II)}\label{fig:unnamed-chunk-120}
+\end{figure}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  En el caso del primer \emph{set}, pese a reducir o aumentar la
+  constante C, el valor de \emph{accuracy} se mantiene en torno a 0.77.
+  Por tanto, y dado que la diferencia no es muy significativa entre un
+  valor C alto y pequeño, \textbf{podemos decantarnos por un valor en
+  torno a 0.5 (moderado-bajo), así como una escala de 1}, aunque
+  \emph{caret} nos recomiende un valor C = 5, de forma que los márgenes
+  de separación entre ambas clases es mayor, obteniendo un modelo más
+  ``general''.
+\end{enumerate}
+
+De nuevo, \textbf{la decision esta basada por patrones y no en valores
+puntuales}, por lo que empleando otra semilla y con otros valores
+training los parametros serán ``aproximadamente'' similares, aunque no
+iguales. Por tanto, dado que la diferencia entre un modelo SVM más
+ajustado (C = 5) y un modelo más general (C = 0.5) es ínfima.
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Por otro lado, en relación con el segundo \emph{set}, habiendo
+  disminuido el valor C hasta 0.001-0.005, no ha hecho aumentar en gran
+  medida el resultado. Por tanto, dado que con un valor C pequeño no
+  solo obtenemos un mayor margen de separación (maniobrabilidad), sino
+  además el mismo \emph{accuracy} que el de un modelo más ``estricto''
+  en la separación, \textbf{nos decantamos por la opción de
+  \emph{caret}}: C pequeño (0.01) y escala pequeña (0.1).
+\end{enumerate}
+
+\hypertarget{svm-rbf}{%
+\subsection{10.3 SVM RBF}\label{svm-rbf}}
+
+Finalizando con el \emph{kernel} radial, comenzando tuneando los dos
+parámetros principales: C y \(\sigma\):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Probamos con C entre 0.01 y 10}
+\NormalTok{C\_rbf      <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.01}\NormalTok{,}\FloatTok{0.05}\NormalTok{,}\FloatTok{0.1}\NormalTok{,}\FloatTok{0.2}\NormalTok{,}\FloatTok{0.5}\NormalTok{,}\DecValTok{1}\NormalTok{,}\DecValTok{2}\NormalTok{,}\DecValTok{5}\NormalTok{,}\DecValTok{10}\NormalTok{)}
+\NormalTok{sigma\_rbf  <{-}}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.1}\NormalTok{, }\FloatTok{0.5}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{5}\NormalTok{, }\DecValTok{10}\NormalTok{)}
+
+\CommentTok{\#{-}{-} Ejemplo con el primer set variables}
+\NormalTok{svm\_rbf\_}\DecValTok{1}\NormalTok{ <{-}}\StringTok{ }\KeywordTok{cruzadaSVMbinRBF}\NormalTok{(}\DataTypeTok{data=}\NormalTok{surgical\_dataset, }\DataTypeTok{vardep=}\NormalTok{target,}
+                              \DataTypeTok{listconti =}\NormalTok{ var\_modelo1, }\DataTypeTok{listclass=}\KeywordTok{c}\NormalTok{(}\StringTok{""}\NormalTok{),}
+                              \DataTypeTok{grupos=}\DecValTok{5}\NormalTok{,}\DataTypeTok{sinicio=}\DecValTok{1234}\NormalTok{,}\DataTypeTok{repe=}\DecValTok{5}\NormalTok{,}\DataTypeTok{C =}\NormalTok{ C\_rbf,}
+                              \DataTypeTok{sigma =}\NormalTok{ sigma\_rbf, }\DataTypeTok{label =} \StringTok{"Modelo 1"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/SVM/svm_rbf_modelos1_2} 
+
+}
+
+\caption{Distribución SVM RBF Modelos 1 y 2 (I)}\label{fig:unnamed-chunk-122}
+\end{figure}
+
+\begin{verbatim}
+Recomendado por caret
+Modelo 1: C = 1   ; sigma = 5 ; Accuracy: 0.8422943
+Modelo 2: C = 1   ; sigma = 5 ; Accuracy: 0.8726666
+\end{verbatim}
+
+En base a los resultados devueltos por \emph{caret}, para ambos
+\emph{sets} de variables recomienda una constante C pequeña/moderada
+(1), así como un valor \(\sigma = 5\). No obstante, y dado que se tratan
+de valores puntuales, analicemos los patrones existentes:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  En el caso del primer \emph{set}, \textbf{los modelos con mayor
+  \emph{accuracy} presentan un valor sigma alto (en torno a 5-10 aumenta
+  hasta 0.83)}. En relación al valor C, prácticamente con cualquier
+  valor el \emph{accuracy} se sitúa en torno a 0.86-0.87, alcanzando su
+  punto máximo en C = 1. Es decir, \textbf{no es necesario un valor C
+  alto (márgenes de separación más pequeños), ya que a partir de C = 2,
+  5, el \emph{accuracy} comienza a disminuir}. Por otro lado, otro
+  posible patrón de comportamiento sería con un valor \emph{sigma} menor
+  (2) y C alto (a partir de 5-10), donde comienza a aumentar el
+  \emph{accuracy}.
+\item
+  En el caso del segundo modelo, el comportamiento es bastante similar:
+  \textbf{o bien escogemos valores \emph{sigma} altos (5-10) y C no
+  demasiado alto (menor a 1), o bien un valor \emph{sigma} menor (2) y
+  una constante C alta (en torno a 5, 10)}.
+\end{enumerate}
+
+En ambos \emph{sets}, podemos comprobar cómo evoluciona el modelo si
+aumentamos el valor de C con \emph{sigma} = 2, dado que a simple vista
+comienza a aumentar conforme incrementamos C (de 0.775 a 0.875):
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/SVM/svm_rbf_modelos1_2_aumentando_C} 
+
+}
+
+\caption{Distribución SVM RBF Modelos 1 y 2 (II)}\label{fig:unnamed-chunk-123}
+\end{figure}
+
+Incluso aumentando \emph{C}, se obtienen prácticamente los mismos
+resultados que con un \emph{sigma} y C menor.
+
+En conclusión, para ambos \emph{sets} de variables \textbf{nos
+decantamos por un valor \emph{sigma} alto (escogemos 5), y una constante
+C no demasiado alta, entre 0.5 y 1}:
+
+\begin{verbatim}
+Recomendado por caret
+Modelo 1: C = 1   ; sigma = 5 ; Accuracy: 0.8422943
+          C = 0.5 ; sigma = 5 ; Accuracy: 0.8415420
+
+Modelo 2: C = 1   ; sigma = 5 ; Accuracy: 0.8726666
+          C = 0.5 ; sigma = 5 ; Accuracy: 0.8711983
+\end{verbatim}
+
+Dado que la diferencia entre \emph{C} = 1 y \emph{C} = 0.5 no es muy
+relevante (aunque \emph{caret} recomiende 1), resulta indiferente
+escoger uno de ellos (por ejemplo, escogemos 0.5).
+
+\hypertarget{comparaciuxf3n-modelos-svm}{%
+\subsection{10.4 Comparación modelos
+SVM}\label{comparaciuxf3n-modelos-svm}}
+
+Una vez elaborados los modelos, \textbf{empleando validación cruzada
+repetida de 5 grupos y 10 repeticiones, analizamos tanto la tasa de
+fallos como el AUC (en ambos \emph{sets} de variables)}:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/SVM/comparacion_svm} 
+
+}
+
+\caption{Comparación tasa de fallos y AUC modelos SVM}\label{fig:unnamed-chunk-124}
+\end{figure}
+
+Sin duda alguna, \textbf{la mejor alternativa tanto en tasa de fallos
+como en AUC es el modelo SVM con \emph{kernel} radial (RBF)}. De hecho,
+quisiera remarcar dos detalles fundamentales, relacionados con los
+\emph{sets} de variables:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Por un lado, en relación con el \emph{kernel} lineal,
+  \textbf{observamos una considerable diferencia entre el primer
+  \emph{set} con cinco variables (junto con \emph{ccsMort30Rate}) y el
+  segundo \emph{set}, tanto en AUC, sesgo y varianza}: incluyendo dicha
+  variable (relación lineal), el modelo mejora hasta 0.74-0.75 de AUC,
+  aproximadamente, además de reducir la tasa de error hasta 0.22 (a
+  diferencia del primer \emph{set}, que alcanza 0.26).
+\item
+  Por el contrario, con el \emph{kernel} radial, añadir dicha variable
+  perjudica al modelo en cuanto a la tasa de fallos (de 0.16 con cinco
+  variables a 0.12-0.13 con tan solo cuatro), aunque en AUC se mantienen
+  prácticamente idénticos.
+\end{enumerate}
+
+Por otro lado, \textbf{analicemos las predicciones obtenidas con el
+conjunto \emph{test}}:
+
+\textbf{SVM Lineal}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)     0.789      0.65844       0.80678        0.31733
+## 2     Modelo 2 (top 4)     0.549      0.49980       0.76550        0.17310
+##   valor_pred_neg
+## 1         0.9454
+## 2         0.7823
+\end{verbatim}
+
+\textbf{SVM Polinomial}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)    0.7940      0.71977       0.80205        0.28304
+## 2     Modelo 2 (top 4)    0.7826      0.63188       0.80316        0.30453
+##   valor_pred_neg
+## 1        0.96345
+## 2        0.94116
+\end{verbatim}
+
+\textbf{SVM RBF}:
+
+\begin{verbatim}
+##                 modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 1 (BIC TOP 5)    0.8517       0.8000        0.8622         0.5396
+## 2     Modelo 2 (top 4)    0.8804       0.8897        0.8786         0.5935
+##   valor_pred_neg
+## 1         0.9553
+## 2         0.9756
+\end{verbatim}
+
+Al igual que en la comparación, con el conjunto \emph{test} \textbf{los
+modelos SVM RBF resultan ser claramente los ganadores}, aunque con unos
+porcentajes inferiores con respecto a los modelos basados en árbol o
+\emph{gradient boosting}:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa} 
+
+}
+
+\caption{Comparacion tasa fallos log-avnnet-bagging-rf-gbm-svm}\label{fig:unnamed-chunk-128}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_auc} 
+
+}
+
+\caption{Comparacion AUC log-avnnet-bagging-rf-gbm-svm}\label{fig:unnamed-chunk-129}
+\end{figure}
+
 \end{document}

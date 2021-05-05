@@ -1323,8 +1323,409 @@ data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
            valor_pred_pos = c(0.6639, 0.6465), valor_pred_neg = c(0.9769, 0.9792))
 ```
 
+En base a los resultados obtenidos, no se diferencia demasiado de un modelo _bagging_:
 
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.901, 0.9019),
+           sensibilidad = c(0.9214, 0.9468), especificidad = c(0.8966, 0.8928),
+           valor_pred_pos = c(0.6589, 0.6424), valor_pred_neg = c(0.9813, 0.9880))
+```
 
+1. __Precisión__: de 0.901 y 0.9019 a 0.899 y 0.8964 en ambos _sets_ de variables, respectivamente.
+2. __Sensibilidad__: de 0.9214 y 0.9468 a 0.9052 y 0.9117, respectivamente (empeora ligeramente).
+3. __Especificidad__: tanto en _bagging_ como en _random forest_ se sitúa en torno a 0.89.
+4. __Valor predictivo positivo__: continúa situándose en torno a 0.64-0.65-0.66.
+5. __Valor predictivo negativo__: continúa situándose en torno a 0.97-0.98.
+
+Es decir, __añadiendo el sorteo de variables al modelo (mtry), la variación que experimenta en el conjunto _test_ es muy pequeña__. De hecho, si observamos la distribución de la tasa de fallos y AUC:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC log-avnnet-bagging-rf", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/03_log_avnnet_bagging_rf_auc.jpeg")
+```
+
+En relación al resto de modelos, _random forest_ se situa a la misma altura que modelos como _bagging_ o _avnnet_. De hecho, si hacemos "zoom" sobre los modelos de árbol:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion modelos bagging y rf", echo=FALSE}
+knitr::include_graphics("./charts/random_forest/comparacion_bagging_rf.png")
+```
+
+Comprobamos que la diferencia entre ambos no es muy significativa, como es el caso de la tasa de fallos, donde la escala del eje puede llevar a engaño, ya que la diferencia entre ambos modelos es de apenas unas milésimas (de 0.1000 - 0.1025 en el caso de _bagging_ a 0.1050-0.1075 en _random forest_). Además, aunque la varianza en este último parezca aumentar, dada la escala del eje no es tan pronunciada.
+
+De nuevo, no existe demasiada diferencia entre ambos _sets_ de variables, tanto en tasa de fallos como en AUC, pese a la diferencia de una variable _input_.
+
+# 9. _Gradient Boosting_
+
+Hasta el momento, hemos comprobado como la variación en el _accuracy_, tasa de error o AUC con los ambos _sets_ candidatos no resulta ser relevante, incluso en numerosas ocasiones los parámetros finales acaban siendo los mismos para ambos candidatos. Por tanto, de cara al resto de modelos como _grandient boosting_, _xgboost_ o _svm_, veamos si es posible poner en común un mismo tuneo de hipérparametros para ambos _sets_, en lugar de "tunear" por separado cada uno de ellos.
+
+## 9.1 Tuneo de hipérparámetros
+
+En primer lugar, comenzando con el tuneo de los diferentes hiperparámetrosm en ambos modelos, con tan solo cinco repeticiones:
+
+1. _shrinkage_: parámetro de regularización.
+2. _n.minobsinnode_: tamaño máximo de nodos finales (parámetro encargado de medir la complejidad).
+3. _n.trees_: número de iteraciones (árboles).
+4. _bag.fraction_: fracción de observaciones del conjunto de entrenamiento seleccionadas aleatoriamente para la construcción del siguiente árbol.
+
+```{r, eval=FALSE}
+#-- Ejemplo de tuneo con el primer set de variables
+set.seed(1234)
+#-- El valor maximo de shrinkage suele estar en torno a 0.2 (probamos con 0.3 y 0.4 tambien)
+gbmgrid<-expand.grid(shrinkage=c(0.4,0.3,0.2,0.1,0.05,0.03,0.01,0.001),
+                     n.minobsinnode=c(5,10,20),
+                     n.trees=c(100,500,1000,5000),
+                     interaction.depth=c(2))
+
+#-- De momento, mantenemos bag.fraction a 1 (todas las observaciones)
+control<-trainControl(method="repeatedcv",number=5,savePredictions = "all", 
+                      repeats=5,classProbs=TRUE)
+gbm_modelo1 <- train(formula_modelo_1,data=surgical_dataset,
+                     method="gbm",trControl=control,tuneGrid=gbmgrid,
+                     distribution="bernoulli", bag.fraction=1,verbose=FALSE)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion hiperparámetros gbm modelo 1", echo=FALSE}
+knitr::include_graphics("./charts/gradient_boosting/05_gbm_hyperparameters_modelo1.png")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparación hiperparámetros gbm modelo 2", echo=FALSE}
+knitr::include_graphics("./charts/gradient_boosting/05_gbm_hyperparameters_modelo2.png")
+```
+
+¿Qué sucede en ambos _sets_ de variables? En primer lugar, analicemos las recomendaciones de _caret_ para ambos _sets_:
+
+```
+Modelo 1: n.trees = 500,  shrinkage = 0.1,  n.minobsinnode = 20. Accuracy: 0.9055354
+Modelo 2: n.trees = 5000, shrinkage = 0.01, n.minobsinnode = 20. Accuracy: 0.9039292
+```
+
+En función de lo recomendado por el propio paquete, existe un contraste entre ambos modelos: por un lado, con cinco variables _input_ recomienda 500 iteraciones, un valor de regularización alto y _n.minobsinnode_ alto (20), es decir, modelos más simples. Por el contrario, con una variable _input_ menos, recomienda muchos más árboles (5000) y un valor de regularización más bajo.
+
+Desde un punto de vista numérico, con estos parámetros se han obtenido el _accuracy_ máximo (incluso también por la estructura de remuestreo, valor de la semilla, etc.). Sin embargo, ¿Es una configuración óptima? O aún más importante ¿Podrían obtenerse resultados similares con modelos más sencillos? Para responder a ambas preguntas, __debemos analizar los posibles patrones que presenta el modelo en ambos _sets___, de forma que podamos decantarnos por una opción mucho más sencilla.
+
+Concretamente, destacamos tres grandes patrones de comportamiento:
+
+1. Por un lado, __un bajo número de iteraciones (en torno a 100), junto con un valor de regularización alto ( _shrinkage_ superior o igual a 0.2-0.3, aproximadamente)__.
+
+2. Por el contrario, también es posible obtener un máximo _accuracy_ __con un valor _shrinkage_ bajo (inferior a 0.1), pero con un elevado número de iteraciones, en torno a 500, 1000 o 5000__.
+
+3. Además, el comportamiento de _n.minobsinnode_ en ambos _sets_ es el mismo tanto para un valor de 5, como de 10 o 20, __por lo que un valor alto (20) es una buena opción a decantarse: a un mayor valor _n.minosinnode_, obtenemos modelos más simples y con menos posibilidad de sobreajuste__.
+
+En conclusión, __no es necesario tunear exageradamente el modelo en ambos casos__, sino que aparentemente con un número de árboles bajo (100), un valor de regularización alto (en torno a 0.2-0.3) y _n.minobsinnode_ = 20 se obtienen de por sí buenos resultados, sin necesidad de complicar aún más el modelo.
+
+### 9.1.1 Estudio del _Early Stopping_
+
+Continuando con la línea anterior, para ambos _set_ de variables __probamos a fijar _n.minobsinnode_ = 20 y _shrinkage_ = 0.2 y 0.3__, observando no solo qué número de iteraciones/árboles sería adecuado utilizar, sino además si con un valor de regularización de 0.2 es suficiente o si aumentando su valor obtenemos mejores resultados, ya que en el gráfico anterior se detectó un ligero ascenso en el valor de _accuracy_ en 0.3 (normalmente el valor máximo suele ser 0.2):
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Estudio Early Stopping Modelos 1 y 2", echo=FALSE}
+knitr::include_graphics("./charts/gradient_boosting/05_early_stopping.png")
+```
+
+En ambos _sets_, __observamos que con 100 árboles se obtiene un buen _accuracy___, mientras que a partir de 400-500 iteraciones, el modelo comienza a sobreajustarse y, como consecuencia, disminuye su precisión. Por otro lado, en relación con el parámetro _shrinkage_ no existe apenas diferencia entre un valor 0.2 y 0.3, por lo que __nos decantamos por 0.2__.
+
+### 9.1.2 Estudio de _bag.fraction_
+
+Hasta el momento, hemos tuneado los modelos _gbm_ __con el conjunto total de las observaciones, esto es, con _bag.fraction_ = 1__. Sin embargo, _caret_ por defecto __no sortea todas las observaciones, sino que por defecto escoge el 50 % aleatoriamente (0.5)__ [^6]
+
+[^6]: _caret_ emplea internamente el paquete _gbm_, cuyo valor _bag.fraction_ por defecto es 0.5. https://cran.r-project.org/web/packages/gbm/gbm.pdf
+
+Como consecuencia, sobre ambos _sets_ __estudiamos la variabilidad del modelo con respecto a dicho parámetro__, aumentando a 10 el número de repeticiones para observar mejor su efecto. Dado que la función _cruzadagbmbin_ nos dispone de dicho parámetro, se ha incluido internamente en la función _train_ de _caret_:
+
+```{r, eval=FALSE}
+#-- bag.fraction no se permite tunear desde expand.grid...
+gbmgrid <- expand.grid(n.minobsinnode=n.minobsinnode, shrinkage=shrinkage,
+                      n.trees=n.trees, interaction.depth=interaction.depth)
+#-- Por lo que lo incluimos dentro de train  
+gbm    <- train(formu,data=databis, method="gbm",trControl=control,
+                bag.fraction=bag.fraction, tuneGrid=gbmgrid,distribution="bernoulli",
+                verbose=FALSE)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Estudio bag.fraction modelos 1 y 2", echo=FALSE}
+knitr::include_graphics("./charts/gradient_boosting/05_gbm_bag_fraction.png")
+```
+
+En un primer análisis, la diferencia entre _bag.fraction_ = 0.5 y _bag.fraction_ = 1 es pequeña, ya que tanto en sesgo como en varianza presentan resultados similares, salvo en la tasa de fallos donde aumenta ligeramente, pero no demasiado dada la escala de los ejes (por ejemplo, en el modelo 1 la varianza se sitúa entre 0.099 y 0.104, considerando los _outliers_). Por tanto, __no existe apenas diferencia entre utilizar el 100 % de las observaciones y tan solo el 50 %__, por lo que podemos mantener dicho parámetro por defecto en _bag.fraction_.
+
+__RESUMEN _gradient boosting___:
+
+1. modelos 1 y 2: _n.trees_ = 100, _shrinkage_ = 0.2, _n.minobsinnode_ = 20 y _bag.fraction_ = 0.5.
+
+## 9.2 Comparación final
+
+A continuación, con los modelos obtenidos realizamos la predicción sobre el conjunto _test_:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.903, 0.9052),
+           sensibilidad = c(0.9149, 0.9264), especificidad = c(0.9003, 0.9006),
+           valor_pred_pos = c(0.6731, 0.6731), valor_pred_neg = c(0.9792, 0.9823))
+```
+
+Como podemos comprobar, _gradient boosting_ se sitúa prácticamente en la misma línea que el resto de modelos basados en árbol: __alta precisión, sensibilidad, especificidad y valor predictivo negativo, pero con un valor predictivo positivo menor, en torno al 67 %__:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf-gbm", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa.jpeg")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC log-avnnet-bagging-rf-gbm", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc.jpeg")
+```
+
+De hecho, aunque la tasa de fallos en _gradient boosting_ sea ligeramente menor, __modelos como _random forest_ o _bagging_ continuan siendo una mejor alternativa__.
+
+# 10. _Support Vector Machines_
+
+## 10.1 SVM Lineal
+
+A continuación, continuamos con los modelos _svm_, comenzando por el _kernel_ más sencillo: el lineal, del cual solo necesitamos tunear el parámetro de regularización __C__ (por el momento, empleamos 5 repeticiones):
+
+```{r, eval=FALSE}
+#-- Probamos desde C = 0.01 hasta C = 10
+C_binaria <- expand.grid(C=c(0.01,0.05,0.1,0.2,0.5,1,2,5,10))
+
+#-- Ejemplo con el primer set de variables (5 variables input)
+cruzadaSVMbin(data=surgical_dataset, vardep=target,
+                           listconti = var_modelo1, listclass=c(""),
+                           grupos=5,sinicio=1234,repe=5,C=C_binaria)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribución SVM Lineal Modelos 1 y 2", echo=FALSE}
+knitr::include_graphics("./charts/SVM/06_svm_lineal_modelo1_2.png")
+```
+
+```
+Recomendado por caret
+Modelo 1: C = 0.01. Accuracy: 0.7746143
+Modelo 2: C = 0.01. Accuracy: 0.7466688
+```
+
+A diferencia del resto de modelos no lineales, con el primer _set_ de variables (5 variables _input_ incluyendo _ccsMort30Rate_), obtenemos un _accuracy_ en torno al 77 %, mientras que con tan solo 4 variables desciende al 74 %, de nuevo un indicativo de la relación lineal de dicha variable con la variable objetivo. Pese a ello, __los modelos basados en árbol o _boosting_ continuan siendo mejor en términos de _accuracy_ (89-90 %)__.
+
+En relación con la constante C, dada la escala de los ejes __no se aprecia una diferencia relevante entre los diferentes valores__, ya que apenas varían en unas milésimas. Sin embargo, si se tuviera que indica un posible patrón, diríamos que a medida que se reduce la constance C, aumenta ligeramente el _accuracy_. Podríamos incluso probar a reducir aún más el parámetro de regularización:
+
+```{r}
+#-- Probamos a reducir C entre 0.1 y 0.001
+C_binaria <- expand.grid(C=c(0.001,0.005,0.01))
+```
+
+Pero tan solo aumenta en 0.0001 en ambos _sets_:
+
+```
+Modelo 1: C: 0.01 -> 0.7746143 ; C: 0.001 -> 0.7749898
+Modelo 2: C: 0.01 -> 0.7466688 ; C: 0.001 -> 0.7749898
+```
+
+Por tanto, y dado que la diferencia no es muy significativa, __nos decantamos por el máximo _accuracy_, correspondiente con C = 0.01__, recomendado por _caret_, un valor no demasiado alto, lo que se traduce en un menor riesgo por sobreajuste (márgenes de separación mucho mayores).
+
+## 10.2 SVM Polinomial
+
+A continuación, proseguimos con el _kernel_ polinomial, __tuneando tanto la constante C de regularización como la escala__ (nuevamente, con cinco repeticiones): 
+
+__NOTA: dado que los polinomios de grado 3 tardaban demasiado tiempo en procesar (incluso con una sola repetición + _doParallel_), se ha utilizado únicamente grado 2__.
+
+```{r, eval=FALSE}
+#-- Probamos con C desde 0.01 hasta 10
+C_poly      <- c(0.01, 0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10)
+degree_poly <- c(2)
+#-- Probamos desde una escala pequeña (0.1) hasta 5
+scale_poly  <- c(0.1, 0.5, 1, 2, 5)
+
+#-- Ejemplo con el primer set de variables (5 variables input)
+svm_pol_1 <- cruzadaSVMbinPoly(data=surgical_dataset, vardep=target,
+                               listconti = var_modelo1, listclass=c(""),
+                               grupos=5,sinicio=1234,repe=5,C = C_poly,
+                               degree = degree_poly, scale = scale_poly)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribución SVM Polinomial Modelos 1 y 2 (I)", echo=FALSE}
+knitr::include_graphics("./charts/SVM/06_svm_poly_modelo1_2.png")
+```
+
+```
+Recomendado por caret
+Modelo 1: C = 5   ; degree = 2; scale = 0.1. Accuracy: 0.7766301
+Modelo 2: C = 0.01; degree = 2; scale = 0.1. Accuracy: 0.7766992
+```
+
+En base a la respuesta del paquete _caret_, con el primer _set_ recomienda una escala en torno a 0.1 y una constance C alta (5), mientras que en el caso del segundo _set_ de variables, la constante C recomendada es más baja, en torno a 0.01. No obstante, y dado que __no podemos dejarnos llevar por valores puntuales (pues puede conducir al sobreajuste), analicemos los patrones existentes__:
+
+1. En el caso del primer _set_ de variables, nos encontramos con dos posibles extremos: __o bien una constante C alta (entre 5 y 10) y una escala moderada/pequeña (en torno a 0.1-0.5-1) o una constante C pequeña y una escala mayor (1, 2 o 5)__.
+
+2. En el segundo _set_, por otro lado, __llama la atención modelos con una constante C pequeña (menor a 0.01) y una escala baja (0.1-0.5, principalmente)__.
+
+Por tanto, analicemos si mejoran los resultados en caso de, en el primer _set_, aumentar la constante C a 15 y 20, así como disminuirlo a 0.005 y 0.001. Por otro lado, probamos también a reducir C a 0.005 y 0.001 en el segundo _set_ de variables:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribución SVM Polinomial Modelos 1 y 2 (II)", echo=FALSE}
+knitr::include_graphics("./charts/SVM/polinomica/svm_polinomial_parte2.png")
+```
+
+1. En el caso del primer _set_, pese a reducir o aumentar la constante C, el valor de _accuracy_ se mantiene en torno a 0.77. Por tanto, y dado que la diferencia no es muy significativa entre un valor C alto y pequeño, __podemos decantarnos por un valor en torno a 0.5 (moderado-bajo), así como una escala de 1__, aunque _caret_ nos recomiende un valor C = 5, de forma que los márgenes de separación entre ambas clases es mayor, obteniendo un modelo más "general".
+
+De nuevo, __la decision esta basada por patrones y no en valores puntuales__, por lo que empleando otra semilla y con otros valores training los parametros serán "aproximadamente" similares, aunque no iguales. Por tanto, dado que la diferencia entre un modelo SVM más ajustado (C = 5) y un modelo más general (C = 0.5) es ínfima.
+
+2. Por otro lado, en relación con el segundo _set_, habiendo disminuido el valor C hasta 0.001-0.005, no ha hecho aumentar en gran medida el resultado. Por tanto, dado que con un valor C pequeño no solo obtenemos un mayor margen de separación (maniobrabilidad), sino además el mismo _accuracy_ que el de un modelo más "estricto" en la separación, __nos decantamos por la opción de _caret___: C pequeño (0.01) y escala pequeña (0.1).
+
+## 10.3 SVM RBF
+
+Finalizando con el _kernel_ radial, comenzando tuneando los dos parámetros principales: C y $\sigma$:
+
+```{r, eval=FALSE}
+#-- Probamos con C entre 0.01 y 10
+C_rbf      <- c(0.01,0.05,0.1,0.2,0.5,1,2,5,10)
+sigma_rbf  <- c(0.1, 0.5, 1, 2, 5, 10)
+
+#-- Ejemplo con el primer set variables
+svm_rbf_1 <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target,
+                              listconti = var_modelo1, listclass=c(""),
+                              grupos=5,sinicio=1234,repe=5,C = C_rbf,
+                              sigma = sigma_rbf, label = "Modelo 1")
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribución SVM RBF Modelos 1 y 2 (I)", echo=FALSE}
+knitr::include_graphics("./charts/SVM/svm_rbf_modelos1_2.png")
+```
+
+```
+Recomendado por caret
+Modelo 1: C = 1   ; sigma = 5 ; Accuracy: 0.8422943
+Modelo 2: C = 1   ; sigma = 5 ; Accuracy: 0.8726666
+```
+
+En base a los resultados devueltos por _caret_, para ambos _sets_ de variables recomienda una constante C pequeña/moderada (1), así como un valor $\sigma = 5$. No obstante, y dado que se tratan de valores puntuales, analicemos los patrones existentes:
+
+1. En el caso del primer _set_, __los modelos con mayor _accuracy_ presentan un valor sigma alto (en torno a 5-10 aumenta hasta 0.83)__. En relación al valor C, prácticamente con cualquier valor el _accuracy_ se sitúa en torno a 0.86-0.87, alcanzando su punto máximo en C = 1. Es decir, __no es necesario un valor C alto (márgenes de separación más pequeños), ya que a partir de C = 2, 5, el _accuracy_ comienza a disminuir__. Por otro lado, otro posible patrón de comportamiento sería con un valor _sigma_ menor (2) y C alto (a partir de 5-10), donde comienza a aumentar el _accuracy_.
+
+2. En el caso del segundo modelo, el comportamiento es bastante similar: __o bien escogemos valores _sigma_ altos (5-10) y C no demasiado alto (menor a 1), o bien un valor _sigma_ menor (2) y una constante C alta (en torno a 5, 10)__.
+
+En ambos _sets_, podemos comprobar cómo evoluciona el modelo si aumentamos el valor de C con _sigma_ = 2, dado que a simple vista comienza a aumentar conforme incrementamos C (de 0.775 a 0.875):
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Distribución SVM RBF Modelos 1 y 2 (II)", echo=FALSE}
+knitr::include_graphics("./charts/SVM/svm_rbf_modelos1_2_aumentando_C.png")
+```
+
+Incluso aumentando _C_, se obtienen prácticamente los mismos resultados que con un _sigma_ y C menor.
+
+En conclusión, para ambos _sets_ de variables __nos decantamos por un valor _sigma_ alto (escogemos 5), y una constante C no demasiado alta, entre 0.5 y 1__:
+
+```
+Recomendado por caret
+Modelo 1: C = 1   ; sigma = 5 ; Accuracy: 0.8422943
+          C = 0.5 ; sigma = 5 ; Accuracy: 0.8415420
+
+Modelo 2: C = 1   ; sigma = 5 ; Accuracy: 0.8726666
+          C = 0.5 ; sigma = 5 ; Accuracy: 0.8711983
+```
+
+Dado que la diferencia entre _C_ = 1 y _C_ = 0.5 no es muy relevante (aunque _caret_ recomiende 1), resulta indiferente escoger uno de ellos (por ejemplo, escogemos 0.5).
+
+## 10.4 Comparación modelos SVM
+
+Una vez elaborados los modelos, __empleando validación cruzada repetida de 5 grupos y 10 repeticiones, analizamos tanto la tasa de fallos como el AUC (en ambos _sets_ de variables)__:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparación tasa de fallos y AUC modelos SVM", echo=FALSE}
+knitr::include_graphics("./charts/SVM/comparacion_svm.png")
+```
+
+Sin duda alguna, __la mejor alternativa tanto en tasa de fallos como en AUC es el modelo SVM con _kernel_ radial (RBF)__. De hecho, quisiera remarcar dos detalles fundamentales, relacionados con los _sets_ de variables:
+
+1. Por un lado, en relación con el _kernel_ lineal, __observamos una considerable diferencia entre el primer _set_ con cinco variables (junto con _ccsMort30Rate_) y el segundo _set_, tanto en AUC, sesgo y varianza__: incluyendo dicha variable (relación lineal), el modelo mejora hasta 0.74-0.75 de AUC, aproximadamente, además de reducir la tasa de error hasta 0.22 (a diferencia del primer _set_, que alcanza 0.26).
+
+2. Por el contrario, con el _kernel_ radial, añadir dicha variable perjudica al modelo en cuanto a la tasa de fallos (de 0.16 con cinco variables a 0.12-0.13 con tan solo cuatro), aunque en AUC se mantienen prácticamente idénticos.
+
+Por otro lado, __analicemos las predicciones obtenidas con el conjunto _test___:
+
+__SVM Lineal__:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.789, 0.549),
+           sensibilidad = c(0.65844, 0.4998), especificidad = c(0.80678, 0.7655),
+           valor_pred_pos = c(0.31733, 0.1731), valor_pred_neg = c(0.94540, 0.7823))
+```
+
+__SVM Polinomial__:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.794, 0.7826),
+           sensibilidad = c(0.71977, 0.63188), especificidad = c(0.80205, 0.80316),
+           valor_pred_pos = c(0.28304, 0.30453), valor_pred_neg = c(0.96345, 0.94116))
+```
+
+__SVM RBF__:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
+           precision = c(0.8517, 0.8804),
+           sensibilidad = c(0.8000, 0.8897), especificidad = c(0.8622, 0.8786),
+           valor_pred_pos = c(0.5396, 0.5935), valor_pred_neg = c(0.9553, 0.9756))
+```
+
+Al igual que en la comparación, con el conjunto _test_ __los modelos SVM RBF resultan ser claramente los ganadores__, aunque con unos porcentajes inferiores con respecto a los modelos basados en árbol o _gradient boosting_:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf-gbm-svm", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa.jpeg")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC log-avnnet-bagging-rf-gbm-svm", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_auc.jpeg")
+```
+
+Antes de continuar con _XGboost_ y Ensamblado, debemos detenernos a analizar si realmente es necesario continuar con ambos _sets_ de variables o no. A lo largo de la práctica (logística, redes, modelos basados en árbol, _boosting_, svm) se ha podido comprobar que la diferencia entre ambos candidatos, por tan solo una variable _input_, no ha sido especialmente relevante, pese a lo observado en la regresión logística donde si existía cierta diferencia entre ambos.
+
+Por tanto, de cara a _XGboost_ pero especialmente a los modelos de Ensamblado __continuaremos con únicamente con el segundo _set_ de variables _input_ (4 variables), a excepción del modelo _svm_ lineal, donde utilizaremos el modelo obtenido con el primer _set___.
+
+# 11. XGboost
+
+## 11.1 Tuneo de hiperparámetros
+
+En primer lugar, debemos recordar los parámetros a tunear en un modelo _XGboost_:
+
+1. _min_child_weight_: número de observaciones mínimas en el nodo final. Similar a _n.minobsinnnode_ de _gbm_.
+
+2. _eta_: parámetro de regularización.
+
+3. _rounds_: número de iteraciones.
+
+4. _max_depth_: profundidad máxima de los árboles.
+
+5. _gamma_: constante de regularización (lo mantenemos a 0).
+
+6. _colsample_bytree_: porcentaje de sorteo de variables en cada árbol (lo mantenemos a 1).
+
+7. _subsample_: sorteo de observaciones antes de cada árbol (lo mantenemos a 1).
+
+```{r, eval=FALSE}
+xgbmgrid <- expand.grid(min_child_weight=c(5,10,20),
+                        eta=c(0.1,0.05,0.03,0.01,0.001), 
+                        nrounds=c(100,500,1000,5000),
+                        max_depth=6,gamma=0,
+                        colsample_bytree=1,subsample=1)
+
+#-- Probamos al comienzo con 5 repeticiones
+set.seed(1234)
+control<-trainControl(method = "repeatedcv",number=5,repeats = 5,
+                      savePredictions = "all",classProbs=TRUE)
+
+xgbm_ <- train(formula_modelo2,data=surgical_dataset,
+               method="xgbTree",trControl=control,
+               tuneGrid=xgbmgrid,verbose=FALSE)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tuneo hiperparámetros XGboost", echo=FALSE}
+knitr::include_graphics("./charts/xgboost/tuneo_xgboost_modelo2.png")
+```
+
+De los gráficos anteriores, __se deduce que se debe tomar un valor _eta_ alto (en torno a 0.1) y pocas iteraciones, alrededor de 100__. Además, si nos fijamos en la escala de los ejes, __no existe demasiada diference entre un valor _min_child_weight_ bajo (5) y alto (20)__, tan solo de apenas unas décimas (0.90 y 0.89, respectivamente). Por tanto, escogemos un valor de 20 al ser las diferencias tan pequeñas, permitiendo con ello modelos más simples y con menos sobreajuste.
+
+## 11.2 Estudio _Early Stopping_
+
+A continuación, probamos a fijar algunos parámetros para analizar cómo evoluciona el modelo en función del número de iteraciones:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Evolucion Early Stopping XGboost", echo=FALSE}
+knitr::include_graphics("./charts/xgboost/early_stopping.png")
+```
 
 
 

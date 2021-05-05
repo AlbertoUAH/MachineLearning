@@ -48,15 +48,15 @@ if (any(listclass==c(""))==FALSE)
   
   set.seed(sinicio)
   control<-trainControl(method = "repeatedcv",number=grupos,repeats=repe,
-   savePredictions = "all",classProbs=TRUE, verboseIter = TRUE) 
+   savePredictions = "all",classProbs=TRUE, verboseIter = FALSE) 
   
   # Aplico caret y construyo modelo
-  
+  print("HOLA")
   SVMgrid <-expand.grid(C=C,degree=degree,scale=scale)
   
   SVM<- train(formu,data=databis,
    method="svmPoly",trControl=control,
-   tuneGrid=SVMgrid,replace=replace, verbose = TRUE)
+   tuneGrid=SVMgrid,replace=replace, verbose = FALSE)
   
   print(SVM$results)
   

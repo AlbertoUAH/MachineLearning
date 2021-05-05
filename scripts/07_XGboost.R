@@ -52,6 +52,9 @@ set.seed(1234)
 xgbm_2 <- train(as.formula(paste0(target,"~",paste0(var_modelo2, collapse = "+"))),data=surgical_dataset,
                 method="xgbTree",trControl=control,tuneGrid=xgbmgrid,verbose=FALSE)
 xgbm_2
+
+
+
 plot(xgbm_2, main = "Tuneo parametros XGBoost Modelo 2")
 
 
@@ -75,6 +78,32 @@ xgbm_4 <- train(as.formula(paste0(target,"~",paste0(var_modelo2, collapse = "+")
 
 #-- Estudio del Early Stopping
 #   Modelo 1 y Modelo 2
+xgbm_2_salida <- as.data.frame(xgbm_2$results)
+
+xgbm_2_salida$eta     <- as.factor(xgbm_2_salida$eta)
+xgbm_2_salida$nrounds <- as.factor(xgbm_2_salida$nrounds)
+xgbm_2_salida$min_child_weight <- as.factor(xgbm_2_salida$min_child_weight)
+
+ggplot(xgbm_2_salida, aes(x = factor(eta), y = Accuracy, colour = factor(nrounds))) +
+       geom_point() + geom_line() +
+       facet_grid( . ~ min_child_weight, labeller = label_both) +
+       theme_bw()  +
+       theme(
+         legend.position = 'top',
+         text = element_text(size=16, face = "bold")
+       )
+
+ggplot(modelo1_results, aes(x = shrinkage, y = Accuracy, colour = n.trees)) +
+  geom_point() + geom_line() +
+  facet_grid( . ~ n.minobsinnode, labeller = label_both)+
+  labs(colour = 'Boosting Interactions') +
+  ggtitle('Gradient Boosting Hyperparameters Tunning (Modelo 1)')+
+  theme_bw() +
+  theme(
+    legend.position = 'top',
+    text = element_text(size=16, face = "bold")
+  )
+
 gbm_modelos_early_stopping <- rbind(xgbm_3$results, xgbm_4$results)
 gbm_modelos_early_stopping$eta <- as.factor(gbm_modelos_early_stopping$eta)
 gbm_modelos_early_stopping$Modelo <- c(rep("Modelo 1", 20), rep("Modelo 2", 20))

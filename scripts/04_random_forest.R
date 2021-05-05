@@ -476,45 +476,50 @@ bagging_modelo_sin_reemp <- tuneo_bagging(surgical_dataset, target = target,
                                           ntree = 2000, grupos = 5, repe = 10, replace = FALSE)
 bagging_modelo_sin_reemp$modelo <- "RF. MODELO 1 (no reemp)"
 modelos_actuales <- rbind(modelos_actuales, bagging_modelo_sin_reemp)
-modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("BAGGING", 20), rep("RANDOM FOREST", 30))
+modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("BAGGING", 20), rep("RANDOM FOREST", 20))
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
+p <- ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
-
+  ggtitle("Tasa de fallos por modelo") +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+p
 ggsave('./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
+t <- ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
-
+  ggtitle("AUC por modelo") +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+t
 ggsave('./charts/comparativas/03_log_avnnet_bagging_rf_auc.jpeg')
 
 #-- Si hacemos zoom sobre los modelos bagging y rf...
 modelos_actuales_zoomed <- modelos_actuales[modelos_actuales$modelo %in% c("BAG. MODELO 1", "BAG. MODELO 2", "RF. MODELO 1",
-                                                                           "RF. MODELO 2", "RF. MODELO 1 (no reemp)"), ]
+                                                                           "RF. MODELO 2"), ]
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                        reorder(modelo,tasa, mean))
 
-ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa, col = tipo)) +
+p <- ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo (solo BAGGING)")
+  ggtitle("Tasa de fallos por modelo (solo BAGGING)") +
+  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 ggsave('./charts/random_forest/03_FINAL_tasa.jpeg')
 
 modelos_actuales_zoomed$modelo <- with(modelos_actuales_zoomed,
                                        reorder(modelo,auc, mean))
-ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo (solo BAGGING)")
+
+t <- ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc, col = tipo)) +
+            geom_boxplot(alpha = 0.7) +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("AUC por modelo (solo BAGGING)") +
+            theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 ggsave('./charts/random_forest/03_FINAL_auc.jpeg')
 

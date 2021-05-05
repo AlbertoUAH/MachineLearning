@@ -69,6 +69,18 @@ gbm_modelo1_aux <- train(factor(target)~mortality_rsi+ccsMort30Rate+bmi+month.8+
 gbm_modelo1_aux
 plot(gbm_modelo1_aux, main = "Gradient Boosting Hyperparameters Tunning (Modelo 1) aumentando shrinkage")
 
+ggplot(modelo1_results, aes(x = shrinkage, y = Accuracy, colour = n.trees)) +
+  geom_point() + geom_line() +
+  facet_grid( . ~ n.minobsinnode, labeller = label_both)+
+  labs(colour = 'Boosting Interactions') +
+  ggtitle('Gradient Boosting Hyperparameters Tunning (Modelo 1)')+
+  theme_bw() +
+  theme(
+    legend.position = 'top',
+    text = element_text(size=16, face = "bold")
+  )
+ggsave('./charts/gradient_boosting/05_gbm_hyperparameters_modelo1.png')
+
 # En cualquiera de los casos, no parece benecifiarse de un aumento considerable, aunque en 0.3 parece alcanzar su valor maximo (0.9037235)
 # La diferencia con respecto al modelo recomendado por caret es muy poco significativa: 0.9055354
 
@@ -78,6 +90,20 @@ gbm_modelo2 <- train(factor(target)~mortality_rsi+bmi+month.8+Age,data=surgical_
                      distribution="bernoulli", bag.fraction=1,verbose=FALSE)
 gbm_modelo2
 plot(gbm_modelo2, main = "Gradient Boosting Hyperparameters Tunning (Modelo 2)")
+
+ggplot(modelo2_results, aes(x = shrinkage, y = Accuracy, colour = n.trees)) +
+  geom_point() + geom_line() +
+  facet_grid( . ~ n.minobsinnode, labeller = label_both)+
+  labs(colour = 'Boosting Interactions') +
+  ggtitle('Gradient Boosting Hyperparameters Tunning (Modelo 2)')+
+  theme_bw() +
+  theme(
+    legend.position = 'top',
+    text = element_text(size=16, face = "bold")
+  )
+ggsave('./charts/gradient_boosting/05_gbm_hyperparameters_modelo2.png')
+
+
 # Recomendacion caret: n.trees = 1000, shrinkage = 0.1 y n.minobsinnode = 20
 # Accuracy: 0.9041672
 
@@ -118,11 +144,14 @@ gbm_modelo1_early_stopping_2 <- train(factor(target)~mortality_rsi+ccsMort30Rate
 gbm_modelo1_es_final <- rbind(gbm_modelo1_early_stopping$results, gbm_modelo1_early_stopping_2$results)
 gbm_modelo1_es_final$shrinkage <- c(rep("0.2", 10), rep("0.3", 10))
 
-gbm_modelo1_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
+p <- gbm_modelo1_es_final[gbm_modelo1_es_final$n.trees >= 100, ] %>% ggplot(aes(x = factor(n.trees), y = Accuracy, label = factor(n.trees),
                                     group = shrinkage, col = shrinkage)) + 
   geom_point() +
-  geom_line() +
-  ggtitle("Evolucion Accuracy Modelo 1 (Early Stopping)")
+  geom_line() + geom_label(data = gbm_modelo1_es_final[gbm_modelo1_es_final$n.trees == 100, ], aes(label = round(Accuracy, 3)), show.legend = FALSE) +
+  ggtitle("Evolucion Modelo 1 (Early Stopping)") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
 #-- Llama la atencion 100 + 0.2 ; 100 + 0.3
 
 #  Modelo 2
@@ -147,11 +176,14 @@ gbm_modelo2_early_stopping_2 <- train(factor(target)~mortality_rsi+bmi+month.8+A
 gbm_modelo2_es_final <- rbind(gbm_modelo2_early_stopping$results, gbm_modelo2_early_stopping_2$results)
 gbm_modelo2_es_final$shrinkage <- c(rep("0.2", 10), rep("0.3", 10))
 
-gbm_modelo2_es_final %>% ggplot(aes(x = n.trees, y = Accuracy, label = n.trees,
-                                    group = shrinkage, col = shrinkage)) + 
+t <- gbm_modelo2_es_final[gbm_modelo2_es_final$n.trees >= 100, ] %>% ggplot(aes(x = factor(n.trees), y = Accuracy, label = factor(n.trees),
+                                         group = shrinkage, col = shrinkage)) + 
   geom_point() +
-  geom_line() +
-  ggtitle("Evolucion Accuracy Modelo 2 (Early Stopping)")
+  geom_line() + geom_label(data = gbm_modelo2_es_final[gbm_modelo2_es_final$n.trees == 100, ], aes(label = round(Accuracy, 3)), show.legend = FALSE) +
+  ggtitle("Evolucion Modelo 2 (Early Stopping)") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
 
 # Nuevamente, nos encontramos que con 100 iteraciones parece una buena alternativa
 
@@ -253,39 +285,26 @@ tuneo_gradient_boosting_modelo2_10_rep <- tuneo_gradient_boosting(
   path.2 = ""
 )
 
-tuneo_modelo1 <- rbind(tuneo_gradient_boosting_modelo1, tuneo_gradient_boosting_modelo1_10rep)
-tuneo_modelo1$rep <- c(rep("5", 10), rep("10", 20))
+tuneo_modelos1_2      <- rbind(tuneo_gradient_boosting_modelo1_10rep, tuneo_gradient_boosting_modelo2_10_rep)
+tuneo_modelos1_2$repe <- c(rep("Modelo 1", 20), rep("Modelo 2", 20))
 
-tuneo_modelo2 <- rbind(tuneo_gradient_boosting_modelo2, tuneo_gradient_boosting_modelo2_10_rep)
-tuneo_modelo2$rep <- c(rep("5", 10), rep("10", 20))
-
-tuneo_modelo1$modelo <- with(tuneo_modelo1, reorder(modelo,tasa, mean))
-ggplot(tuneo_modelo1, aes(x = modelo, y = tasa, col = rep)) +
+tuneo_modelos1_2$modelo <- with(tuneo_modelos1_2, reorder(modelo,tasa, mean))
+p <- ggplot(tuneo_modelos1_2, aes(x = modelo, y = tasa, col = repe)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
+  ggtitle("Tasa de fallos por modelo") + theme(
+    text = element_text(size=14, face = "bold")
+  )
 ggsave("./charts/gradient_boosting/modelo1/05_tasa_fallos_modelo1_10rep.png")
 
-tuneo_modelo1$modelo <- with(tuneo_modelo1, reorder(modelo,auc, mean))
-ggplot(tuneo_modelo1, aes(x = modelo, y = auc, col = rep)) +
+tuneo_modelos1_2$modelo <- with(tuneo_modelos1_2, reorder(modelo,auc, mean))
+t <- ggplot(tuneo_modelos1_2, aes(x = modelo, y = auc, col = repe)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
+  ggtitle("AUC por modelo") + theme(
+    text = element_text(size=14, face = "bold")
+  )
 ggsave("./charts/gradient_boosting/modelo1/05_auc_modelo1_10rep.png")
-
-tuneo_modelo2$modelo <- with(tuneo_modelo2, reorder(modelo,tasa, mean))
-ggplot(tuneo_modelo2, aes(x = modelo, y = tasa, col = rep)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
-ggsave("./charts/gradient_boosting/modelo2/05_tasa_fallos_modelo2_10rep.png")
-
-tuneo_modelo2$modelo <- with(tuneo_modelo2, reorder(modelo,auc, mean))
-ggplot(tuneo_modelo2, aes(x = modelo, y = auc, col = rep)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
-ggsave("./charts/gradient_boosting/modelo2/05_auc_modelo2_10rep.png")
 
 # Podemos comprobar como la diferencia entre bag.fraction 0.5 y 1 es practicamente nula, por lo que nos decantamos por bag.fraction = 0.5
 
@@ -337,20 +356,26 @@ modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("B
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
-
+p <- ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
+            geom_boxplot(alpha = 0.7) +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("Tasa de fallos por modelo") + theme(
+              text = element_text(size=11, face = "bold"),
+              axis.text.x = element_text(vjust = 0.5, angle = 45)
+            )
+p
 ggsave('./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
-
+t <- ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
+            geom_boxplot(alpha = 0.7) +
+            scale_x_discrete(name = "Modelo") +
+            ggtitle("AUC por modelo") + theme(
+              text = element_text(size=11, face = "bold"),
+              axis.text.x = element_text(vjust = 0.5, angle = 45)
+            )
+t
 ggsave('./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc.jpeg')
 
 #---- Estadisticas
