@@ -78,32 +78,6 @@ xgbm_4 <- train(as.formula(paste0(target,"~",paste0(var_modelo2, collapse = "+")
 
 #-- Estudio del Early Stopping
 #   Modelo 1 y Modelo 2
-xgbm_2_salida <- as.data.frame(xgbm_2$results)
-
-xgbm_2_salida$eta     <- as.factor(xgbm_2_salida$eta)
-xgbm_2_salida$nrounds <- as.factor(xgbm_2_salida$nrounds)
-xgbm_2_salida$min_child_weight <- as.factor(xgbm_2_salida$min_child_weight)
-
-ggplot(xgbm_2_salida, aes(x = factor(eta), y = Accuracy, colour = factor(nrounds))) +
-       geom_point() + geom_line() +
-       facet_grid( . ~ min_child_weight, labeller = label_both) +
-       theme_bw()  +
-       theme(
-         legend.position = 'top',
-         text = element_text(size=16, face = "bold")
-       )
-
-ggplot(modelo1_results, aes(x = shrinkage, y = Accuracy, colour = n.trees)) +
-  geom_point() + geom_line() +
-  facet_grid( . ~ n.minobsinnode, labeller = label_both)+
-  labs(colour = 'Boosting Interactions') +
-  ggtitle('Gradient Boosting Hyperparameters Tunning (Modelo 1)')+
-  theme_bw() +
-  theme(
-    legend.position = 'top',
-    text = element_text(size=16, face = "bold")
-  )
-
 gbm_modelos_early_stopping <- rbind(xgbm_3$results, xgbm_4$results)
 gbm_modelos_early_stopping$eta <- as.factor(gbm_modelos_early_stopping$eta)
 gbm_modelos_early_stopping$Modelo <- c(rep("Modelo 1", 20), rep("Modelo 2", 20))
@@ -117,12 +91,20 @@ gbm_modelos_early_stopping %>% filter(Modelo == "Modelo 1") %>%
   ggtitle("Evolucion Accuracy Modelo 1 (Early Stopping)")
 
 #   Modelo 2
-gbm_modelos_early_stopping %>% filter(Modelo == "Modelo 2") %>% 
-  ggplot(aes(x = nrounds, y = Accuracy, label = nrounds,
-             group = eta, col = eta)) + 
+gbm_modelos_early_stopping[gbm_modelos_early_stopping$eta == 0.1 & gbm_modelos_early_stopping$nrounds >= 100, ] %>% filter(Modelo == "Modelo 2") %>% 
+  ggplot(aes(x = factor(nrounds), y = Accuracy)) + 
   geom_point() +
   geom_line() +
   ggtitle("Evolucion Accuracy Modelo 2 (Early Stopping)")
+
+gbm_modelos_early_stopping[gbm_modelos_early_stopping$eta == 0.1 & gbm_modelos_early_stopping$nrounds >= 100, ] %>% filter(Modelo == "Modelo 2") %>% ggplot(aes(x = factor(nrounds), y = Accuracy, label = factor(nrounds),
+                                                                           group = eta, col = eta)) + 
+  geom_point() +
+  geom_line() + geom_label(data = gbm_modelos_early_stopping[gbm_modelos_early_stopping$eta == 0.1 & gbm_modelos_early_stopping$nrounds == 100, ]  %>% filter(Modelo == "Modelo 2"), aes(label = round(Accuracy, 3)), show.legend = FALSE) +
+  ggtitle("Evolucion XGboost (Early Stopping)") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
 
 #  En general, en ambos modelos se obtiene un buen accuracy con 100 iteraciones y un valor eta = 0.1
 
@@ -143,9 +125,8 @@ gbm_modelos_max_depth     <- rbind(xgbm_5$results, xgbm_6$results)
 gbm_modelos_max_depth$max_depth <- as.factor(gbm_modelos_max_depth$eta)
 gbm_modelos_max_depth$Modelo    <- c(rep("Modelo 1", 6), rep("Modelo 2", 6))
 
-gbm_modelos_max_depth %>% 
-  ggplot(aes(x = max_depth, y = Accuracy, label = nrounds,
-             group = Modelo, col = Modelo)) + 
+gbm_modelos_max_depth[gbm_modelos_max_depth$Modelo == "Modelo 1", ] %>% 
+  ggplot(aes(x = max_depth, y = Accuracy, label = nrounds)) + 
   geom_point() +
   geom_line() +
   ggtitle("Evolucion Accuracy Modelos 1 y 2 (max_depth)")
@@ -221,10 +202,23 @@ ggplot(tuneo_modelo1, aes(x = modelo, y = tasa, col = rep)) +
 ggsave("./charts/xgboost/tasa_fallos_modelo1_05_10_rep.png")
 
 tuneo_modelo2$modelo <- with(tuneo_modelo2, reorder(modelo,auc, mean))
-ggplot(tuneo_modelo2, aes(x = modelo, y = auc, col = rep)) +
+p <- ggplot(tuneo_modelo2, aes(x = modelo, y = auc, col = rep)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
+  ggtitle("AUC por subsample") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
+
+tuneo_modelo2$modelo <- with(tuneo_modelo2, reorder(modelo,tasa, mean))
+q <- ggplot(tuneo_modelo2, aes(x = modelo, y = tasa, col = rep)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("Tasa de fallos por subsample") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
+
 ggsave("./charts/xgboost/auc_modelo2_05_10_rep.png")
 
 # Entre 0.5 y 1 no existe una diferencia muy significativa, por lo que nos decantamos por
@@ -239,7 +233,7 @@ control <- trainControl(method = "repeatedcv",number=5,repeats=10,
                         savePredictions = "all",classProbs=TRUE)
 
 xgbmgrid <- expand.grid(min_child_weight=20,eta=0.1, nrounds=100,
-                        max_depth=6,gamma=0,colsample_bytree=1,subsample=0.5)
+                        max_depth=6,gamma=0,colsample_bytree=1,subsample=1)
 
 # Modelo 1
 set.seed(1234)
@@ -269,15 +263,15 @@ modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx",
                                              sheet = "xgboost"))
 modelos_actuales$tasa <- as.numeric(modelos_actuales$tasa)
 modelos_actuales$auc <- as.numeric(modelos_actuales$auc)
-modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20), rep("BAGGING", 20), rep("RANDOM FOREST", 20),
-                           rep("GBM", 20), rep("SVM", 60), rep("XGBOOST", 20))
+modelos_actuales$tipo <- c(rep("LOGISTICA", 10), rep("RED NEURONAL", 10), rep("BAGGING", 10), rep("RANDOM FOREST", 10),
+                           rep("GBM", 10), rep("SVM", 30), rep("XGBOOST", 10))
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
 ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo") + theme(axis.text.x = element_text(angle = 45))
+  ggtitle("Tasa de fallos por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=14, face = "bold"))
 
 ggsave('./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg')
 
@@ -287,7 +281,7 @@ modelos_actuales$modelo <- with(modelos_actuales,
 ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo") + theme(axis.text.x = element_text(angle = 45))
+  ggtitle("AUC por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=14, face = "bold"))
 
 ggsave('./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg')
 
@@ -311,4 +305,38 @@ stopCluster(cluster)
 
 #---- Guardamos el fichero RData
 save.image(file = "./rdata/XGboost.RData")
+
+aux <- data.frame()
+for (max_depth in c(1,3,6,10,15,20)) {
+  salida <- cruzadaxgbmbin(data=surgical_dataset, vardep=target,
+                           listconti=var_modelo2,
+                           listclass=c(""),
+                           grupos=5,sinicio=1234,repe=5,nrounds=100,eta=0.01,
+                           min_child_weight=20,gamma=0,colsample_bytree=1,subsample=1,max_depth=max_depth)
+  salida$max_depth <- rep(max_depth, 5)
+  aux <- rbind(aux, salida)
+}
+
+aux$modelo <- with(aux, reorder(max_depth,tasa, mean))
+p <- ggplot(aux, aes(x = factor(max_depth), y = tasa)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("Tasa de fallos por max_depth") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
+
+
+aux$modelo <- with(aux, reorder(max_depth,auc, mean))
+q <- ggplot(aux, aes(x = factor(max_depth), y = auc)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("AUC por max_depth") +
+  theme(
+    text = element_text(size=14, face = "bold")
+  )
+
+
+
+
 

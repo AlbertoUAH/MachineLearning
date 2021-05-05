@@ -3183,6 +3183,37 @@ Dado que la diferencia entre \emph{C} = 1 y \emph{C} = 0.5 no es muy
 relevante (aunque \emph{caret} recomiende 1), resulta indiferente
 escoger uno de ellos (por ejemplo, escogemos 0.5).
 
+\textbf{RESUMEN \emph{SVM Lineal}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelos 1 y 2: \emph{C} = 0.01.
+\end{enumerate}
+
+\textbf{RESUMEN \emph{SVM Polinomial}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelo 1: \emph{C} = 0.01 ; \emph{scale} = 0.1.
+\item
+  modelo 2: \emph{C} = 0.5 ; \emph{scale} = 1.
+\end{enumerate}
+
+\textbf{RESUMEN \emph{SVM RBF}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  modelo 1: \emph{C} = 0.5 ; \emph{sigma} = 5.
+\item
+  modelo 2: \emph{C} = 0.5 ; \emph{sigma} = 5.
+\end{enumerate}
+
 \hypertarget{comparaciuxf3n-modelos-svm}{%
 \subsection{10.4 Comparación modelos
 SVM}\label{comparaciuxf3n-modelos-svm}}
@@ -3279,5 +3310,226 @@ porcentajes inferiores con respecto a los modelos basados en árbol o
 
 \caption{Comparacion AUC log-avnnet-bagging-rf-gbm-svm}\label{fig:unnamed-chunk-129}
 \end{figure}
+
+Antes de continuar con \emph{XGboost} y Ensamblado, debemos detenernos a
+analizar si realmente es necesario continuar con ambos \emph{sets} de
+variables o no. A lo largo de la práctica (logística, redes, modelos
+basados en árbol, \emph{boosting}, svm) se ha podido comprobar que la
+diferencia entre ambos candidatos, por tan solo una variable
+\emph{input}, no ha sido especialmente relevante, pese a lo observado en
+la regresión logística donde si existía cierta diferencia entre ambos.
+
+Por tanto, de cara a \emph{XGboost} pero especialmente a los modelos de
+Ensamblado \textbf{continuaremos con únicamente con el segundo
+\emph{set} de variables \emph{input} (4 variables), a excepción del
+modelo \emph{svm} lineal, donde utilizaremos el modelo obtenido con el
+primer \emph{set}}.
+
+\hypertarget{xgboost}{%
+\section{11. XGboost}\label{xgboost}}
+
+\hypertarget{tuneo-de-hiperparuxe1metros}{%
+\subsection{11.1 Tuneo de
+hiperparámetros}\label{tuneo-de-hiperparuxe1metros}}
+
+En primer lugar, debemos recordar los parámetros a tunear en un modelo
+\emph{XGboost}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{min\_child\_weight}: número de observaciones mínimas en el nodo
+  final. Similar a \emph{n.minobsinnnode} de \emph{gbm}.
+\item
+  \emph{eta}: parámetro de regularización.
+\item
+  \emph{rounds}: número de iteraciones.
+\item
+  \emph{max\_depth}: profundidad máxima de los árboles.
+\item
+  \emph{gamma}: constante de regularización (lo mantenemos a 0).
+\item
+  \emph{colsample\_bytree}: porcentaje de sorteo de variables en cada
+  árbol (lo mantenemos a 1).
+\item
+  \emph{subsample}: sorteo de observaciones antes de cada árbol (lo
+  mantenemos a 1).
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{xgbmgrid <{-}}\StringTok{ }\KeywordTok{expand.grid}\NormalTok{(}\DataTypeTok{min\_child\_weight=}\KeywordTok{c}\NormalTok{(}\DecValTok{5}\NormalTok{,}\DecValTok{10}\NormalTok{,}\DecValTok{20}\NormalTok{),}
+                        \DataTypeTok{eta=}\KeywordTok{c}\NormalTok{(}\FloatTok{0.1}\NormalTok{,}\FloatTok{0.05}\NormalTok{,}\FloatTok{0.03}\NormalTok{,}\FloatTok{0.01}\NormalTok{,}\FloatTok{0.001}\NormalTok{), }
+                        \DataTypeTok{nrounds=}\KeywordTok{c}\NormalTok{(}\DecValTok{100}\NormalTok{,}\DecValTok{500}\NormalTok{,}\DecValTok{1000}\NormalTok{,}\DecValTok{5000}\NormalTok{),}
+                        \DataTypeTok{max\_depth=}\DecValTok{6}\NormalTok{,}\DataTypeTok{gamma=}\DecValTok{0}\NormalTok{,}
+                        \DataTypeTok{colsample\_bytree=}\DecValTok{1}\NormalTok{,}\DataTypeTok{subsample=}\DecValTok{1}\NormalTok{)}
+
+\CommentTok{\#{-}{-} Probamos al comienzo con 5 repeticiones}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1234}\NormalTok{)}
+\NormalTok{control<{-}}\KeywordTok{trainControl}\NormalTok{(}\DataTypeTok{method =} \StringTok{"repeatedcv"}\NormalTok{,}\DataTypeTok{number=}\DecValTok{5}\NormalTok{,}\DataTypeTok{repeats =} \DecValTok{5}\NormalTok{,}
+                      \DataTypeTok{savePredictions =} \StringTok{"all"}\NormalTok{,}\DataTypeTok{classProbs=}\OtherTok{TRUE}\NormalTok{)}
+
+\NormalTok{xgbm\_ <{-}}\StringTok{ }\KeywordTok{train}\NormalTok{(formula\_modelo2,}\DataTypeTok{data=}\NormalTok{surgical\_dataset,}
+               \DataTypeTok{method=}\StringTok{"xgbTree"}\NormalTok{,}\DataTypeTok{trControl=}\NormalTok{control,}
+               \DataTypeTok{tuneGrid=}\NormalTok{xgbmgrid,}\DataTypeTok{verbose=}\OtherTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/xgboost/tuneo_xgboost_modelo2} 
+
+}
+
+\caption{Tuneo hiperparámetros XGboost}\label{fig:unnamed-chunk-131}
+\end{figure}
+
+De los gráficos anteriores, \textbf{se deduce que se debe tomar un valor
+\emph{eta} alto (en torno a 0.1) y pocas iteraciones, alrededor de 100}.
+Además, si nos fijamos en la escala de los ejes, \textbf{no existe
+demasiada diference entre un valor \emph{min\_child\_weight} bajo (5) y
+alto (20)}, tan solo de apenas unas décimas (0.90 y 0.89,
+respectivamente). Por tanto, escogemos un valor de 20 al ser las
+diferencias tan pequeñas, permitiendo con ello modelos más simples y con
+menos sobreajuste.
+
+\hypertarget{estudio-early-stopping}{%
+\subsection{\texorpdfstring{11.2 Estudio \emph{Early
+Stopping}}{11.2 Estudio Early Stopping}}\label{estudio-early-stopping}}
+
+A continuación, probamos a fijar algunos parámetros para analizar cómo
+evoluciona el modelo en función del número de iteraciones:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/xgboost/early_stopping} 
+
+}
+
+\caption{Evolucion Early Stopping XGboost}\label{fig:unnamed-chunk-132}
+\end{figure}
+
+Como podemos comprobar en el gráfico anterior, 100 iteraciones es un
+valor óptimo, en términos generales.
+
+\hypertarget{tuneo-max_depth}{%
+\subsection{\texorpdfstring{11.3 Tuneo
+\emph{max\_depth}}{11.3 Tuneo max\_depth}}\label{tuneo-max_depth}}
+
+Hasta el momento, se ha considerado una profundidad máxima de 6 en cada
+árbol del modelo. No obstante, \textbf{analicemos la evolución del
+modelo, tanto en sesgo como en varianza, al variar dicho parámetro}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Tuneamos max\_depth (minimo 1, maximo 20)}
+\NormalTok{xgbm\_mo <{-}}\StringTok{ }\KeywordTok{cruzadaxgbmbin}\NormalTok{(}\DataTypeTok{data=}\NormalTok{surgical\_dataset, }\DataTypeTok{vardep=}\NormalTok{target,}
+                            \DataTypeTok{listconti=}\NormalTok{var\_modelo2, }\DataTypeTok{listclass=}\KeywordTok{c}\NormalTok{(}\StringTok{""}\NormalTok{), }
+                            \DataTypeTok{grupos=}\DecValTok{5}\NormalTok{,}\DataTypeTok{sinicio=}\DecValTok{1234}\NormalTok{,}\DataTypeTok{repe=}\DecValTok{5}\NormalTok{,}
+                            \DataTypeTok{nrounds=}\DecValTok{100}\NormalTok{,}\DataTypeTok{eta=}\FloatTok{0.01}\NormalTok{,}\DataTypeTok{min\_child\_weight=}\DecValTok{20}\NormalTok{,}
+                            \DataTypeTok{gamma=}\DecValTok{0}\NormalTok{,}\DataTypeTok{colsample\_bytree=}\DecValTok{1}\NormalTok{,}\DataTypeTok{subsample=}\DecValTok{1}\NormalTok{,}
+                            \DataTypeTok{max\_depth=}\KeywordTok{c}\NormalTok{(}\DecValTok{1}\NormalTok{,}\DecValTok{3}\NormalTok{,}\DecValTok{6}\NormalTok{,}\DecValTok{10}\NormalTok{,}\DecValTok{15}\NormalTok{,}\DecValTok{20}\NormalTok{)}
+\NormalTok{                        )}
+\end{Highlighting}
+\end{Shaded}
+
+\textbackslash begin\{figure\}{[}h!{]}
+
+\{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/xgboost/max_depth}
+
+\}
+
+\textbackslash caption\{Tasa de fallos y AUC en función de
+max\_depth\}\label{fig:unnamed-chunk-134} \textbackslash end\{figure\}
+
+Analizando los resultados, \textbf{una profundidad máxima de 6 parece
+ser una buena opción, ya que a partir de dicho valor tanto el sesgo como
+el AUC se estabilizan}.
+
+\hypertarget{tuneo-subsample}{%
+\subsection{\texorpdfstring{11.4 Tuneo
+\emph{subsample}}{11.4 Tuneo subsample}}\label{tuneo-subsample}}
+
+Como último parámetro a tunear, probamos con el parámetro
+\emph{subsample} con el que sortear el número de observaciones,
+especialmente para comprobar cómo afecta a la varianza, más que al
+sesog. Concretamente, y del mismo modo que lo realizado con
+\emph{gradient boosting}, \textbf{probaremos sorteando el 50 \% de las
+observaciones}:
+
+\textbf{Nota}: para observar mejor el efecto del sorteo de
+observaciones, probamos tanto con 5 como 10 repeticiones.
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/xgboost/subsample} 
+
+}
+
+\caption{Tasa de fallos y AUC en función de subsample}\label{fig:unnamed-chunk-135}
+\end{figure}
+
+En términos de varianza, al ser datos tan secillos no se observa mejora
+alguna. No obstante, \textbf{no hay demasiada diferencia entre sortear
+el 100 \% de las observaciones y tan solo la mitad}. Por tanto,
+mantenemos el parámetro \emph{subsample} a 1 (valor por defecto en
+muchos paquetes \emph{XGboost}).
+
+\textbf{RESUMEN \emph{XGboost}}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{nrounds} = 100
+\item
+  \emph{eta} = 0.01
+\item
+  \emph{min\_child\_weight} = 20
+\item
+  \emph{colsample\_bytree} = 1,
+\item
+  \emph{subsample} = 1
+\item
+  \emph{max\_depth} = 6
+\end{enumerate}
+
+\hypertarget{comparaciuxf3n-final-4}{%
+\subsection{11.5 Comparación final}\label{comparaciuxf3n-final-4}}
+
+Una vez elaborado el modelo, realizamos una primera predicción con los
+datos \emph{test}:
+
+\begin{verbatim}
+##             modelo precision sensibilidad especificidad valor_pred_pos
+## 1 Modelo 2 (top 4)    0.9091       0.9333        0.9037          0.684
+##   valor_pred_neg
+## 1         0.9838
+\end{verbatim}
+
+Del mismo modo, \textbf{se mantiene en la ``linea'' de lo obtenido de
+otros modelos no lineales como \emph{random forest}, \emph{bagging} o
+\emph{gradient boosting}} (aunque si mejora los resultados con respecto
+a la \emph{svm} radial).
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa} 
+
+}
+
+\caption{Comparacion tasa fallos log-avnnet-bagging-rf-gbm-svm-xgboost}\label{fig:unnamed-chunk-137}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc} 
+
+}
+
+\caption{Comparacion AUC log-avnnet-bagging-rf-gbm-svm-xgboost}\label{fig:unnamed-chunk-138}
+\end{figure}
+
+\hypertarget{ensamblado}{%
+\section{12. Ensamblado}\label{ensamblado}}
 
 \end{document}

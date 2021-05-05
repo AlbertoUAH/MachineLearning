@@ -1620,6 +1620,20 @@ Modelo 2: C = 1   ; sigma = 5 ; Accuracy: 0.8726666
 
 Dado que la diferencia entre _C_ = 1 y _C_ = 0.5 no es muy relevante (aunque _caret_ recomiende 1), resulta indiferente escoger uno de ellos (por ejemplo, escogemos 0.5).
 
+__RESUMEN _SVM Lineal___:
+
+1. modelos 1 y 2: _C_ = 0.01.
+
+__RESUMEN _SVM Polinomial___:
+
+1. modelo 1: _C_ = 0.01 ; _scale_ = 0.1.
+2. modelo 2: _C_ = 0.5  ; _scale_ = 1.
+
+__RESUMEN _SVM RBF___:
+
+1. modelo 1: _C_ = 0.5  ; _sigma_ = 5.
+2. modelo 2: _C_ = 0.5  ; _sigma_ = 5.
+
 ## 10.4 Comparación modelos SVM
 
 Una vez elaborados los modelos, __empleando validación cruzada repetida de 5 grupos y 10 repeticiones, analizamos tanto la tasa de fallos como el AUC (en ambos _sets_ de variables)__:
@@ -1726,6 +1740,75 @@ A continuación, probamos a fijar algunos parámetros para analizar cómo evoluc
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Evolucion Early Stopping XGboost", echo=FALSE}
 knitr::include_graphics("./charts/xgboost/early_stopping.png")
 ```
+
+Como podemos comprobar en el gráfico anterior, 100 iteraciones es un valor óptimo, en términos generales.
+
+## 11.3 Tuneo _max_depth_
+
+Hasta el momento, se ha considerado una profundidad máxima de 6 en cada árbol del modelo. No obstante, __analicemos la evolución del modelo, tanto en sesgo como en varianza, al variar dicho parámetro__:
+
+```{r, eval=FALSE}
+#-- Tuneamos max_depth (minimo 1, maximo 20)
+xgbm_mo <- cruzadaxgbmbin(data=surgical_dataset, vardep=target,
+                            listconti=var_modelo2, listclass=c(""), 
+                            grupos=5,sinicio=1234,repe=5,
+                            nrounds=100,eta=0.01,min_child_weight=20,
+                            gamma=0,colsample_bytree=1,subsample=1,
+                            max_depth=c(1,3,6,10,15,20)
+                        )
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en función de max_depth", echo=FALSE}
+knitr::include_graphics("./charts/xgboost/max_depth.png")
+```
+
+Analizando los resultados, __una profundidad máxima de 6 parece ser una buena opción, ya que a partir de dicho valor tanto el sesgo como el AUC se estabilizan__.
+
+## 11.4 Tuneo _subsample_
+
+Como último parámetro a tunear, probamos con el parámetro _subsample_ con el que sortear el número de observaciones, especialmente para comprobar cómo afecta a la varianza, más que al sesog. Concretamente, y del mismo modo que lo realizado con _gradient boosting_, __probaremos sorteando el 50 % de las observaciones__:
+
+__Nota__: para observar mejor el efecto del sorteo de observaciones, probamos tanto con 5 como 10 repeticiones.
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en función de subsample", echo=FALSE}
+knitr::include_graphics("./charts/xgboost/subsample.png")
+```
+
+En términos de varianza, al ser datos tan secillos no se observa mejora alguna. No obstante, __no hay demasiada diferencia entre sortear el 100 % de las observaciones y tan solo la mitad__. Por tanto, mantenemos el parámetro _subsample_ a 1 (valor por defecto en muchos paquetes _XGboost_).
+
+__RESUMEN _XGboost___:
+
+1. _nrounds_ = 100
+2. _eta_ = 0.01
+3. _min_child_weight_ = 20
+4. _colsample_bytree_ = 1,
+5. _subsample_ = 1
+6. _max_depth_ = 6
+
+## 11.5 Comparación final
+
+Una vez elaborado el modelo, realizamos una primera predicción con los datos _test_:
+
+```{r, echo=FALSE}
+data.frame(modelo = c("Modelo 2 (top 4)"),
+           precision = c(0.9091),
+           sensibilidad = c(0.9333), especificidad = c(0.9037),
+           valor_pred_pos = c(0.6840), valor_pred_neg = c(0.9838))
+```
+
+Del mismo modo, __se mantiene en la "linea" de lo obtenido de otros modelos no lineales como _random forest_, _bagging_ o _gradient boosting___ (aunque si mejora los resultados con respecto a la _svm_ radial).
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf-gbm-svm-xgboost", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC log-avnnet-bagging-rf-gbm-svm-xgboost", echo=FALSE}
+knitr::include_graphics("./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg")
+```
+
+# 12. Ensamblado
+
+
+
 
 
 
