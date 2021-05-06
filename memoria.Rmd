@@ -4,12 +4,14 @@ author: "Fernández Hernández, Alberto"
 date: "4/28/2021"
 header-includes:
   - \usepackage[font={small}]{caption}
+  - \usepackage[document]{ragged2e}
+
 output:
   pdf_document: 
     fig_cap: yes
     keep_tex: yes
 ---
-
+\justify
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(fig.pos = "h!", out.extra = '')
 knitr::opts_chunk$set(echo = TRUE)
@@ -1758,7 +1760,7 @@ xgbm_mo <- cruzadaxgbmbin(data=surgical_dataset, vardep=target,
                         )
 ```
 
-```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en función de max_depth", echo=FALSE}
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Tasa de fallos y AUC en función de max depth", echo=FALSE}
 knitr::include_graphics("./charts/xgboost/max_depth.png")
 ```
 
@@ -1779,7 +1781,7 @@ En términos de varianza, al ser datos tan secillos no se observa mejora alguna.
 __RESUMEN _XGboost___:
 
 1. _nrounds_ = 100
-2. _eta_ = 0.01
+2. _eta_ = 0.1
 3. _min_child_weight_ = 20
 4. _colsample_bytree_ = 1,
 5. _subsample_ = 1
@@ -1807,8 +1809,196 @@ knitr::include_graphics("./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_
 
 # 12. Ensamblado
 
+## 12.1 Correlación entre los modelos
+
+Inicialmente, de forma previa al ensamblado __analicemos la correlación entre cada uno de los modelos__, entrenados mediante validación cruzada repetida del mismo modo que lo hecho hasta el momento (5 grupos y 10 repeticiones):
+
+```{r, eval=FALSE}
+#-- Correlacion entre los diferentes modelos
+mat <- unigraf[,modelos] 
+matrizcorr <- cor(mat)
+corrplot(matrizcorr, method="color",
+         type="upper", order="hclust", 
+         addCoef.col = "black",
+         tl.col="black", tl.srt=45,
+         p.mat = matrizcorr, sig.level = 0.99,
+         diag=FALSE
+)
+```
+
+```{r, out.width="100%", out.height="100%", fig.align="center", fig.cap="Correlación entre modelos", echo=FALSE}
+knitr::include_graphics("./charts/ensamb_corr.png")
+```
+
+Podemos comprobar cómo las diferentes familias tienen alta correlación entre sí, detectando dos grandes grupos de alta correlación:
+
+1. __Modelos no lineales basados en árbol, como _bagging_ o _random forest_, junto con los modelos basados en _boosting_ como _gbm_ y _xgboost_, así como la red y el _svm_ con _kernel_ radial__. En ninguno de los casos la correlación disminuye de 0.8.
+
+2. __El modelo logístico y las _svm_ con _kernel_ lineal y polinomial__. En cualquiera de los casos, la correlación no disminye de 0.6.
+
+Como era de esperar, se encuentra generalmente una alta correlación entre modelos no lineales y lineales por separado. Por tanto, ¿Cómo influye de cara al ensamblado? Por lo general, cuanto menor sea la correlación entre los clasificadores, más se reducirá el sesgo en los nuevos ensamblados, o en el peor de los casos se mantendrá o no subirá demasiado. 
+
+## 12.2  Ensamblado con dos clasificadores
+
+Por tanto, el objetivo será unir clasificadores que presenten un sesgo lo suficientemente bajo y similar, con poca correlación entre ellos. De hecho, en base al gráfico anterior, existen varias alternativas, uniendo principalmente modelos lineales y no lineales entre sí:
+
+1. _svm_ lineal, polinomial o logística con _Random forest_, _bagging_, _gradient boosting_, _Xgboost_, _avnnet_ e incluso _svm_ con _kernel_ radial, __modelos cuya correlación es moderada, en torno a 0.5-0.6, aproximadamente__.
+
+Sin embargo, que el sesgo mejore o no es algo que __no se puede conocer _a priori_, por lo que es necesario realizar pruebas empíricas__. Como consecuencia, __realizamos una primera aproximación, comezando con un ensamblado entre dos modelos, realizando todas las posibles combinaciones entre sí (mediante el promedio de resultados)__:
+
+```{r, eval=FALSE}
+nipredi[, paste0("en-", i)] <- (unipredi[, modelo] + unipredi[, modelo_aux]) / 2
+```
+
+Además, dado que la regresión logística no obtuvo buenos resultados, remarcamos con un color diferente cualquier ensamblado en el que intervenga dicho modelo, observando con ello si mejora o no:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos modelos + ensamblado", echo=FALSE}
+knitr::include_graphics("./charts/ensamblado_tasa_fallos_1.png")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC modelos + ensamblado", echo=FALSE}
+knitr::include_graphics("./charts/ensamblado_auc_1.png")
+```
+
+En primer lugar, cabe destacar que en conjunto con otros modelos, __la regresión logística mejora tanto en tasa de fallos como en AUC__:
+
+1. _en-8_: logística + _svm_ polinomial
+
+2. _en-1_: logística + _avnnet_
+
+3. _en-4_: logística + _gbm_
+
+4. _en-3_: logística + _Random Forest_
+
+5. _en-2_: logística + _bagging_
+
+6. _en-5_: logística + _Xgboost_
+
+Con ellos, la tasa de fallos se reduce por debajo de 0.20 y el AUC aumenta hasta 0.85. Sin embargo, pese a su mejoría contínua siendo preferible modelos originales como _random forest_, _bagging_ o _gbm_, dado al juntarlo con un modelo con peores resultados (como es el caso de la logística), provocan que el resultado mejore aunque sigue siendo preferible los modelos originales.
+
+Por otro lado, debemos destacar los mejores modelos de ensamblado, tanto en tasa de fallos como en AUC:
+
+1. Con menor tasa de fallos:
+  * _en-11_: _avnnet_ + _gbm_
+  * _en-12_: _avnnet_ + _Xgboost_
+  * _en-27_: _gbm_ + _Xgboost_
+  
+2. Con mayor AUC:
+  * _en-23_: _Random Forest_ + _Xgboost_
+  * _en-18_: _bagging_ + _Xgboost_
+  * _en-16_: _bagging_ + _Random Forest_
+  
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos  y AUC modelos + ensamblado (II)", echo=FALSE}
+knitr::include_graphics("./charts/mejores_ensamblados_2modelos.png")
+```
+  
+__Llama la atención como, tanto en tasa de fallos como en AUC, los mejores ensamblados corresponden con modelos similares (estadísticamente), pero con alta correlación entre si, consiguiendo mejorar sus correspondientes tasas de fallos y AUC, aunque muy ligeramente__, dada la escala de los ejes. Por ejemplo, uniendo _avnnet_ y _gbm_ (en-11) solo conseguimos mejorar la tasas de fallos en 0.005 (lo cual incluso puede ser debido a la estructura de remuestreo). Por otro lado, modelos como _bagging_ + _XGboost_ apenas mejoran el AUC (en torno a milésimas).
+
+De hecho, ¿Qué sucede con el resto de ensamblados con poca correlación? Si filtramos del gráfico anterior, descartando ensamblados con modelos de alta correlación (> 0.8):
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos modelos + ensamblado (III)", echo=FALSE}
+knitr::include_graphics("./charts/ensamblado_tasa_fallos_1_corr08.png")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC modelos + ensamblado (III)", echo=FALSE}
+knitr::include_graphics("./charts/ensamblado_auc_1_corr08.png")
+```
+
+En cualquiera de los casos obtenidos, sigue siendo preferible los modelos originales. Esto es debido a que el _dataset_ obtiene mejores resultados con la misma familia de modelos, es decir, mientras que con modelos lineales como logística o _svm_ lineal apenas alcanzan el 77-78 % de _Accuracy_, con modelos no lineales como redes pero en especial árboles y _boosting_, la precisión llega a aumentar hasta rozar el 90 % de precisión. Por ello, __los únicos modelos con un sesgo especialmente bajo son justamente aquellos con alta correlación entre sí__, por lo que si juntamos un modelo lineal con otro no lineal (por ejemplo, _avnnet_ con logística), hará que el modelo mejore con respecto a la logística, pero seguirá siendo preferible un modelo no lineal.
+
+A simple vista, __uniendo dos clasificadores no se consigue mejorar significativamente los resultados del modelo__, en especial cuando los mejores modelos presentan una alta correlación entre sí, por lo que la mejoría es poco o nada apreciable.
+
+### 12.3 Ensamblado con tres clasificadores
+
+No obstante, podríamos probar a los mejores clasificadores en ensamblados de tres modelos, concretamente aquellos con alta correlación, es decir, _random forest_, _svm rbf_, _avnnet_, _gbm_ y _xgboost_ ( _bagging_ lo descartamos ya que con _random forest_ se obtienen prácticamente los mismo resultados ):
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos modelos + ensamblado (IV)", echo=FALSE}
+knitr::include_graphics("./charts/ensamblado_modelos3.png")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC modelos + ensamblado (IV)", echo=FALSE}
+knitr::include_graphics("./charts/ensamblado_modelos3_auc.png")
+```
+
+Pese a añadir tres clasificadores, __la mejora continua siendo insignificante__.
+
+### 12.4 Concluciones ensamblado
+
+A la vista de los resultados obtenidos, ¿Merece la pena aplicar ensamblado? La respuesta es no, principalmente por dos motivos:
+
+1. __Los modelos originales que obtienen mejores resultados corresponden con aquellos con alta correlación, esto es, modelos de árbol, red y _boosting___.
+
+2. __Incluso ensamblando dichos modelos, la mejoría es poco o nada relevante__.
+
+Por tanto, __está claro que los modelos no lineales con alta correlación son los algoritmos dominante para este conjunto de datos, por lo que no merece la pena el ensamblado__.
+
+# 13. Comparación con _h2o_
+
+Una vez elaborados todos los modelos, Es momento de preguntarnos ¿Se cumplen las espectativas obtenidas con _h2o_? Es decir, con _autoML_ obtuvimos inicialmente (como mejor modelo) _gradient boosting_ con los siguientes valores AUC:
+
+
+```{r, echo=FALSE}
+data.frame("modelo" = c("GBM_5_AutoML_set1_variables", "GBM_5_AutoML_set2_variables"),
+           "auc" = c(0.9211350, 0.9096419)
+)
+```
+
+Si los comparamos con el AUC de los mejores modelos obtenidos:
+
+```{r, echo=FALSE}
+data.frame("modelo" = c("bagging set 1", "bagging set 2", "Random Forest set 1", "Random Forest set 2", "gbm set 1", "gbm set 2"),
+           "auc_medio" = c(0.9144, 0.9049, 0.9144, 0.9038, 0.9043, 0.8954)
+)
+```
+
+En relación a _gradient boosting_, las diferencias son pequeñas entre ambos paquetes (de 0.92 a 0.90 con el primer _set_ y de 0.90 a 0.89 en el segundo), lo cual puede ser debido a la estructura del remuestreo o la optmización de los algoritmos en los diferentes paquetes. Por tanto, lo obtenido por _h2o_ __se aproxima a los resultados de _caret___. No obstante, también se han obtenido buenos resultados con diferentes modelos como es el caso de _random forest_ o _bagging_, cuyos valores AUC son prácticamente iguales.
+
+# 14. Probando con el _dataset_ completo
+
+A continuación, y utilizando únicamente el segundo _set_ de variables (salvo con el model _svm_ lineal, con el que empleamos el primer _set_), __probamos los mismos algoritmos "tuneados" con el conjunto de datos original, con el objetivo de comprobar si el orden entre algoritmos se conserva__:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos dataset original y subconjunto", echo=FALSE}
+knitr::include_graphics("./charts/comparacion_datasets_tasa_fallos.png")
+```
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC dataset original y subconjunto", echo=FALSE}
+knitr::include_graphics("./charts/comparacion_datasets_auc.png")
+```
+
+De forma general, __el orden de los modelos, tanto con el _dataset_ original como con el subconjunto utilizado durante la práctica, se conserva__, a excepción de la tasa de fallos, siendo _Xgboost_ el mejor modelo con el _dataset_ original, mientras que con el subconjunto la menor tasa se obtiene con _gbm_; aunque la diferencia no sea muy relevante entre ambos.
+
+# 15. Aumento del número de grupos y repeticiones
+
+Tras comprobar que el orden de los modelos se conserva con el conjunto original, nos queda una última prueba: con los mejores modelos ( _bagging_, _gbm_, _random forest_ y _XGboost_ ), __realizar una última comparación bajo un número alto y diferente de semillas y un número mayor de grupos de CV__. De este modo, lo que se pretende buscar es que el orden entre las "cajas" y la varianza de los modelos se mantenga similar a lo obtenido originalmente.
+
+Dado que durante la práctica se ha trabajo con 5 grupos y un máximo de 10 repeticiones, __aumentamos a 10 grupos y 20 repeticiones__, además de aumentar la semilla inicial a 123456:
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC y tasa de fallos con 5 y 10 grupos", echo=FALSE}
+knitr::include_graphics("./charts/comparacion_5_10_folds.png")
+```
+
+A la vista de los resultados, __tanto el orden como la varianza se mantiene más o menos similar al aumentar el número de grupos__, aunque en algunas "cajas" observemos una mayor varianza con 10 grupos, como es el caso de _Random Forest_ o _Bagging_ en AUC. No obstante, y dada la escala de los ejes, la diferencia de la varianza es muy pequeña, por lo que consideramos que se mantienen práctiamente idénticos.
+
+# 16. Variación del punto de corte
+
+Como última sección, con los mejores modelos obtenidos __analizaremos los valores especificidad-sensibilidad con el punto de corte actual (0.5), además de comprobar como varían dichos algoritmos bajo diferentes puntos__.
+
+En primer lugar, de todos los mejores modelos obtenidos, ¿Por cual o cuales nos decantamos? Echemos un vistazo al AUC y tasa de fallos de los cuatro más importantes: _gradient_boosting_, _bagging_, _Random Forest_ y _Xgboost_.
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparación modelos finales", echo=FALSE}
+knitr::include_graphics("./charts/modelos_finales.png")
+```
+
+De todos los modelos presentes, y dejándonos guiar por los gráficos, diríamos que el mejor en cuanto a AUC y tasa de fallos serían modelos basados en _boosting_ como _gbm_ y _XGboost_, pues no solo presentan bajas tasas de error, sino que además (y en especial con _XGboost_, un alto valor en el área bajo la curva).
+
+De nuevo, la escala del gráfico puede llevar a engaño, y es que la diferencia entre los modelos basados en árboles y _boosting_ es ínfima. A modo de ejemplo, entre la tasa de fallos de _gbm_ y un modelo _Random Forest_ es de tan solo 0.007. En relación a la variancia, sucede lo mismo: aunque _Random Forest_ aperente tener la mayor variabilidad en cuanto a tasa de fallos, lo cierto es que la escala del eje puede conducir a engaño, puesto que la amplitud es de apenas unas milésimas. 
+
+Por tanto, a la vista de los resultados, __no merece la pena emplear un modelo _boosting_ en lugar de _Random Forest__. Además, pese al mayor número de árboles que se han empleado (2000), una de las ventajas del modelo _Random Forest_, frente a _gbm_, _Xgboost_ o incluso _bagging_, __es el sorteo de variables y el menor tamaño de la submuestra__. De este modo, sorteando tan solo dos variables a lo largo de cada nivel del árbol (mtry = 2), así como tan solo 1000 observaciones para cada árbol (lo cual supone alrededor del 17 % del _sub-dataset_ empleado, menos del 50 % como es el caso de _gbm_), __los resultados obtenidos son muy similares, aún incluso con menos recursos__. 
+
+No obstante, podemos comparar las medidas básicas de cada modelo (sensibilidad, especificidad, valor predictivo positivo y negativo):
 
 
 
 
 
+En conclusión, __estudiamos el punto de corte con las predicciones de _Random Forest___.
+
+## 16.1 Medidas básicas (punto de corte = 0.5)
+
+En primer lugar, 

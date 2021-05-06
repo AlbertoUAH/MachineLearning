@@ -100,6 +100,7 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{-\maxdimen} % remove section numbering
 \usepackage[font={small}]{caption}
+\usepackage[document]{ragged2e}
 
 \title{Práctica Machine Learning}
 \author{Fernández Hernández, Alberto}
@@ -107,6 +108,8 @@
 
 \begin{document}
 \maketitle
+
+\justify
 
 \begin{verbatim}
                                          [IIIII]
@@ -3433,14 +3436,14 @@ modelo, tanto en sesgo como en varianza, al variar dicho parámetro}:
 \end{Highlighting}
 \end{Shaded}
 
-\textbackslash begin\{figure\}{[}h!{]}
+\begin{figure}[h!]
 
-\{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/xgboost/max_depth}
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/xgboost/max_depth} 
 
-\}
+}
 
-\textbackslash caption\{Tasa de fallos y AUC en función de
-max\_depth\}\label{fig:unnamed-chunk-134} \textbackslash end\{figure\}
+\caption{Tasa de fallos y AUC en función de max depth}\label{fig:unnamed-chunk-134}
+\end{figure}
 
 Analizando los resultados, \textbf{una profundidad máxima de 6 parece
 ser una buena opción, ya que a partir de dicho valor tanto el sesgo como
@@ -3483,7 +3486,7 @@ muchos paquetes \emph{XGboost}).
 \item
   \emph{nrounds} = 100
 \item
-  \emph{eta} = 0.01
+  \emph{eta} = 0.1
 \item
   \emph{min\_child\_weight} = 20
 \item
@@ -3531,5 +3534,432 @@ a la \emph{svm} radial).
 
 \hypertarget{ensamblado}{%
 \section{12. Ensamblado}\label{ensamblado}}
+
+\hypertarget{correlaciuxf3n-entre-los-modelos}{%
+\subsection{12.1 Correlación entre los
+modelos}\label{correlaciuxf3n-entre-los-modelos}}
+
+Inicialmente, de forma previa al ensamblado \textbf{analicemos la
+correlación entre cada uno de los modelos}, entrenados mediante
+validación cruzada repetida del mismo modo que lo hecho hasta el momento
+(5 grupos y 10 repeticiones):
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#{-}{-} Correlacion entre los diferentes modelos}
+\NormalTok{mat <{-}}\StringTok{ }\NormalTok{unigraf[,modelos] }
+\NormalTok{matrizcorr <{-}}\StringTok{ }\KeywordTok{cor}\NormalTok{(mat)}
+\KeywordTok{corrplot}\NormalTok{(matrizcorr, }\DataTypeTok{method=}\StringTok{"color"}\NormalTok{,}
+         \DataTypeTok{type=}\StringTok{"upper"}\NormalTok{, }\DataTypeTok{order=}\StringTok{"hclust"}\NormalTok{, }
+         \DataTypeTok{addCoef.col =} \StringTok{"black"}\NormalTok{,}
+         \DataTypeTok{tl.col=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{tl.srt=}\DecValTok{45}\NormalTok{,}
+         \DataTypeTok{p.mat =}\NormalTok{ matrizcorr, }\DataTypeTok{sig.level =} \FloatTok{0.99}\NormalTok{,}
+         \DataTypeTok{diag=}\OtherTok{FALSE}
+\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=1\linewidth,height=1\textheight,]{./charts/ensamb_corr} 
+
+}
+
+\caption{Correlación entre modelos}\label{fig:unnamed-chunk-140}
+\end{figure}
+
+Podemos comprobar cómo las diferentes familias tienen alta correlación
+entre sí, detectando dos grandes grupos de alta correlación:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Modelos no lineales basados en árbol, como \emph{bagging} o
+  \emph{random forest}, junto con los modelos basados en \emph{boosting}
+  como \emph{gbm} y \emph{xgboost}, así como la red y el \emph{svm} con
+  \emph{kernel} radial}. En ninguno de los casos la correlación
+  disminuye de 0.8.
+\item
+  \textbf{El modelo logístico y las \emph{svm} con \emph{kernel} lineal
+  y polinomial}. En cualquiera de los casos, la correlación no disminye
+  de 0.6.
+\end{enumerate}
+
+Como era de esperar, se encuentra generalmente una alta correlación
+entre modelos no lineales y lineales por separado. Por tanto, ¿Cómo
+influye de cara al ensamblado? Por lo general, cuanto menor sea la
+correlación entre los clasificadores, más se reducirá el sesgo en los
+nuevos ensamblados, o en el peor de los casos se mantendrá o no subirá
+demasiado.
+
+\hypertarget{ensamblado-con-dos-clasificadores}{%
+\subsection{12.2 Ensamblado con dos
+clasificadores}\label{ensamblado-con-dos-clasificadores}}
+
+Por tanto, el objetivo será unir clasificadores que presenten un sesgo
+lo suficientemente bajo y similar, con poca correlación entre ellos. De
+hecho, en base al gráfico anterior, existen varias alternativas, uniendo
+principalmente modelos lineales y no lineales entre sí:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  \emph{svm} lineal, polinomial o logística con \emph{Random forest},
+  \emph{bagging}, \emph{gradient boosting}, \emph{Xgboost},
+  \emph{avnnet} e incluso \emph{svm} con \emph{kernel} radial,
+  \textbf{modelos cuya correlación es moderada, en torno a 0.5-0.6,
+  aproximadamente}.
+\end{enumerate}
+
+Sin embargo, que el sesgo mejore o no es algo que \textbf{no se puede
+conocer \emph{a priori}, por lo que es necesario realizar pruebas
+empíricas}. Como consecuencia, \textbf{realizamos una primera
+aproximación, comezando con un ensamblado entre dos modelos, realizando
+todas las posibles combinaciones entre sí (mediante el promedio de
+resultados)}:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nipredi[, }\KeywordTok{paste0}\NormalTok{(}\StringTok{"en{-}"}\NormalTok{, i)] <{-}}\StringTok{ }\NormalTok{(unipredi[, modelo] }\OperatorTok{+}\StringTok{ }\NormalTok{unipredi[, modelo\_aux]) }\OperatorTok{/}\StringTok{ }\DecValTok{2}
+\end{Highlighting}
+\end{Shaded}
+
+Además, dado que la regresión logística no obtuvo buenos resultados,
+remarcamos con un color diferente cualquier ensamblado en el que
+intervenga dicho modelo, observando con ello si mejora o no:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/ensamblado_tasa_fallos_1} 
+
+}
+
+\caption{Comparacion tasa fallos modelos + ensamblado}\label{fig:unnamed-chunk-142}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/ensamblado_auc_1} 
+
+}
+
+\caption{Comparacion AUC modelos + ensamblado}\label{fig:unnamed-chunk-143}
+\end{figure}
+
+En primer lugar, cabe destacar que en conjunto con otros modelos,
+\textbf{la regresión logística mejora tanto en tasa de fallos como en
+AUC}:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \emph{en-8}: logística + \emph{svm} polinomial
+\item
+  \emph{en-1}: logística + \emph{avnnet}
+\item
+  \emph{en-4}: logística + \emph{gbm}
+\item
+  \emph{en-3}: logística + \emph{Random Forest}
+\item
+  \emph{en-2}: logística + \emph{bagging}
+\item
+  \emph{en-5}: logística + \emph{Xgboost}
+\end{enumerate}
+
+Con ellos, la tasa de fallos se reduce por debajo de 0.20 y el AUC
+aumenta hasta 0.85. Sin embargo, pese a su mejoría contínua siendo
+preferible modelos originales como \emph{random forest}, \emph{bagging}
+o \emph{gbm}, dado al juntarlo con un modelo con peores resultados (como
+es el caso de la logística), provocan que el resultado mejore aunque
+sigue siendo preferible los modelos originales.
+
+Por otro lado, debemos destacar los mejores modelos de ensamblado, tanto
+en tasa de fallos como en AUC:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Con menor tasa de fallos:
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{en-11}: \emph{avnnet} + \emph{gbm}
+\item
+  \emph{en-12}: \emph{avnnet} + \emph{Xgboost}
+\item
+  \emph{en-27}: \emph{gbm} + \emph{Xgboost}
+\end{itemize}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Con mayor AUC:
+\end{enumerate}
+
+\begin{itemize}
+\tightlist
+\item
+  \emph{en-23}: \emph{Random Forest} + \emph{Xgboost}
+\item
+  \emph{en-18}: \emph{bagging} + \emph{Xgboost}
+\item
+  \emph{en-16}: \emph{bagging} + \emph{Random Forest}
+\end{itemize}
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/mejores_ensamblados_2modelos} 
+
+}
+
+\caption{Comparacion tasa fallos  y AUC modelos + ensamblado (II)}\label{fig:unnamed-chunk-144}
+\end{figure}
+
+\textbf{Llama la atención como, tanto en tasa de fallos como en AUC, los
+mejores ensamblados corresponden con modelos similares
+(estadísticamente), pero con alta correlación entre si, consiguiendo
+mejorar sus correspondientes tasas de fallos y AUC, aunque muy
+ligeramente}, dada la escala de los ejes. Por ejemplo, uniendo
+\emph{avnnet} y \emph{gbm} (en-11) solo conseguimos mejorar la tasas de
+fallos en 0.005 (lo cual incluso puede ser debido a la estructura de
+remuestreo). Por otro lado, modelos como \emph{bagging} + \emph{XGboost}
+apenas mejoran el AUC (en torno a milésimas).
+
+De hecho, ¿Qué sucede con el resto de ensamblados con poca correlación?
+Si filtramos del gráfico anterior, descartando ensamblados con modelos
+de alta correlación (\textgreater{} 0.8):
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/ensamblado_tasa_fallos_1_corr08} 
+
+}
+
+\caption{Comparacion tasa fallos modelos + ensamblado (III)}\label{fig:unnamed-chunk-145}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/ensamblado_auc_1_corr08} 
+
+}
+
+\caption{Comparacion AUC modelos + ensamblado (III)}\label{fig:unnamed-chunk-146}
+\end{figure}
+
+En cualquiera de los casos obtenidos, sigue siendo preferible los
+modelos originales. Esto es debido a que el \emph{dataset} obtiene
+mejores resultados con la misma familia de modelos, es decir, mientras
+que con modelos lineales como logística o \emph{svm} lineal apenas
+alcanzan el 77-78 \% de \emph{Accuracy}, con modelos no lineales como
+redes pero en especial árboles y \emph{boosting}, la precisión llega a
+aumentar hasta rozar el 90 \% de precisión. Por ello, \textbf{los únicos
+modelos con un sesgo especialmente bajo son justamente aquellos con alta
+correlación entre sí}, por lo que si juntamos un modelo lineal con otro
+no lineal (por ejemplo, \emph{avnnet} con logística), hará que el modelo
+mejore con respecto a la logística, pero seguirá siendo preferible un
+modelo no lineal.
+
+A simple vista, \textbf{uniendo dos clasificadores no se consigue
+mejorar significativamente los resultados del modelo}, en especial
+cuando los mejores modelos presentan una alta correlación entre sí, por
+lo que la mejoría es poco o nada apreciable.
+
+\hypertarget{ensamblado-con-tres-clasificadores}{%
+\subsubsection{12.3 Ensamblado con tres
+clasificadores}\label{ensamblado-con-tres-clasificadores}}
+
+No obstante, podríamos probar a los mejores clasificadores en
+ensamblados de tres modelos, concretamente aquellos con alta
+correlación, es decir, \emph{random forest}, \emph{svm rbf},
+\emph{avnnet}, \emph{gbm} y \emph{xgboost} ( \emph{bagging} lo
+descartamos ya que con \emph{random forest} se obtienen prácticamente
+los mismo resultados ):
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/ensamblado_modelos3} 
+
+}
+
+\caption{Comparacion tasa fallos modelos + ensamblado (IV)}\label{fig:unnamed-chunk-147}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/ensamblado_modelos3_auc} 
+
+}
+
+\caption{Comparacion AUC modelos + ensamblado (IV)}\label{fig:unnamed-chunk-148}
+\end{figure}
+
+Pese a añadir tres clasificadores, \textbf{la mejora continua siendo
+insignificante}.
+
+\hypertarget{concluciones-ensamblado}{%
+\subsubsection{12.4 Concluciones
+ensamblado}\label{concluciones-ensamblado}}
+
+A la vista de los resultados obtenidos, ¿Merece la pena aplicar
+ensamblado? La respuesta es no, principalmente por dos motivos:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Los modelos originales que obtienen mejores resultados
+  corresponden con aquellos con alta correlación, esto es, modelos de
+  árbol, red y \emph{boosting}}.
+\item
+  \textbf{Incluso ensamblando dichos modelos, la mejoría es poco o nada
+  relevante}.
+\end{enumerate}
+
+Por tanto, \textbf{está claro que los modelos no lineales con alta
+correlación son los algoritmos dominante para este conjunto de datos,
+por lo que no merece la pena el ensamblado}.
+
+\hypertarget{comparaciuxf3n-con-h2o}{%
+\section{\texorpdfstring{13. Comparación con
+\emph{h2o}}{13. Comparación con h2o}}\label{comparaciuxf3n-con-h2o}}
+
+Una vez elaborados todos los modelos, Es momento de preguntarnos ¿Se
+cumplen las espectativas obtenidas con \emph{h2o}? Es decir, con
+\emph{autoML} obtuvimos inicialmente (como mejor modelo) \emph{gradient
+boosting} con los siguientes valores AUC:
+
+\begin{verbatim}
+##                        modelo       auc
+## 1 GBM_5_AutoML_set1_variables 0.9211350
+## 2 GBM_5_AutoML_set2_variables 0.9096419
+\end{verbatim}
+
+Si los comparamos con el AUC de los mejores modelos obtenidos:
+
+\begin{verbatim}
+##                modelo auc_medio
+## 1       bagging set 1    0.9144
+## 2       bagging set 2    0.9049
+## 3 Random Forest set 1    0.9144
+## 4 Random Forest set 2    0.9038
+## 5           gbm set 1    0.9043
+## 6           gbm set 2    0.8954
+\end{verbatim}
+
+En relación a \emph{gradient boosting}, las diferencias son pequeñas
+entre ambos paquetes (de 0.92 a 0.90 con el primer \emph{set} y de 0.90
+a 0.89 en el segundo), lo cual puede ser debido a la estructura del
+remuestreo o la optmización de los algoritmos en los diferentes
+paquetes. Por tanto, lo obtenido por \emph{h2o} \textbf{se aproxima a
+los resultados de \emph{caret}}. No obstante, también se han obtenido
+buenos resultados con diferentes modelos como es el caso de \emph{random
+forest} o \emph{bagging}, cuyos valores AUC son prácticamente iguales.
+
+\hypertarget{probando-con-el-dataset-completo}{%
+\section{\texorpdfstring{14. Probando con el \emph{dataset}
+completo}{14. Probando con el dataset completo}}\label{probando-con-el-dataset-completo}}
+
+A continuación, y utilizando únicamente el segundo \emph{set} de
+variables (salvo con el model \emph{svm} lineal, con el que empleamos el
+primer \emph{set}), \textbf{probamos los mismos algoritmos ``tuneados''
+con el conjunto de datos original, con el objetivo de comprobar si el
+orden entre algoritmos se conserva}:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparacion_datasets_tasa_fallos} 
+
+}
+
+\caption{Comparacion tasa fallos dataset original y subconjunto}\label{fig:unnamed-chunk-151}
+\end{figure}
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparacion_datasets_auc} 
+
+}
+
+\caption{Comparacion AUC dataset original y subconjunto}\label{fig:unnamed-chunk-152}
+\end{figure}
+
+De forma general, \textbf{el orden de los modelos, tanto con el
+\emph{dataset} original como con el subconjunto utilizado durante la
+práctica, se conserva}, a excepción de la tasa de fallos, siendo
+\emph{Xgboost} el mejor modelo con el \emph{dataset} original, mientras
+que con el subconjunto la menor tasa se obtiene con \emph{gbm}; aunque
+la diferencia no sea muy relevante entre ambos.
+
+\hypertarget{aumento-del-nuxfamero-de-grupos-y-repeticiones}{%
+\section{15. Aumento del número de grupos y
+repeticiones}\label{aumento-del-nuxfamero-de-grupos-y-repeticiones}}
+
+Tras comprobar que el orden de los modelos se conserva con el conjunto
+original, nos queda una última prueba: con los mejores modelos (
+\emph{bagging}, \emph{gbm}, \emph{random forest} y \emph{XGboost} ),
+\textbf{realizar una última comparación bajo un número alto y diferente
+de semillas y un número mayor de grupos de CV}. De este modo, lo que se
+pretende buscar es que el orden entre las ``cajas'' y la varianza de los
+modelos se mantenga similar a lo obtenido originalmente.
+
+Dado que durante la práctica se ha trabajo con 5 grupos y un máximo de
+10 repeticiones, \textbf{aumentamos a 10 grupos y 20 repeticiones},
+además de aumentar la semilla inicial a 123456:
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/comparacion_5_10_folds} 
+
+}
+
+\caption{Comparacion AUC y tasa de fallos con 5 y 10 grupos}\label{fig:unnamed-chunk-153}
+\end{figure}
+
+A la vista de los resultados, \textbf{tanto el orden como la varianza se
+mantiene más o menos similar al aumentar el número de grupos}, aunque en
+algunas ``cajas'' observemos una mayor varianza con 10 grupos, como es
+el caso de \emph{Random Forest} o \emph{Bagging} en AUC. No obstante, y
+dada la escala de los ejes, la diferencia de la varianza es muy pequeña,
+por lo que consideramos que se mantienen práctiamente idénticos.
+
+\hypertarget{variaciuxf3n-del-punto-de-corte}{%
+\section{16. Variación del punto de
+corte}\label{variaciuxf3n-del-punto-de-corte}}
+
+Como última sección, con los mejores modelos obtenidos
+\textbf{analizaremos los valores especificidad-sensibilidad con el punto
+de corte actual (0.5), además de comprobar como varían dichos algoritmos
+bajo diferentes puntos}.
+
+En primer lugar, de todos los mejores modelos obtenidos, ¿Por cual o
+cuales nos decantamos? Echemos un vistazo al AUC y tasa de fallos de los
+cuatro más importantes: \emph{gradient\_boosting}, \emph{bagging},
+\emph{Random Forest} y \emph{Xgboost}.
+
+\begin{figure}[h!]
+
+{\centering \includegraphics[width=0.99\linewidth,height=0.99\textheight,]{./charts/modelos_finales} 
+
+}
+
+\caption{Comparación modelos finales}\label{fig:unnamed-chunk-154}
+\end{figure}
+
+De todos los modelos presentes, y dejándonos guiar por los gráficos,
+diríamos que el mejor en cuanto a AUC y tasa de fallos serían modelos
+basados en \emph{boosting} como \emph{gbm} y \emph{XGboost}, pues no
+solo presentan bajas tasas de error, sino que además (y en especial con
+\emph{XGboost}, un alto valor en el área bajo la curva).
+
+De nuevo, la escala del gráfico puede llevar a engaño, y es que la
+diferencia entre los modelos basados en árboles y \emph{boosting} es
+ínfima. A modo de ejemplo, entre la tasa de fallos de \emph{gbm} y un
+modelo \emph{Random Forest} es de tan solo 0.007. En relación a la
+variancia, sucede lo mismo: aunque \emph{Random Forest} aperente tener
+la mayor variabilidad en cuanto a tasa de fallos, lo cierto es que la
+escala del eje puede conducir a engaño, puesto que la amplitud es de
+apenas
 
 \end{document}

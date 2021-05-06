@@ -118,7 +118,7 @@ xgboost <- cruzadaxgbmbin(data=surgical_dataset,vardep=target,
            listconti=var_modelo2,listclass=c(""),
            grupos=grupos,sinicio=sinicio,repe=repe,
            min_child_weight=20,eta=0.1,nrounds=100,max_depth=6,
-           gamma=0,colsample_bytree=1,subsample=0.5)
+           gamma=0,colsample_bytree=1,subsample=1)
 
 medias_xgboost    <- as.data.frame(xgboost[1])
 medias_xgboost$modelo <-"XGboost"
@@ -145,7 +145,7 @@ pred_svm_poly$svmpoly <- pred_svm_poly$Yes
 
 svm_rbf   <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target, listconti=var_modelo2,
                               listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
-                              C=1, sigma=5)
+                              C=0.5, sigma=5)
 
 medias_svm_rbf    <- as.data.frame(svm_rbf[1])
 medias_svm_rbf$modelo <-"SVM_RBF"
@@ -167,16 +167,9 @@ modelos  <- c("logi","avnnet", "bagging", "rf", "gbm", "xgboost", "svmlin", "svm
 mat <- unigraf[,modelos] 
 matrizcorr <- cor(mat)
 colmat <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
-corrplot(matrizcorr, method="color", col=colmat(200),  
-         type="upper", order="hclust", 
-         addCoef.col = "black", # Add coefficient of correlation
-         tl.col="black", tl.srt=45, #Text label color and rotation
-         # Combine with significance
-         p.mat = matrizcorr, sig.level = 0.99,
-         # hide correlation coefficient on the principal diagonal
-         diag=FALSE 
-)
-
+ggcorrplot(matrizcorr, hc.order = TRUE, type = "lower", ggtheme = ggplot2::theme_gray,
+           lab = TRUE,colors = c("#6D9EC1", "white", "#E46726")) + theme(text = element_text(size=13, face = "bold"))
+ggsave("./charts/ensamb_corr.png")
 #-- Comentarios: cabe destacar que el modelo de regresion logistica presenta una correlación moderada con 
 #   la mayoría de los modelos, a excepción del kernel SVM Lineal.
 #   En relacion al resto de parametros, el kernel polinomial presenta una correlacion moderada con la mayoria
@@ -252,41 +245,42 @@ medias0$tipo <- c(rep("Logistica", 10),
 
 
 
-medias0$modelo <- with(medias0,
-                       reorder(modelo,tasa, mean))
-ggplot(medias0, aes(x = modelo, y = tasa, col = tipo)) +
-  geom_boxplot(alpha = 0.7) +
-  scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45))
-
-medias0$modelo <- with(medias0,
+medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), "modelo"] <- with(medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), ],
                        reorder(modelo,auc, mean))
-ggplot(medias0, aes(x = modelo, y = auc, col = tipo)) +
+ggplot(medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), ], aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45))
+  ggtitle("Tasa de fallos por modelo (modelos originales + Ensamblado < 0.8 corr)") + 
+  theme(axis.text.x = element_text(angle = 45, face = "bold"), text = element_text(face = "bold"))
+ggsave('./charts/ensamblado_tasa_fallos_1_corr08.png')
+
+aux$modelo <- with(aux, reorder(modelo,auc, max))
+ggplot(aux, aes(x = modelo, y = auc, col = tipo)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_x_discrete(name = "Modelo") +
+  ggtitle("AUC por modelo (modelos originales + Ensamblado < 0.8 corr)") + 
+  theme(axis.text.x = element_text(angle = 45, face = "bold"), text = element_text(face = "bold"))
+ggsave('./charts/ensamblado_auc_1_corr08.png')
 
 #-- Hagamos zoom a los mejores modelos: "avnnet-gbm" (11), "avnnet-bagging" (9), "bagging-gbm" (17)
 #                                       bagging-rf"  (16), "bagging-xgboost"(18),"rf-xgboost"  (23)
 medias0$modelo <- with(medias0,
                        reorder(modelo,tasa, mean))
-ggplot(medias0[medias0$modelo %in% c("en-11", "en-9", "en-17", "avnnet", "bagging", "rf", "gbm", "xgboost",
+p <- ggplot(medias0[medias0$modelo %in% c("en-11", "en-12", "en-27", "avnnet", "bagging", "rf", "gbm", "xgboost",
                                      "en-16", "en-18", "en-23"), ], aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45))
+  ggtitle("Tasa de fallos (originales + Ensamblado)") + 
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
 
 medias0$modelo <- with(medias0,
                        reorder(modelo,auc, mean))
-ggplot(medias0[medias0$modelo %in% c("en-11", "en-9", "en-17", "avnnet", "bagging", "rf", "gbm", "xgboost",
+q <- ggplot(medias0[medias0$modelo %in% c("en-11", "en-12", "en-27", "avnnet", "bagging", "rf", "gbm", "xgboost",
                                      "en-16", "en-18", "en-23"), ], aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45))
+  ggtitle("AUC (originales + Ensamblado)") + 
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
 
 
 #-- Comentarios:
@@ -295,14 +289,14 @@ ggplot(medias0[medias0$modelo %in% c("en-11", "en-9", "en-17", "avnnet", "baggin
 #   La logistica combina bien con modelos de arboles como bagging o random forest
 #-- Con los detalles comentados, aumentamos a tres modelos por ensamblado
 #   Llama la atencion avnnet-gbm (11) - avnnet-bagging (9)
-unipredi_2 <- cbind(pred_logistica,pred_avnnet,pred_bagging,pred_random_forest,
+unipredi_2 <- cbind(pred_logistica,pred_avnnet,pred_random_forest,
                   pred_gradient_boosting,pred_xgboost,pred_svm_lineal,pred_svm_poly, pred_svm_rbf)
 
 #  Eliminamos columnas duplicadas
 unipredi_2 <- unipredi_2[, !duplicated(colnames(unipredi_2))]
 
 #-- Combinacion modelos con logistica
-modelos  <- c("avnnet", "bagging", "rf", "gbm", "xgboost", "svmrbf", "svmlin", "svmpoly")
+modelos  <- c("avnnet", "rf", "gbm", "xgboost", "svmrbf")
 
 nombres_modelo <- list(); i <- 1
 for(modelos in combn(modelos, m=2, simplify = FALSE)) {
@@ -313,7 +307,7 @@ for(modelos in combn(modelos, m=2, simplify = FALSE)) {
 }
 
 #-- Combinacion entre los 6 mejores modelos (excluimos logistica y polinomial)
-modelos  <- c("avnnet", "bagging", "rf", "gbm", "xgboost", "svmrbf", "svmlin", "svmpoly")
+modelos  <- c("avnnet", "rf", "gbm", "xgboost", "svmrbf")
 
 for(modelos in combn(modelos, m=3, simplify = FALSE)) {
   nombre_modelo  <- paste0(modelos[1],"-",modelos[2],"-",modelos[3])
@@ -329,25 +323,9 @@ unipredi_2$Rep<-as.numeric(unipredi_2$Rep)
 
 dput(names(unipredi_2))
 
-listado           <- c("logi","avnnet", "bagging", "rf", "gbm",
-                       "xgboost", "svmlin", "svmpoly", "svmrbf", "en-1", "en-2", 
-                       "en-3", "en-4", "en-5", "en-6", "en-7", "en-8", 
-                       "en-9", "en-10", "en-11", "en-12", "en-13", 
-                       "en-14", "en-15", "en-16", "en-17", "en-18", 
-                       "en-19", "en-20", "en-21", "en-22", "en-23", 
-                       "en-24", "en-25", "en-26", "en-27", "en-28", 
-                       "en-29", "en-30", "en-31", "en-32", "en-33", 
-                       "en-34", "en-35", "en-36", "en-37", "en-38", 
-                       "en-39", "en-40", "en-41", "en-42", "en-43", 
-                       "en-44", "en-45", "en-46", "en-47", "en-48", 
-                       "en-49", "en-50", "en-51", "en-52", "en-53", 
-                       "en-54", "en-55", "en-56", "en-57", "en-58", 
-                       "en-59", "en-60", "en-61", "en-62", "en-63", 
-                       "en-64", "en-65", "en-66", "en-67", "en-68", 
-                       "en-69", "en-70", "en-71", "en-72", "en-73", 
-                       "en-74", "en-75", "en-76", "en-77", "en-78", 
-                       "en-79", "en-80", "en-81", "en-82", "en-83", 
-                       "en-84")
+listado           <- c("logi", "avnnet", "rf", "gbm","xgboost", "svmlin", 
+                       "svmpoly", "svmrbf", "en-1", "en-2", "en-3", 
+                       "en-4", "en-5", "en-6", "en-7", "en-8", "en-9", "en-10")
 
 medias1<-data.frame(c())
 for (prediccion in listado)
@@ -371,9 +349,8 @@ for (prediccion in listado)
 }
 
 medias1$tipo <- c(rep("Logistica", 10),
-                  rep("Original",  80),
-                  rep("Logistica", 280),
-                  rep("Ensamblado", 560))
+                  rep("Original",  70),
+                  rep("Ensamblado", 180-10-70))
 
 
 
@@ -383,7 +360,8 @@ ggplot(medias1, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45))
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
+ggsave('./charts/ensamblado_modelos3.png')
 
 medias1$modelo <- with(medias1,
                        reorder(modelo,auc, mean))
@@ -391,7 +369,8 @@ ggplot(medias1, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45))
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
+ggsave('./charts/ensamblado_modelos3_auc.png')
 
 #-- Pese a añadir mas de 3 modelos por ensamblado, continuan siendo mejor los modelos originales
 #   Llama la atencion:

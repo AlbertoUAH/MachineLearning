@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.10.7)  5 MAY 2021 23:30
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (TeX Live 2019) (preloaded format=pdflatex 2019.10.7)  6 MAY 2021 22:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -517,37 +517,73 @@ Package caption3 Info: TeX engine: e-TeX on input line 64.
 \c@caption@flags=\count120
 \c@ContinuedFloat=\count121
 Package caption Info: hyperref package is loaded.
+) (/usr/local/texlive/2019/texmf-dist/tex/latex/ms/ragged2e.sty
+Package: ragged2e 2009/05/21 v2.1 ragged2e Package (MS)
+
+LaTeX Warning: Command \@arrayparboxrestore  has changed.
+               Check if current package is valid.
+
+(/usr/local/texlive/2019/texmf-dist/tex/latex/ms/everysel.sty
+Package: everysel 2011/10/28 v1.2 EverySelectfont Package (MS)
+) (/usr/local/texlive/2019/texmf-dist/tex/latex/footmisc/footmisc.sty
+Package: footmisc 2011/06/06 v5.5b a miscellany of footnote facilities
+\FN@temptoken=\toks25
+\footnotemargin=\dimen138
+\c@pp@next@reset=\count122
+Package footmisc Info: Declaring symbol style bringhurst on input line 855.
+Package footmisc Info: Declaring symbol style chicago on input line 863.
+Package footmisc Info: Declaring symbol style wiley on input line 872.
+Package footmisc Info: Declaring symbol style lamport-robust on input line 883.
+
+Package footmisc Info: Declaring symbol style lamport* on input line 903.
+Package footmisc Info: Declaring symbol style lamport*-robust on input line 924
+.
+)
+\CenteringLeftskip=\skip49
+\RaggedLeftLeftskip=\skip50
+\RaggedRightLeftskip=\skip51
+\CenteringRightskip=\skip52
+\RaggedLeftRightskip=\skip53
+\RaggedRightRightskip=\skip54
+\CenteringParfillskip=\skip55
+\RaggedLeftParfillskip=\skip56
+\RaggedRightParfillskip=\skip57
+\JustifyingParfillskip=\skip58
+\CenteringParindent=\skip59
+\RaggedLeftParindent=\skip60
+\RaggedRightParindent=\skip61
+\JustifyingParindent=\skip62
 ) (./memoria.aux)
 \openout1 = `memoria.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 108.
-LaTeX Font Info:    Try loading font information for TS1+cmr on input line 108.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 109.
+LaTeX Font Info:    Try loading font information for TS1+cmr on input line 109.
 
 (/usr/local/texlive/2019/texmf-dist/tex/latex/base/ts1cmr.fd
 File: ts1cmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 108.
-LaTeX Font Info:    ... okay on input line 108.
-LaTeX Font Info:    Try loading font information for T1+lmr on input line 108.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 109.
+LaTeX Font Info:    ... okay on input line 109.
+LaTeX Font Info:    Try loading font information for T1+lmr on input line 109.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Info: Redefining \microtypecontext on input line 108.
+LaTeX Info: Redefining \microtypecontext on input line 109.
 Package microtype Info: Generating PDF output.
 Package microtype Info: Character protrusion enabled (level 2).
 Package microtype Info: Using protrusion set `basicmath'.
@@ -562,17 +598,17 @@ File: mt-cmr.cfg 2013/05/19 v2.2 microtype config. file: Computer Modern Roman
 (RS)
 ) (/usr/local/texlive/2019/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count122
-\scratchdimen=\dimen138
+\scratchcounter=\count123
+\scratchdimen=\dimen139
 \scratchbox=\box30
-\nofMPsegments=\count123
-\nofMParguments=\count124
-\everyMPshowfont=\toks25
-\MPscratchCnt=\count125
-\MPscratchDim=\dimen139
-\MPnumerator=\count126
-\makeMPintoPDFobject=\count127
-\everyMPtoPDFconversion=\toks26
+\nofMPsegments=\count124
+\nofMParguments=\count125
+\everyMPshowfont=\toks26
+\MPscratchCnt=\count126
+\MPscratchDim=\dimen140
+\MPnumerator=\count127
+\makeMPintoPDFobject=\count128
+\everyMPtoPDFconversion=\toks27
 ) (/usr/local/texlive/2019/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
 Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
 (/usr/local/texlive/2019/texmf-dist/tex/latex/oberdiek/grfext.sty
@@ -589,17 +625,17 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 \AtBeginShipoutBox=\box31
-Package hyperref Info: Link coloring OFF on input line 108.
+Package hyperref Info: Link coloring OFF on input line 109.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2016/05/21 v2.44 Cross-referencing by name of section
 (/usr/local/texlive/2019/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2016/05/16 v1.5 Cleanup title references (HO)
 )
-\c@section@level=\count128
+\c@section@level=\count129
 )
-LaTeX Info: Redefining \ref on input line 108.
-LaTeX Info: Redefining \pageref on input line 108.
-LaTeX Info: Redefining \nameref on input line 108.
+LaTeX Info: Redefining \ref on input line 109.
+LaTeX Info: Redefining \pageref on input line 109.
+LaTeX Info: Redefining \nameref on input line 109.
 *geometry* driver: auto-detecting
 *geometry* detected driver: pdftex
 *geometry* verbose mode - [ preamble ] result:
@@ -636,55 +672,58 @@ LaTeX Info: Redefining \nameref on input line 108.
 
 Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: End \AtBeginDocument code.
-LaTeX Font Info:    Try loading font information for OT1+lmr on input line 110.
+Package ragged2e Info: ABD: executing \RaggedRight on input line 109.
+ABD: EverySelectfont initializing macros
+LaTeX Info: Redefining \selectfont on input line 109.
+LaTeX Font Info:    Try loading font information for OT1+lmr on input line 111.
 
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OML+lmm on input line 110.
+LaTeX Font Info:    Try loading font information for OML+lmm on input line 111.
 
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 110
+LaTeX Font Info:    Try loading font information for OMS+lmsy on input line 111
 .
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for OMX+lmex on input line 110
+LaTeX Font Info:    Try loading font information for OMX+lmex on input line 111
 .
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <12> on input line 110.
+(Font)              <12> on input line 111.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 110.
+(Font)              <8> on input line 111.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 110.
-LaTeX Font Info:    Try loading font information for U+msa on input line 110.
+(Font)              <6> on input line 111.
+LaTeX Font Info:    Try loading font information for U+msa on input line 111.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 ) (/usr/local/texlive/2019/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 110.
+LaTeX Font Info:    Try loading font information for U+msb on input line 111.
 (/usr/local/texlive/2019/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) (/usr/local/texlive/2019/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
-LaTeX Font Info:    Try loading font information for T1+lmtt on input line 111.
+LaTeX Font Info:    Try loading font information for T1+lmtt on input line 114.
 
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 122
+LaTeX Font Info:    Try loading font information for TS1+lmtt on input line 125
 .
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/ts1lmtt.fd
 File: ts1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 )
-LaTeX Font Info:    Try loading font information for TS1+lmr on input line 127.
+LaTeX Font Info:    Try loading font information for TS1+lmr on input line 130.
 
 (/usr/local/texlive/2019/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
@@ -692,28 +731,28 @@ File: ts1lmr.fd 2009/10/30 v1.6 Font defs for Latin Modern
 
 {/usr/local/texlive/2019/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10> on input line 138.
+(Font)              <10> on input line 141.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <7> on input line 138.
+(Font)              <7> on input line 141.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <5> on input line 138.
+(Font)              <5> on input line 141.
 [2]
 LaTeX Font Info:    Font shape `T1/lmtt/bx/n' in size <10> not available
-(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 329.
+(Font)              Font shape `T1/lmtt/b/n' tried instead on input line 332.
 [3] [4]
 <memoria_files/figure-latex/unnamed-chunk-7-1.pdf, id=100, 477.785pt x 224.84pt
 >
 File: memoria_files/figure-latex/unnamed-chunk-7-1.pdf Graphic file (type pdf)
 <use memoria_files/figure-latex/unnamed-chunk-7-1.pdf>
 Package pdftex.def Info: memoria_files/figure-latex/unnamed-chunk-7-1.pdf  used
- on input line 428.
+ on input line 431.
 (pdftex.def)             Requested size: 469.7571pt x 221.06215pt.
 <./capturas/Depuracion/woebin_mort30_dementia.png, id=101, 1150.2975pt x 561.09
 625pt>
 File: ./capturas/Depuracion/woebin_mort30_dementia.png Graphic file (type png)
 <use ./capturas/Depuracion/woebin_mort30_dementia.png>
 Package pdftex.def Info: ./capturas/Depuracion/woebin_mort30_dementia.png  used
- on input line 458.
+ on input line 461.
 (pdftex.def)             Requested size: 465.06055pt x 226.84889pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -722,7 +761,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 <./capturas/Depuracion/dow.png, id=114, 709.65125pt x 705.63625pt>
 File: ./capturas/Depuracion/dow.png Graphic file (type png)
 <use ./capturas/Depuracion/dow.png>
-Package pdftex.def Info: ./capturas/Depuracion/dow.png  used on input line 541.
+Package pdftex.def Info: ./capturas/Depuracion/dow.png  used on input line 544.
 
 (pdftex.def)             Requested size: 305.33899pt x 303.61148pt.
 
@@ -735,15 +774,15 @@ File: memoria_files/figure-latex/unnamed-chunk-13-1.pdf Graphic file (type pdf)
 
 <use memoria_files/figure-latex/unnamed-chunk-13-1.pdf>
 Package pdftex.def Info: memoria_files/figure-latex/unnamed-chunk-13-1.pdf  use
-d on input line 550.
+d on input line 553.
 (pdftex.def)             Requested size: 469.76872pt x 256.5805pt.
 [7 <./capturas/Depuracion/dow.png> <./memoria_files/figure-latex/unnamed-chunk-
 13-1.pdf>]
-<./capturas/Depuracion/month.png, id=140, 710.655pt x 710.655pt>
+<./capturas/Depuracion/month.png, id=139, 710.655pt x 710.655pt>
 File: ./capturas/Depuracion/month.png Graphic file (type png)
 <use ./capturas/Depuracion/month.png>
 Package pdftex.def Info: ./capturas/Depuracion/month.png  used on input line 58
-5.
+8.
 (pdftex.def)             Requested size: 352.32292pt x 352.32292pt.
 [8 <./capturas/Depuracion/month.png>]
 <memoria_files/figure-latex/unnamed-chunk-16-1.pdf, id=150, 463.7325pt x 309.15
@@ -752,7 +791,7 @@ File: memoria_files/figure-latex/unnamed-chunk-16-1.pdf Graphic file (type pdf)
 
 <use memoria_files/figure-latex/unnamed-chunk-16-1.pdf>
 Package pdftex.def Info: memoria_files/figure-latex/unnamed-chunk-16-1.pdf  use
-d on input line 605.
+d on input line 608.
 (pdftex.def)             Requested size: 463.73842pt x 309.15895pt.
 [9 <./memoria_files/figure-latex/unnamed-chunk-16-1.pdf>]
 <memoria_files/figure-latex/unnamed-chunk-21-1.pdf, id=164, 495.8525pt x 272.01
@@ -761,7 +800,7 @@ File: memoria_files/figure-latex/unnamed-chunk-21-1.pdf Graphic file (type pdf)
 
 <use memoria_files/figure-latex/unnamed-chunk-21-1.pdf>
 Package pdftex.def Info: memoria_files/figure-latex/unnamed-chunk-21-1.pdf  use
-d on input line 719.
+d on input line 722.
 (pdftex.def)             Requested size: 469.75583pt x 257.70006pt.
 [10]
 <memoria_files/figure-latex/unnamed-chunk-22-1.pdf, id=178, 495.8525pt x 272.01
@@ -770,7 +809,7 @@ File: memoria_files/figure-latex/unnamed-chunk-22-1.pdf Graphic file (type pdf)
 
 <use memoria_files/figure-latex/unnamed-chunk-22-1.pdf>
 Package pdftex.def Info: memoria_files/figure-latex/unnamed-chunk-22-1.pdf  use
-d on input line 729.
+d on input line 732.
 (pdftex.def)             Requested size: 469.75583pt x 257.70006pt.
 [11 <./memoria_files/figure-latex/unnamed-chunk-21-1.pdf> <./memoria_files/figu
 re-latex/unnamed-chunk-22-1.pdf>] [12] [13]
@@ -780,7 +819,7 @@ File: ./charts/01_feature_selection_RFE_LR_whole_dataset.png Graphic file (type
  png)
 <use ./charts/01_feature_selection_RFE_LR_whole_dataset.png>
 Package pdftex.def Info: ./charts/01_feature_selection_RFE_LR_whole_dataset.png
-  used on input line 991.
+  used on input line 994.
 (pdftex.def)             Requested size: 465.05449pt x 273.86542pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -792,7 +831,7 @@ File: ./charts/01_feature_selection_RFE_RF_whole_dataset.png Graphic file (type
  png)
 <use ./charts/01_feature_selection_RFE_RF_whole_dataset.png>
 Package pdftex.def Info: ./charts/01_feature_selection_RFE_RF_whole_dataset.png
-  used on input line 1035.
+  used on input line 1038.
 (pdftex.def)             Requested size: 465.05449pt x 273.86542pt.
 <./charts/01_feature_selection_primera_comparacion.png, id=238, 4110.35625pt x 
 2287.54625pt>
@@ -800,7 +839,7 @@ File: ./charts/01_feature_selection_primera_comparacion.png Graphic file (type
 png)
 <use ./charts/01_feature_selection_primera_comparacion.png>
 Package pdftex.def Info: ./charts/01_feature_selection_primera_comparacion.png 
- used on input line 1058.
+ used on input line 1061.
 (pdftex.def)             Requested size: 464.99797pt x 258.7864pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -812,7 +851,7 @@ File: ./charts/01_feature_selection_segunda_comparacion.png Graphic file (type
 png)
 <use ./charts/01_feature_selection_segunda_comparacion.png>
 Package pdftex.def Info: ./charts/01_feature_selection_segunda_comparacion.png 
- used on input line 1131.
+ used on input line 1134.
 (pdftex.def)             Requested size: 455.61673pt x 288.32266pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -824,7 +863,7 @@ File: ./charts/01_feature_selection_comparacion_random_forest.png Graphic file
 (type png)
 <use ./charts/01_feature_selection_comparacion_random_forest.png>
 Package pdftex.def Info: ./charts/01_feature_selection_comparacion_random_fores
-t.png  used on input line 1159.
+t.png  used on input line 1162.
 (pdftex.def)             Requested size: 465.04065pt x 292.2604pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -835,7 +874,7 @@ File: ./charts/01_feature_selection_comparacion_final.png Graphic file (type pn
 g)
 <use ./charts/01_feature_selection_comparacion_final.png>
 Package pdftex.def Info: ./charts/01_feature_selection_comparacion_final.png  u
-sed on input line 1224.
+sed on input line 1227.
 (pdftex.def)             Requested size: 465.0083pt x 230.81299pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -843,142 +882,142 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 [18 <./charts/01_feature_selection_segunda_comparacion.png>] [19 <./charts/01_f
 eature_selection_comparacion_random_forest.png> <./charts/01_feature_selection_
 comparacion_final.png>]
-<./charts/01_feature_selection_comparacion_5_10_rep.png, id=282, 3889.53125pt x
+<./charts/01_feature_selection_comparacion_5_10_rep.png, id=281, 3889.53125pt x
  1940.24875pt>
 File: ./charts/01_feature_selection_comparacion_5_10_rep.png Graphic file (type
  png)
 <use ./charts/01_feature_selection_comparacion_5_10_rep.png>
 Package pdftex.def Info: ./charts/01_feature_selection_comparacion_5_10_rep.png
-  used on input line 1272.
+  used on input line 1275.
 (pdftex.def)             Requested size: 465.06183pt x 231.99084pt.
 [20 <./charts/01_feature_selection_comparacion_5_10_rep.png>]
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []                                              \T1/lmtt/m/n/10 model_id       
 auc   logloss mean_per_class_error[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 1                         GBM_5_AutoML_20210422_174850 0.9211
 350 0.2591059            0.1608837[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 2  StackedEnsemble_BestOfFamily_AutoML_20210422_174850 0.9208
 431 0.2647496            0.1603029[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 3                         GBM_1_AutoML_20210422_174850 0.9200
 581 0.2690935            0.1659645[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 4     StackedEnsemble_AllModels_AutoML_20210422_174850 0.9200
 033 0.2647962            0.1676764[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 5                         GBM_2_AutoML_20210422_174850 0.9190
 857 0.2695043            0.1648937[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 6                     XGBoost_3_AutoML_20210422_174850 0.9189
 663 0.2613378            0.1651901[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 7       XGBoost_grid__1_AutoML_20210422_174850_model_1 0.9189
 402 0.2629065            0.1675371[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 8           GBM_grid__1_AutoML_20210422_174850_model_1 0.9187
 735 0.2763313            0.1689585[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 9                         GBM_3_AutoML_20210422_174850 0.9175
 951 0.2725404            0.1757392[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1356--1356
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1359--1359
 []\T1/lmtt/m/n/10 10                    XGBoost_2_AutoML_20210422_174850 0.9169
 047 0.2717032            0.1707306[] 
  []
 
 
-Overfull \hbox (34.24352pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (34.24352pt too wide) in paragraph at lines 1395--1395
 []                                              \T1/lmtt/m/n/10 model_id       
 auc   logloss  mean_per_class_error[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 1                         GBM_5_AutoML_20210422_182719 0.9096
 419 0.2700148            0.1646700[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 2  StackedEnsemble_BestOfFamily_AutoML_20210422_182719 0.9088
 350 0.2712222            0.1666722[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 3     StackedEnsemble_AllModels_AutoML_20210422_182719 0.9083
 655 0.2708531            0.1683963[] 
  []
 
 [21]
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 4                     XGBoost_3_AutoML_20210422_182719 0.9083
 145 0.2683037            0.1735557[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 5                         GBM_1_AutoML_20210422_182719 0.9075
 638 0.2769396            0.1730899[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 6                         GBM_2_AutoML_20210422_182719 0.9072
 236 0.2767946            0.1770094[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 7       XGBoost_grid__1_AutoML_20210422_182719_model_1 0.9065
 834 0.2696259            0.1678335[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 8                     XGBoost_2_AutoML_20210422_182719 0.9064
 648 0.2756899            0.1671682[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 9                     XGBoost_1_AutoML_20210422_182719 0.9047
 755 0.2746863            0.1725274[] 
  []
 
 
-Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
+Overfull \hbox (28.99353pt too wide) in paragraph at lines 1395--1395
 []\T1/lmtt/m/n/10 10          GBM_grid__1_AutoML_20210422_182719_model_1 0.9044
 822 0.3115999            0.1720491[] 
  []
@@ -989,7 +1028,7 @@ Overfull \hbox (28.99353pt too wide) in paragraph at lines 1392--1392
 File: ./charts/02_comparacion_tasa_auc_modelo1.png Graphic file (type png)
 <use ./charts/02_comparacion_tasa_auc_modelo1.png>
 Package pdftex.def Info: ./charts/02_comparacion_tasa_auc_modelo1.png  used on 
-input line 1503.
+input line 1506.
 (pdftex.def)             Requested size: 465.01616pt x 263.37198pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1000,7 +1039,7 @@ File: ./charts/02_comparacion_tasa_auc_modelo1_10rep.png Graphic file (type png
 )
 <use ./charts/02_comparacion_tasa_auc_modelo1_10rep.png>
 Package pdftex.def Info: ./charts/02_comparacion_tasa_auc_modelo1_10rep.png  us
-ed on input line 1525.
+ed on input line 1528.
 (pdftex.def)             Requested size: 465.01616pt x 263.37198pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1011,7 +1050,7 @@ File: ./charts/02_comparacion_tasa_auc_modelo1_10rep_iters.png Graphic file (ty
 pe png)
 <use ./charts/02_comparacion_tasa_auc_modelo1_10rep_iters.png>
 Package pdftex.def Info: ./charts/02_comparacion_tasa_auc_modelo1_10rep_iters.p
-ng  used on input line 1543.
+ng  used on input line 1546.
 (pdftex.def)             Requested size: 465.01616pt x 263.37198pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1025,7 +1064,7 @@ File: ./charts/02_comparacion_tasa_auc_modelo2_5rep.png Graphic file (type png)
 
 <use ./charts/02_comparacion_tasa_auc_modelo2_5rep.png>
 Package pdftex.def Info: ./charts/02_comparacion_tasa_auc_modelo2_5rep.png  use
-d on input line 1658.
+d on input line 1661.
 (pdftex.def)             Requested size: 465.01616pt x 263.37198pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1034,7 +1073,7 @@ File: ./charts/02_comparacion_tasa_auc_modelo2_5rep.png Graphic file (type png)
 
 <use ./charts/02_comparacion_tasa_auc_modelo2_5rep.png>
 Package pdftex.def Info: ./charts/02_comparacion_tasa_auc_modelo2_5rep.png  use
-d on input line 1675.
+d on input line 1678.
 (pdftex.def)             Requested size: 465.01616pt x 263.37198pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1045,7 +1084,7 @@ File: ./charts/02_comparacion_tasa_auc_modelo2_10rep_iters.png Graphic file (ty
 pe png)
 <use ./charts/02_comparacion_tasa_auc_modelo2_10rep_iters.png>
 Package pdftex.def Info: ./charts/02_comparacion_tasa_auc_modelo2_10rep_iters.p
-ng  used on input line 1690.
+ng  used on input line 1693.
 (pdftex.def)             Requested size: 465.0083pt x 246.32494pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1056,14 +1095,14 @@ t>
 File: ./charts/comparativas/02_log_avnnet_tasa.jpeg Graphic file (type jpg)
 <use ./charts/comparativas/02_log_avnnet_tasa.jpeg>
 Package pdftex.def Info: ./charts/comparativas/02_log_avnnet_tasa.jpeg  used on
- input line 1732.
+ input line 1735.
 (pdftex.def)             Requested size: 465.0083pt x 246.32494pt.
 <./charts/comparativas/02_log_avnnet_auc.jpeg, id=360, 4001.95125pt x 2119.92pt
 >
 File: ./charts/comparativas/02_log_avnnet_auc.jpeg Graphic file (type jpg)
 <use ./charts/comparativas/02_log_avnnet_auc.jpeg>
 Package pdftex.def Info: ./charts/comparativas/02_log_avnnet_auc.jpeg  used on 
-input line 1740.
+input line 1743.
 (pdftex.def)             Requested size: 465.0083pt x 246.32494pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1073,7 +1112,7 @@ ativas/02_log_avnnet_tasa.jpeg>]
 <./charts/OOB_1.png, id=368, 4001.95125pt x 2199.21625pt>
 File: ./charts/OOB_1.png Graphic file (type png)
 <use ./charts/OOB_1.png>
-Package pdftex.def Info: ./charts/OOB_1.png  used on input line 1788.
+Package pdftex.def Info: ./charts/OOB_1.png  used on input line 1791.
 (pdftex.def)             Requested size: 465.0083pt x 255.5388pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1081,7 +1120,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 <./charts/OOB_2.png, id=369, 4001.95125pt x 2199.21625pt>
 File: ./charts/OOB_2.png Graphic file (type png)
 <use ./charts/OOB_2.png>
-Package pdftex.def Info: ./charts/OOB_2.png  used on input line 1802.
+Package pdftex.def Info: ./charts/OOB_2.png  used on input line 1805.
 (pdftex.def)             Requested size: 465.0083pt x 255.5388pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1094,7 +1133,7 @@ File: ./charts/03_distribucion_auc_tasa_fallos_modelo1.png Graphic file (type p
 ng)
 <use ./charts/03_distribucion_auc_tasa_fallos_modelo1.png>
 Package pdftex.def Info: ./charts/03_distribucion_auc_tasa_fallos_modelo1.png  
-used on input line 1878.
+used on input line 1881.
 (pdftex.def)             Requested size: 465.03555pt x 240.17159pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1106,7 +1145,7 @@ File: ./charts/03_distribucion_auc_tasa_fallos_modelo1_comp.png Graphic file (t
 ype png)
 <use ./charts/03_distribucion_auc_tasa_fallos_modelo1_comp.png>
 Package pdftex.def Info: ./charts/03_distribucion_auc_tasa_fallos_modelo1_comp.
-png  used on input line 1942.
+png  used on input line 1945.
 (pdftex.def)             Requested size: 465.04695pt x 286.41579pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1117,7 +1156,7 @@ File: ./charts/03_distribucion_auc_tasa_fallos_modelo1_comp_50rep.png Graphic f
 ile (type png)
 <use ./charts/03_distribucion_auc_tasa_fallos_modelo1_comp_50rep.png>
 Package pdftex.def Info: ./charts/03_distribucion_auc_tasa_fallos_modelo1_comp_
-50rep.png  used on input line 1965.
+50rep.png  used on input line 1968.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1137,7 +1176,7 @@ File: ./charts/bagging/bis_03_comparacion_final_modelo1_5_10_folds.png Graphic
 file (type png)
 <use ./charts/bagging/bis_03_comparacion_final_modelo1_5_10_folds.png>
 Package pdftex.def Info: ./charts/bagging/bis_03_comparacion_final_modelo1_5_10
-_folds.png  used on input line 1989.
+_folds.png  used on input line 1992.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 <./charts/03_distribucion_auc_tasa_fallos_modelo2.png, id=416, 4001.95125pt x 2
 463.2025pt>
@@ -1145,30 +1184,30 @@ File: ./charts/03_distribucion_auc_tasa_fallos_modelo2.png Graphic file (type p
 ng)
 <use ./charts/03_distribucion_auc_tasa_fallos_modelo2.png>
 Package pdftex.def Info: ./charts/03_distribucion_auc_tasa_fallos_modelo2.png  
-used on input line 2029.
+used on input line 2032.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
 [34 <./charts/bagging/bis_03_comparacion_final_modelo1_5_10_folds.png>]
-<./charts/03_distribucion_auc_tasa_fallos_modelo2_comp.png, id=426, 4001.95125p
+<./charts/03_distribucion_auc_tasa_fallos_modelo2_comp.png, id=425, 4001.95125p
 t x 2463.2025pt>
 File: ./charts/03_distribucion_auc_tasa_fallos_modelo2_comp.png Graphic file (t
 ype png)
 <use ./charts/03_distribucion_auc_tasa_fallos_modelo2_comp.png>
 Package pdftex.def Info: ./charts/03_distribucion_auc_tasa_fallos_modelo2_comp.
-png  used on input line 2066.
+png  used on input line 2069.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-<./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep.png, id=427, 4001.
+<./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep.png, id=426, 4001.
 95125pt x 2463.2025pt>
 File: ./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep.png Graphic f
 ile (type png)
 <use ./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_50rep.png>
 Package pdftex.def Info: ./charts/03_distribucion_auc_tasa_fallos_modelo2_comp_
-50rep.png  used on input line 2082.
+50rep.png  used on input line 2085.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1185,7 +1224,7 @@ File: ./charts/bagging/bis_03_comparacion_final_modelo2_5_10_folds.png Graphic
 file (type png)
 <use ./charts/bagging/bis_03_comparacion_final_modelo2_5_10_folds.png>
 Package pdftex.def Info: ./charts/bagging/bis_03_comparacion_final_modelo2_5_10
-_folds.png  used on input line 2103.
+_folds.png  used on input line 2106.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 <./charts/bagging/03_comparacion_final_bagging.png, id=443, 4001.95125pt x 2463
 .2025pt>
@@ -1193,7 +1232,7 @@ File: ./charts/bagging/03_comparacion_final_bagging.png Graphic file (type png)
 
 <use ./charts/bagging/03_comparacion_final_bagging.png>
 Package pdftex.def Info: ./charts/bagging/03_comparacion_final_bagging.png  use
-d on input line 2146.
+d on input line 2149.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1205,7 +1244,7 @@ File: ./charts/comparativas/03_log_avnnet_bagging_tasa.jpeg Graphic file (type
 jpg)
 <use ./charts/comparativas/03_log_avnnet_bagging_tasa.jpeg>
 Package pdftex.def Info: ./charts/comparativas/03_log_avnnet_bagging_tasa.jpeg 
- used on input line 2189.
+ used on input line 2192.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1216,7 +1255,7 @@ File: ./charts/comparativas/03_log_avnnet_bagging_auc.jpeg Graphic file (type j
 pg)
 <use ./charts/comparativas/03_log_avnnet_bagging_auc.jpeg>
 Package pdftex.def Info: ./charts/comparativas/03_log_avnnet_bagging_auc.jpeg  
-used on input line 2197.
+used on input line 2200.
 (pdftex.def)             Requested size: 465.0083pt x 286.21278pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1233,7 +1272,7 @@ File: ./charts/random_forest/error_rates/error_rate_1.png Graphic file (type pn
 g)
 <use ./charts/random_forest/error_rates/error_rate_1.png>
 Package pdftex.def Info: ./charts/random_forest/error_rates/error_rate_1.png  u
-sed on input line 2228.
+sed on input line 2231.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 [40 <./charts/random_forest/error_rates/error_rate_1.png>]
 <./charts/random_forest/04_comp_inicial_mtry_modelo1.png, id=487, 4440.59pt x 3
@@ -1242,7 +1281,7 @@ File: ./charts/random_forest/04_comp_inicial_mtry_modelo1.png Graphic file (typ
 e png)
 <use ./charts/random_forest/04_comp_inicial_mtry_modelo1.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_inicial_mtry_modelo1.pn
-g  used on input line 2273.
+g  used on input line 2276.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 <./charts/random_forest/error_rates/error_rate_2.png, id=488, 4440.59pt x 3061.
 4375pt>
@@ -1250,7 +1289,7 @@ File: ./charts/random_forest/error_rates/error_rate_2.png Graphic file (type pn
 g)
 <use ./charts/random_forest/error_rates/error_rate_2.png>
 Package pdftex.def Info: ./charts/random_forest/error_rates/error_rate_2.png  u
-sed on input line 2298.
+sed on input line 2301.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1261,7 +1300,7 @@ File: ./charts/random_forest/04_comp_inicial_mtry_modelo2.png Graphic file (typ
 e png)
 <use ./charts/random_forest/04_comp_inicial_mtry_modelo2.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_inicial_mtry_modelo2.pn
-g  used on input line 2317.
+g  used on input line 2320.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1274,7 +1313,7 @@ File: ./charts/random_forest/04_comp_tasa_auc_modelo1.png Graphic file (type pn
 g)
 <use ./charts/random_forest/04_comp_tasa_auc_modelo1.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_tasa_auc_modelo1.png  u
-sed on input line 2379.
+sed on input line 2382.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1286,7 +1325,7 @@ File: ./charts/random_forest/04_comp_tasa_auc_modelo1_sampsizes.png Graphic fil
 e (type png)
 <use ./charts/random_forest/04_comp_tasa_auc_modelo1_sampsizes.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_tasa_auc_modelo1_sampsi
-zes.png  used on input line 2423.
+zes.png  used on input line 2426.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1297,7 +1336,7 @@ File: ./charts/random_forest/04_comp_tasa_auc_modelo1_10_folds.png Graphic file
  (type png)
 <use ./charts/random_forest/04_comp_tasa_auc_modelo1_10_folds.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_tasa_auc_modelo1_10_fol
-ds.png  used on input line 2447.
+ds.png  used on input line 2450.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1309,7 +1348,7 @@ File: ./charts/random_forest/04_comp_tasa_auc_modelo2.png Graphic file (type pn
 g)
 <use ./charts/random_forest/04_comp_tasa_auc_modelo2.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_tasa_auc_modelo2.png  u
-sed on input line 2480.
+sed on input line 2483.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1320,7 +1359,7 @@ File: ./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes.png Graphic fil
 e (type png)
 <use ./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_tasa_auc_modelo2_sampsi
-zes.png  used on input line 2495.
+zes.png  used on input line 2498.
 (pdftex.def)             Requested size: 465.0222pt x 320.59622pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1331,7 +1370,7 @@ File: ./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes2_10_folds.png G
 raphic file (type png)
 <use ./charts/random_forest/04_comp_tasa_auc_modelo2_sampsizes2_10_folds.png>
 Package pdftex.def Info: ./charts/random_forest/04_comp_tasa_auc_modelo2_sampsi
-zes2_10_folds.png  used on input line 2511.
+zes2_10_folds.png  used on input line 2514.
 (pdftex.def)             Requested size: 465.0222pt x 208.4401pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1342,7 +1381,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 File: ./charts/comparativas/03_rf_con_sin_reemp.png Graphic file (type png)
 <use ./charts/comparativas/03_rf_con_sin_reemp.png>
 Package pdftex.def Info: ./charts/comparativas/03_rf_con_sin_reemp.png  used on
- input line 2556.
+ input line 2559.
 (pdftex.def)             Requested size: 465.01566pt x 245.31459pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1354,7 +1393,7 @@ File: ./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg Graphic file (ty
 pe jpg)
 <use ./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg>
 Package pdftex.def Info: ./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jp
-eg  used on input line 2619.
+eg  used on input line 2622.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1365,7 +1404,7 @@ File: ./charts/comparativas/03_log_avnnet_bagging_rf_auc.jpeg Graphic file (typ
 e jpg)
 <use ./charts/comparativas/03_log_avnnet_bagging_rf_auc.jpeg>
 Package pdftex.def Info: ./charts/comparativas/03_log_avnnet_bagging_rf_auc.jpe
-g  used on input line 2627.
+g  used on input line 2630.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1376,7 +1415,7 @@ File: ./charts/random_forest/comparacion_bagging_rf.png Graphic file (type png)
 
 <use ./charts/random_forest/comparacion_bagging_rf.png>
 Package pdftex.def Info: ./charts/random_forest/comparacion_bagging_rf.png  use
-d on input line 2640.
+d on input line 2643.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1393,7 +1432,7 @@ File: ./charts/gradient_boosting/05_gbm_hyperparameters_modelo1.png Graphic fil
 e (type png)
 <use ./charts/gradient_boosting/05_gbm_hyperparameters_modelo1.png>
 Package pdftex.def Info: ./charts/gradient_boosting/05_gbm_hyperparameters_mode
-lo1.png  used on input line 2716.
+lo1.png  used on input line 2719.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 <./charts/gradient_boosting/05_gbm_hyperparameters_modelo2.png, id=595, 4558.02
 875pt x 2429.075pt>
@@ -1401,7 +1440,7 @@ File: ./charts/gradient_boosting/05_gbm_hyperparameters_modelo2.png Graphic fil
 e (type png)
 <use ./charts/gradient_boosting/05_gbm_hyperparameters_modelo2.png>
 Package pdftex.def Info: ./charts/gradient_boosting/05_gbm_hyperparameters_mode
-lo2.png  used on input line 2724.
+lo2.png  used on input line 2727.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1412,7 +1451,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 File: ./charts/gradient_boosting/05_early_stopping.png Graphic file (type png)
 <use ./charts/gradient_boosting/05_early_stopping.png>
 Package pdftex.def Info: ./charts/gradient_boosting/05_early_stopping.png  used
- on input line 2795.
+ on input line 2798.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1424,7 +1463,7 @@ File: ./charts/gradient_boosting/05_gbm_bag_fraction.png Graphic file (type png
 )
 <use ./charts/gradient_boosting/05_gbm_bag_fraction.png>
 Package pdftex.def Info: ./charts/gradient_boosting/05_gbm_bag_fraction.png  us
-ed on input line 2841.
+ed on input line 2844.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1436,7 +1475,7 @@ File: ./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa.jpeg Graphic file
  (type jpg)
 <use ./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa.jpeg>
 Package pdftex.def Info: ./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tas
-a.jpeg  used on input line 2890.
+a.jpeg  used on input line 2893.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1447,7 +1486,7 @@ File: ./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc.jpeg Graphic file
 (type jpg)
 <use ./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc.jpeg>
 Package pdftex.def Info: ./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc
-.jpeg  used on input line 2898.
+.jpeg  used on input line 2901.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1456,7 +1495,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 File: ./charts/SVM/06_svm_lineal_modelo1_2.png Graphic file (type png)
 <use ./charts/SVM/06_svm_lineal_modelo1_2.png>
 Package pdftex.def Info: ./charts/SVM/06_svm_lineal_modelo1_2.png  used on inpu
-t line 2935.
+t line 2938.
 (pdftex.def)             Requested size: 465.01016pt x 247.81425pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1468,7 +1507,7 @@ net_bagging_rf_gbm_auc.jpeg>] [56 <./charts/SVM/06_svm_lineal_modelo1_2.png>]
 File: ./charts/SVM/06_svm_poly_modelo1_2.png Graphic file (type png)
 <use ./charts/SVM/06_svm_poly_modelo1_2.png>
 Package pdftex.def Info: ./charts/SVM/06_svm_poly_modelo1_2.png  used on input 
-line 3012.
+line 3015.
 (pdftex.def)             Requested size: 465.02756pt x 221.5725pt.
 <./charts/SVM/polinomica/svm_polinomial_parte2.png, id=662, 4775.8425pt x 2362.
 8275pt>
@@ -1476,7 +1515,7 @@ File: ./charts/SVM/polinomica/svm_polinomial_parte2.png Graphic file (type png)
 
 <use ./charts/SVM/polinomica/svm_polinomial_parte2.png>
 Package pdftex.def Info: ./charts/SVM/polinomica/svm_polinomial_parte2.png  use
-d on input line 3052.
+d on input line 3055.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1486,7 +1525,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 File: ./charts/SVM/svm_rbf_modelos1_2.png Graphic file (type png)
 <use ./charts/SVM/svm_rbf_modelos1_2.png>
 Package pdftex.def Info: ./charts/SVM/svm_rbf_modelos1_2.png  used on input lin
-e 3115.
+e 3118.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1497,7 +1536,7 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 File: ./charts/SVM/svm_rbf_modelos1_2_aumentando_C.png Graphic file (type png)
 <use ./charts/SVM/svm_rbf_modelos1_2_aumentando_C.png>
 Package pdftex.def Info: ./charts/SVM/svm_rbf_modelos1_2_aumentando_C.png  used
- on input line 3159.
+ on input line 3162.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 [59 <./charts/SVM/svm_rbf_modelos1_2.png> <./charts/SVM/svm_rbf_modelos1_2_aume
 ntando_C.png>]
@@ -1505,7 +1544,7 @@ ntando_C.png>]
 File: ./charts/SVM/comparacion_svm.png Graphic file (type png)
 <use ./charts/SVM/comparacion_svm.png>
 Package pdftex.def Info: ./charts/SVM/comparacion_svm.png  used on input line 3
-227.
+230.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 [60 <./charts/SVM/comparacion_svm.png>]
 <./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa.jpeg, id=707, 4775
@@ -1514,7 +1553,7 @@ File: ./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa.jpeg Graphic
 file (type jpg)
 <use ./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa.jpeg>
 Package pdftex.def Info: ./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm
-_tasa.jpeg  used on input line 3299.
+_tasa.jpeg  used on input line 3302.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1525,7 +1564,7 @@ File: ./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_auc.jpeg Graphic f
 ile (type jpg)
 <use ./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_auc.jpeg>
 Package pdftex.def Info: ./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm
-_auc.jpeg  used on input line 3307.
+_auc.jpeg  used on input line 3310.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1537,13 +1576,13 @@ charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_auc.jpeg>]
 File: ./charts/xgboost/tuneo_xgboost_modelo2.png Graphic file (type png)
 <use ./charts/xgboost/tuneo_xgboost_modelo2.png>
 Package pdftex.def Info: ./charts/xgboost/tuneo_xgboost_modelo2.png  used on in
-put line 3380.
+put line 3383.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 <./charts/xgboost/early_stopping.png, id=734, 4775.8425pt x 2362.8275pt>
 File: ./charts/xgboost/early_stopping.png Graphic file (type png)
 <use ./charts/xgboost/early_stopping.png>
 Package pdftex.def Info: ./charts/xgboost/early_stopping.png  used on input lin
-e 3405.
+e 3408.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
@@ -1552,79 +1591,200 @@ LaTeX Warning: `!h' float specifier changed to `!ht'.
 <./charts/xgboost/max_depth.png, id=745, 4775.8425pt x 2362.8275pt>
 File: ./charts/xgboost/max_depth.png Graphic file (type png)
 <use ./charts/xgboost/max_depth.png>
-Package pdftex.def Info: ./charts/xgboost/max_depth.png  used on input line 343
-8.
-(pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
-[64 <./charts/xgboost/early_stopping.png>]
-<./charts/xgboost/subsample.png, id=753, 4775.8425pt x 2362.8275pt>
-File: ./charts/xgboost/subsample.png Graphic file (type png)
-<use ./charts/xgboost/subsample.png>
-Package pdftex.def Info: ./charts/xgboost/subsample.png  used on input line 346
-5.
+Package pdftex.def Info: ./charts/xgboost/max_depth.png  used on input line 344
+1.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-[65 <./charts/xgboost/max_depth.png>]
+<./charts/xgboost/subsample.png, id=746, 4775.8425pt x 2362.8275pt>
+File: ./charts/xgboost/subsample.png Graphic file (type png)
+<use ./charts/xgboost/subsample.png>
+Package pdftex.def Info: ./charts/xgboost/subsample.png  used on input line 346
+8.
+(pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[64 <./charts/xgboost/early_stopping.png>] [65 <./charts/xgboost/max_depth.png>
+ <./charts/xgboost/subsample.png>]
 <./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg, id=7
-69, 4775.8425pt x 2362.8275pt>
+72, 4775.8425pt x 2362.8275pt>
 File: ./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg 
 Graphic file (type jpg)
 <use ./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg>
 Package pdftex.def Info: ./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm
-_xgboost_tasa.jpeg  used on input line 3517.
+_xgboost_tasa.jpeg  used on input line 3520.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
 <./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg, id=77
-0, 4775.8425pt x 2362.8275pt>
+3, 4775.8425pt x 2362.8275pt>
 File: ./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg G
 raphic file (type jpg)
 <use ./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg>
 Package pdftex.def Info: ./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm
-_xgboost_auc.jpeg  used on input line 3525.
+_xgboost_auc.jpeg  used on input line 3528.
 (pdftex.def)             Requested size: 465.00514pt x 230.05928pt.
+[66 <./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg> 
+<./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg>]
+<./charts/ensamb_corr.png, id=781, 4767.8125pt x 2357.80875pt>
+File: ./charts/ensamb_corr.png Graphic file (type png)
+<use ./charts/ensamb_corr.png>
+Package pdftex.def Info: ./charts/ensamb_corr.png  used on input line 3564.
+(pdftex.def)             Requested size: 469.75235pt x 232.3049pt.
+[67 <./charts/ensamb_corr.png>]
+<./charts/ensamblado_tasa_fallos_1.png, id=795, 4767.8125pt x 2357.80875pt>
+File: ./charts/ensamblado_tasa_fallos_1.png Graphic file (type png)
+<use ./charts/ensamblado_tasa_fallos_1.png>
+Package pdftex.def Info: ./charts/ensamblado_tasa_fallos_1.png  used on input l
+ine 3634.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+<./charts/ensamblado_auc_1.png, id=796, 4767.8125pt x 2357.80875pt>
+File: ./charts/ensamblado_auc_1.png Graphic file (type png)
+<use ./charts/ensamblado_auc_1.png>
+Package pdftex.def Info: ./charts/ensamblado_auc_1.png  used on input line 3642
+.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
 
 LaTeX Warning: `!h' float specifier changed to `!ht'.
 
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3535.
-[66 <./charts/xgboost/subsample.png> <./charts/comparativas/07_log_avnnet_baggi
-ng_rf_gbm_svm_xgboost_tasa.jpeg>] [67 <./charts/comparativas/07_log_avnnet_bagg
-ing_rf_gbm_svm_xgboost_auc.jpeg>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 3535.
+[68 <./charts/ensamblado_tasa_fallos_1.png>]
+<./charts/mejores_ensamblados_2modelos.png, id=811, 4767.8125pt x 2357.80875pt>
+
+File: ./charts/mejores_ensamblados_2modelos.png Graphic file (type png)
+<use ./charts/mejores_ensamblados_2modelos.png>
+Package pdftex.def Info: ./charts/mejores_ensamblados_2modelos.png  used on inp
+ut line 3716.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<./charts/ensamblado_tasa_fallos_1_corr08.png, id=812, 4767.8125pt x 2357.80875
+pt>
+File: ./charts/ensamblado_tasa_fallos_1_corr08.png Graphic file (type png)
+<use ./charts/ensamblado_tasa_fallos_1_corr08.png>
+Package pdftex.def Info: ./charts/ensamblado_tasa_fallos_1_corr08.png  used on 
+input line 3739.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<./charts/ensamblado_auc_1_corr08.png, id=813, 4767.8125pt x 2357.80875pt>
+File: ./charts/ensamblado_auc_1_corr08.png Graphic file (type png)
+<use ./charts/ensamblado_auc_1_corr08.png>
+Package pdftex.def Info: ./charts/ensamblado_auc_1_corr08.png  used on input li
+ne 3747.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[69 <./charts/ensamblado_auc_1.png>]
+<./charts/ensamblado_modelos3.png, id=822, 4767.8125pt x 2357.80875pt>
+File: ./charts/ensamblado_modelos3.png Graphic file (type png)
+<use ./charts/ensamblado_modelos3.png>
+Package pdftex.def Info: ./charts/ensamblado_modelos3.png  used on input line 3
+785.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+<./charts/ensamblado_modelos3_auc.png, id=823, 4767.8125pt x 2357.80875pt>
+File: ./charts/ensamblado_modelos3_auc.png Graphic file (type png)
+<use ./charts/ensamblado_modelos3_auc.png>
+Package pdftex.def Info: ./charts/ensamblado_modelos3_auc.png  used on input li
+ne 3793.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+[70 <./charts/mejores_ensamblados_2modelos.png> <./charts/ensamblado_tasa_fallo
+s_1_corr08.png>] [71 <./charts/ensamblado_auc_1_corr08.png> <./charts/ensamblad
+o_modelos3.png>] [72 <./charts/ensamblado_modelos3_auc.png>]
+<./charts/comparacion_datasets_tasa_fallos.png, id=855, 4767.8125pt x 2357.8087
+5pt>
+File: ./charts/comparacion_datasets_tasa_fallos.png Graphic file (type png)
+<use ./charts/comparacion_datasets_tasa_fallos.png>
+Package pdftex.def Info: ./charts/comparacion_datasets_tasa_fallos.png  used on
+ input line 3873.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+<./charts/comparacion_datasets_auc.png, id=856, 4767.8125pt x 2357.80875pt>
+File: ./charts/comparacion_datasets_auc.png Graphic file (type png)
+<use ./charts/comparacion_datasets_auc.png>
+Package pdftex.def Info: ./charts/comparacion_datasets_auc.png  used on input l
+ine 3881.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+[73 <./charts/comparacion_datasets_tasa_fallos.png> <./charts/comparacion_datas
+ets_auc.png>]
+<./charts/comparacion_5_10_folds.png, id=868, 4767.8125pt x 2357.80875pt>
+File: ./charts/comparacion_5_10_folds.png Graphic file (type png)
+<use ./charts/comparacion_5_10_folds.png>
+Package pdftex.def Info: ./charts/comparacion_5_10_folds.png  used on input lin
+e 3913.
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+<./charts/modelos_finales.png, id=869, 4767.8125pt x 2357.80875pt>
+File: ./charts/modelos_finales.png Graphic file (type png)
+<use ./charts/modelos_finales.png>
+Package pdftex.def Info: ./charts/modelos_finales.png  used on input line 3943.
+
+(pdftex.def)             Requested size: 465.02354pt x 229.96637pt.
+
+LaTeX Warning: `!h' float specifier changed to `!ht'.
+
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 3965.
+[74 <./charts/comparacion_5_10_folds.png>] [75 <./charts/modelos_finales.png>]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 3965.
 (./memoria.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 3535.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 3535.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 3965.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 3965.
  ) 
 Here is how much of TeX's memory you used:
- 15616 strings out of 492616
- 243527 string characters out of 6129481
- 347182 words of memory out of 5000000
- 18683 multiletter control sequences out of 15000+600000
- 97418 words of font info for 161 fonts, out of 8000000 for 9000
+ 15930 strings out of 492616
+ 250340 string characters out of 6129481
+ 351225 words of memory out of 5000000
+ 18922 multiletter control sequences out of 15000+600000
+ 97548 words of font info for 162 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 37i,8n,41p,806b,486s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/
-texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2019/t
-exmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2019/texmf-dist/
-fonts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2019/texmf-dist/fonts/enc/
-dvips/lm/lm-ts1.enc}</usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/l
-mbx10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmbx12.pfb>
-</usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmbxi10.pfb></usr/loc
-al/texlive/2019/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive
-/2019/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2019/texmf
--dist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2019/texmf-dist/fonts
-/type1/public/lm/lmr17.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/publ
-ic/lm/lmr6.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr7.p
-fb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/loc
-al/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr9.pfb></usr/local/texlive/2
-019/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/local/texlive/2019/texmf-
-dist/fonts/type1/public/lm/lmri8.pfb></usr/local/texlive/2019/texmf-dist/fonts/
-type1/public/lm/lmsy10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/publ
-ic/lm/lmtk10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmtt
-10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
-Output written on memoria.pdf (67 pages, 16972196 bytes).
+ 37i,8n,41p,806b,484s stack positions out of 5000i,500n,10000p,200000b,80000s
+pdfTeX warning (dest): name{Hfootnote.6} has been referenced but does not exi
+st, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.5} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.4} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.3} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.2} has been referenced but does not exist
+, replaced by a fixed one
+
+pdfTeX warning (dest): name{Hfootnote.1} has been referenced but does not exist
+, replaced by a fixed one
+
+{/usr/local/texlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/usr/local/te
+xlive/2019/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/usr/local/texlive/2019/tex
+mf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/usr/local/texlive/2019/texmf-dist/fo
+nts/enc/dvips/lm/lm-mathit.enc}{/usr/local/texlive/2019/texmf-dist/fonts/enc/dv
+ips/lm/lm-ts1.enc}</usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmb
+x10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></
+usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmbxi10.pfb></usr/local
+/texlive/2019/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></usr/local/texlive/2
+019/texmf-dist/fonts/type1/public/lm/lmr10.pfb></usr/local/texlive/2019/texmf-d
+ist/fonts/type1/public/lm/lmr12.pfb></usr/local/texlive/2019/texmf-dist/fonts/t
+ype1/public/lm/lmr17.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public
+/lm/lmr6.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr7.pfb
+></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr8.pfb></usr/local
+/texlive/2019/texmf-dist/fonts/type1/public/lm/lmr9.pfb></usr/local/texlive/201
+9/texmf-dist/fonts/type1/public/lm/lmri10.pfb></usr/local/texlive/2019/texmf-di
+st/fonts/type1/public/lm/lmri8.pfb></usr/local/texlive/2019/texmf-dist/fonts/ty
+pe1/public/lm/lmsy10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public
+/lm/lmtk10.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmtt10
+.pfb></usr/local/texlive/2019/texmf-dist/fonts/type1/public/lm/lmtti10.pfb>
+Output written on memoria.pdf (75 pages, 20000761 bytes).
 PDF statistics:
- 1107 PDF objects out of 1200 (max. 8388607)
- 881 compressed objects within 9 object streams
- 373 named destinations out of 1000 (max. 500000)
- 19242 words of extra memory for PDF output out of 20736 (max. 10000000)
+ 1241 PDF objects out of 1440 (max. 8388607)
+ 982 compressed objects within 10 object streams
+ 423 named destinations out of 1000 (max. 500000)
+ 19366 words of extra memory for PDF output out of 20736 (max. 10000000)
 

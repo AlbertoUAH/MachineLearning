@@ -266,9 +266,9 @@ modelos_actuales$auc <- as.numeric(modelos_actuales$auc)
 modelos_actuales$tipo <- c(rep("LOGISTICA", 10), rep("RED NEURONAL", 10), rep("BAGGING", 10), rep("RANDOM FOREST", 10),
                            rep("GBM", 10), rep("SVM", 30), rep("XGBOOST", 10))
 
-modelos_actuales$modelo <- with(modelos_actuales,
+modelos_actuales[modelos_actuales$tipo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ]$modelo <- with(modelos_actuales[modelos_actuales$tipo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ],
                                 reorder(modelo,tasa, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
+p <- ggplot(modelos_actuales[modelos_actuales$tipo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ], aes(x = modelo, y = tasa)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=14, face = "bold"))
@@ -276,9 +276,9 @@ ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
 ggsave('./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg')
 
 
-modelos_actuales$modelo <- with(modelos_actuales,
-                                reorder(modelo,auc, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
+modelos_actuales[modelos_actuales$tipo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ]$modelo <- with(modelos_actuales[modelos_actuales$tipo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ],
+                                                                                                              reorder(modelo,auc, mean))
+q <- ggplot(modelos_actuales[modelos_actuales$tipo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ], aes(x = modelo, y = auc)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=14, face = "bold"))

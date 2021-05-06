@@ -17,6 +17,7 @@ suppressPackageStartupMessages({
   
   source("./librerias/librerias_propias.R")
   source("./librerias/cruzada SVM binaria polinomial.R")
+  source("./librerias/cruzada SVM binaria lineal.R")
 })
 
 # Funcion para calcular la tasa de fallos
@@ -51,6 +52,7 @@ rm(surgical_test_data)
 target <- "target"
 
 #-- Modelo 2
+var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 var_modelo2 <- c("mortality_rsi", "bmi", "month.8", "Age")
 
 #-- Parametros generales: semilla, numero de grupos y repeticiones
@@ -129,7 +131,7 @@ for (i  in 1:2) {
 
 # SVM Lineal
 for (i in 1:2) {
-  svm_lin   <- cruzadaSVMbin(data=datasets[[i]], vardep=target, listconti=var_modelo2,
+  svm_lin   <- cruzadaSVMbin(data=datasets[[i]], vardep=target, listconti=var_modelo1,
                              listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
                              C=0.01, replace=TRUE)
   
@@ -156,7 +158,7 @@ for (i in 1:2) {
 for (i in 1:2) {
   svm_rbf   <- cruzadaSVMbinRBF(data=datasets[[i]], vardep=target, listconti=var_modelo2,
                                 listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
-                                C=1, sigma=5)
+                                C=0.5, sigma=5)
   
   svm_rbf$tipo   <-"SVM_RBF"
   svm_rbf$modelo <- names(datasets)[i]
@@ -170,7 +172,7 @@ for (i  in 1:2) {
                             listconti=var_modelo2,listclass=c(""),
                             grupos=grupos,sinicio=sinicio,repe=repe,
                             min_child_weight=20,eta=0.1,nrounds=100,max_depth=6,
-                            gamma=0,colsample_bytree=1,subsample=0.5)
+                            gamma=0,colsample_bytree=1,subsample=1)
   
   xgboost$tipo   <-"XGboost"
   xgboost$modelo <- names(datasets)[i]
@@ -179,73 +181,6 @@ for (i  in 1:2) {
 }
 rm(i)
 
-source("./librerias/cruzadas ensamblado binaria fuente.R")
-# Ensamblado Bagging + XGboost
-for (i in 1:2) {
-  bagging_ensemb <- cruzadarfbin(data=datasets[[i]], vardep=target,
-                                 listconti=var_modelo2,listclass=c(""),
-                                 grupos=grupos,sinicio=sinicio,repe=repe,nodesize=20,
-                                 mtry=4,ntree=900, sampsize=1000,replace = TRUE)
-  
-  medias_bagging    <- as.data.frame(bagging_ensemb[1])
-  medias_bagging$modelo <-"Bagging"
-  pred_bagging      <- as.data.frame(bagging_ensemb[2])
-  pred_bagging$bagging <- pred_bagging$Yes
-  
-  xgboost_ensemb <- cruzadaxgbmbin(data=datasets[[i]],vardep=target,
-                                   listconti=var_modelo2,listclass=c(""),
-                                   grupos=grupos,sinicio=sinicio,repe=repe,
-                                   min_child_weight=20,eta=0.1,nrounds=100,max_depth=6,
-                                   gamma=0,colsample_bytree=1,subsample=0.5)
-  
-  medias_xgboost    <- as.data.frame(xgboost_ensemb[1])
-  medias_xgboost$modelo <-"XGboost"
-  pred_xgboost      <- as.data.frame(xgboost_ensemb[2])
-  pred_xgboost$xgboost <- pred_xgboost$Yes
-  
-  unipredi <- cbind(pred_bagging, pred_xgboost)
-  unipredi <- unipredi[, !duplicated(colnames(unipredi))]
-  
-  unipredi[, "bagging-xgboost"] <- (unipredi[, "bagging"] + unipredi[, "xgboost"]) / 2
-  
-  listado <- c("bagging-xgboost")
-  
-  # Cambio a Yes, No, todas las predicciones
-  repeticiones<-nlevels(factor(unipredi$Rep))
-  unipredi$Rep<-as.factor(unipredi$Rep)
-  unipredi$Rep<-as.numeric(unipredi$Rep)
-  
-  
-  medias0<-data.frame(c())
-  for (prediccion in listado)
-  {
-    unipredi$proba<-unipredi[,prediccion]
-    unipredi[,prediccion]<-ifelse(unipredi[,prediccion]>0.5,"Yes","No")
-    for (repe in 1:repeticiones)
-    {
-      paso <- unipredi[(unipredi$Rep==repe),]
-      pre<-factor(paso[,prediccion])
-      archi<-paso[,c("proba","obs")]
-      archi<-archi[order(archi$proba),]
-      obs<-paso[,c("obs")]
-      tasa=1-tasafallos(pre,obs)
-      t<-as.data.frame(tasa)
-      t$modelo<-prediccion
-      auc<-suppressMessages(auc(archi$obs,archi$proba))
-      t$auc<-auc
-      medias0<-rbind(medias0,t)
-    }
-  }
-  
-  medias0$tipo   <-"Ensamblado"
-  medias0$modelo <- names(datasets)[i]
-  
-  modelos <- rbind(modelos, medias0[c("tasa", "auc", "tipo", "modelo")])
-}
-rm(unipredi); rm(bagging_ensemb); rm(xgboost_ensemb); rm(medias_bagging); rm(medias_xgboost)
-rm(pred_bagging); rm(pred_xgboost); rm(listado); rm(prediccion); rm(paso); rm(pre); rm(archi)
-rm(obs); rm(tasa); rm(t); rm(auc) ;rm(medias0)
-
 #-- Comparamos las salidas
 #   Tasa de fallos
 modelos$tipo <- with(modelos,
@@ -253,7 +188,8 @@ modelos$tipo <- with(modelos,
 ggplot(modelos, aes(x = tipo, y = tasa, colour = modelo)) +
   geom_boxplot(notch = FALSE) +
   ggtitle("Comparacion tasa de fallos dataset (subconjunto) y dataset original") +
-  theme_bw()
+  theme_bw() + theme(text = element_text(face = "bold", size = 13))
+ggsave('./charts/comparacion_datasets_tasa_fallos.png')
 
 #  AUC
 modelos$tipo <- with(modelos,
@@ -261,5 +197,5 @@ modelos$tipo <- with(modelos,
 ggplot(modelos, aes(x = tipo, y = auc, colour = modelo)) +
   geom_boxplot(notch = FALSE) +
   ggtitle("Comparacion AUC dataset (subconjunto) y dataset original") +
-  theme_bw()
-
+  theme_bw() + theme(text = element_text(face = "bold", size = 13))
+ggsave('./charts/comparacion_datasets_auc.png')

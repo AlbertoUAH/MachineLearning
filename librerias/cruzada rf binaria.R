@@ -44,7 +44,7 @@ if (any(listclass==c(""))==FALSE)
   databis<-cbind(datacon,databis[,-numerocont,drop=FALSE ])
   
   databis[,vardep]<-as.factor(databis[,vardep])
-  
+  print(names(databis))
   formu<-formula(paste("factor(",vardep,")~.",sep=""))
   
   # Preparo caret   

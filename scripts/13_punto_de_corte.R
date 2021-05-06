@@ -18,6 +18,8 @@ suppressPackageStartupMessages({
   
   source("./librerias/librerias_propias.R")
   source("./librerias/funcion resultadosrf.R")
+  source("./librerias/funcion resultadosgbm.R")
+  source("./librerias/funcion resultadosxgboost.R")
 })
 
 #--- Creamos el cluster
@@ -47,8 +49,10 @@ sinicio <- 1234; grupos <- 5; repe <- 10
 
 #-- Probamos con diferentes puntos de corte
 puntos_corte <- seq(0, 1, 0.05)
-dataframe_puntos_corte_rf <- data.frame()
+dataframe_puntos_corte_rf      <- data.frame()
 dataframe_puntos_corte_bagging <- data.frame()
+dataframe_puntos_corte_gbm     <- data.frame()
+dataframe_puntos_corte_xgboost <- data.frame()
 
 for(punto_corte in puntos_corte) {
   result_rf <- resultadosrf(dataf=surgical_dataset,vardep=target,listconti=var_modelo2,mtry=2,ntree=2000,sampsize=1000,
@@ -69,6 +73,31 @@ for(punto_corte in puntos_corte) {
   result_rf$pto_corte <- punto_corte
   
   dataframe_puntos_corte_bagging <- rbind(dataframe_puntos_corte_bagging, result_rf)
+  print(punto_corte)
+}
+
+for(punto_corte in puntos_corte) {
+  result_gbm <- resultadosgbm(dataf=surgical_dataset,
+                              vardep=target,listconti=var_modelo2,
+                              n.minobsinnode=20,shrink=0.2,n.trees=100,
+                              bag.fraction=0.5,corte=punto_corte)
+  result_gbm$AUC <- as.numeric(result_gbm$AUC)
+  result_gbm$tasa <- as.numeric(result_gbm$tasa)
+  result_gbm$pto_corte <- punto_corte
+  
+  dataframe_puntos_corte_gbm <- rbind(dataframe_puntos_corte_gbm, result_gbm)
+  print(punto_corte)
+}
+
+for(punto_corte in puntos_corte) {
+  result_xgboost <- resultadosxgboost(dataf=surgical_dataset,
+                              vardep=target,listconti=var_modelo2,
+                              corte=punto_corte)
+  result_xgboost$AUC <- ifelse(is.null(result_xgboost$AUC), 0, as.numeric(result_xgboost$AUC))
+  result_xgboost$tasa <- as.numeric(result_xgboost$tasa)
+  result_xgboost$pto_corte <- punto_corte
+  
+  dataframe_puntos_corte_xgboost <- rbind(dataframe_puntos_corte_xgboost, result_xgboost)
   print(punto_corte)
 }
 
