@@ -286,10 +286,11 @@ tuneo_gradient_boosting_modelo2_10_rep <- tuneo_gradient_boosting(
 )
 
 tuneo_modelos1_2      <- rbind(tuneo_gradient_boosting_modelo1_10rep, tuneo_gradient_boosting_modelo2_10_rep)
-tuneo_modelos1_2$repe <- c(rep("Modelo 1", 20), rep("Modelo 2", 20))
+tuneo_modelos1_2$Modelo <- c(rep("Modelo 1", 20), rep("Modelo 2", 20))
+tuneo_modelos1_2$bag.fraction <- c(rep("0.5", 10), rep("1", 10))
 
-tuneo_modelos1_2$modelo <- with(tuneo_modelos1_2, reorder(modelo,tasa, mean))
-p <- ggplot(tuneo_modelos1_2, aes(x = modelo, y = tasa, col = repe)) +
+tuneo_modelos1_2$Modelo <- with(tuneo_modelos1_2, reorder(Modelo,tasa, mean))
+p <- ggplot(tuneo_modelos1_2, aes(x = Modelo, y = tasa, col = bag.fraction)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo") + theme(
@@ -298,7 +299,7 @@ p <- ggplot(tuneo_modelos1_2, aes(x = modelo, y = tasa, col = repe)) +
 ggsave("./charts/gradient_boosting/modelo1/05_tasa_fallos_modelo1_10rep.png")
 
 tuneo_modelos1_2$modelo <- with(tuneo_modelos1_2, reorder(modelo,auc, mean))
-t <- ggplot(tuneo_modelos1_2, aes(x = modelo, y = auc, col = repe)) +
+t <- ggplot(tuneo_modelos1_2, aes(x = Modelo, y = auc, col = bag.fraction)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo") + theme(

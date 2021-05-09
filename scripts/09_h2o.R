@@ -28,6 +28,7 @@ target <- "target"
 var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
 var_modelo2 <- c("mortality_rsi", "bmi", "month.8", "Age")
 
+
 h2o.init()
 
 #-- Covertimos el dataset a un objeto h2o

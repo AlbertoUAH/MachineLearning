@@ -177,7 +177,7 @@ svm_pol_2_2 <- data.frame("id" = c(21, 22, 23, 24, 25, 26),
 svm_poly_5_rep_v2   <- as.data.frame(read_xlsx("./data/modelos_svm.xlsx", sheet = "SVM_polinomial_2"))
 svm_poly_5_rep_v2[, "C"] <- as.numeric(svm_poly_5_rep_v2[, "C"])
 svm_poly_5_rep_v2 <- rbind(svm_poly_5_rep_v2, svm_pol_2_2)
-p <- ggplot(svm_poly_5_rep_v2[svm_poly_5_rep_v2$Modelo == 1, ], aes(x = factor(C), y = Accuracy,
+p <- ggplot(svm_poly_5_rep_v2[svm_poly_5_rep_v2$Modelo == 1 & svm_poly_5_rep_v2$C > 0.005, ], aes(x = factor(C), y = Accuracy,
                                                          color = factor(scale), pch = factor(scale))) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) + 
   ggtitle("SVM Polinomial Modelo 1 (Grado 2)")  + theme(text = element_text(size=13, face = "bold"))
