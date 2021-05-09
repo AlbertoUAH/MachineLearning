@@ -209,12 +209,12 @@ ggsave('./charts/01_feature_selection_segunda_comparacion.png')
 # del modelo aumenta
 rf_modelo_bic <- train_rf_model(surgical_dataset, 
                                 as.formula(paste0("target~", paste0(candidato.bic.2, collapse = "+"))),
-                                mtry = 5, ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                mtry = 5, ntree = 2000, grupos = 5, repe = 5, nodesize = 10,
                                 seed = 1234)
 
 rf_modelo_aic   <- train_rf_model(surgical_dataset, 
                                  as.formula(paste0("target~", paste0(candidato.aic.2, collapse = "+"))),
-                                 mtry = 5, ntree = 1000, grupos = 5, repe = 5, nodesize = 10,
+                                 mtry = 5, ntree = 2000, grupos = 5, repe = 5, nodesize = 10,
                                  seed = 1234)
 
 
@@ -225,15 +225,15 @@ imp2 <- show_vars_importance(rf_modelo_bic, "Importancia variables (BIC)")
 ggpubr::ggarrange(imp1, imp2, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_comparacion_random_forest.png')
 
-top4 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate")
-candidato.aic.top5 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate", "ahrq_ccs")
-candidato.bic.4 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate", "baseline_osteoart")
-candidato.bic.5 <- c("Age", "mortality_rsi", "bmi", "ccsMort30Rate", "month.8")
+top4 <- c("Age", "mortality_rsi", "bmi", "month.8")
+candidato.aic.top5 <- c("Age", "mortality_rsi", "bmi", "month.8", "ahrq_ccs")
+candidato.bic.4 <- c("Age", "mortality_rsi", "bmi", "month.8", "baseline_osteoart")
+candidato.bic.5 <- c("Age", "mortality_rsi", "bmi", "month.8", "ccsMort30Rate")
 
-candidatos_4         <- list(candidato.aic, candidato.bic, top4, candidato.rfe.rf, 
+candidatos_4         <- list(candidato.rfe.lr.2, candidato.aic, candidato.bic, top4, candidato.rfe.rf, 
                              candidato.bic.4, candidato.bic.5)
-nombres_candidatos_4 <- c("AIC" , "BIC" , "AIC-BIC-TOP 4", "RFE RF TOP 5 (AIC TOP 5)",
-                          "BIC (TOP 5 - baseline_osteoart)", "BIC (TOP 5 - month.8)")
+nombres_candidatos_4 <- c("RFE LR TOP 3", "AIC" , "BIC" , "AIC-BIC-TOP 4", "RFE RF TOP 5 (AIC TOP 5)",
+                          "BIC (TOP 5 - baseline_osteoart)", "BIC (TOP 5 - ccsMort30Rate)")
 union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
                             grupos = 5, repe = 5)
 union4$modelo <- with(union4, reorder(modelo,tasa, mean))
@@ -264,13 +264,13 @@ write.csv(surgical_dataset, "data/surgical_dataset_final.csv", row.names = FALSE
 
 #-- Nota: de cara a las comparaciones con el resto de modelos, aumentamos el numero de repeticiones a 10
 candidatos_final         <- list(candidato.bic.5, top4)
-nombres_candidatos_final <- c("BIC (TOP 5 - month.8)", "AIC-BIC-TOP 4")
+nombres_candidatos_final <- c("BIC (TOP 5 - ccsMort30Rate)", "AIC-BIC-TOP 4")
 union_final <- cruzada_logistica(surgical_dataset, target, candidatos_final, nombres_candidatos_final,
                             grupos = 5, repe = 10)
 rm(candidatos_final)
 rm(nombres_candidatos_final)
 
-union_10_rep <- rbind(union4[union4$modelo %in% c("BIC (TOP 5 - month.8)", "AIC-BIC-TOP 4"), ], union_final)
+union_10_rep <- rbind(union4[union4$modelo %in% c("BIC (TOP 5 - ccsMort30Rate)", "AIC-BIC-TOP 4"), ], union_final)
 union_10_rep$rep <- c(rep("5", 10), rep("10", 20))
 
 # Tasa de fallos

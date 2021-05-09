@@ -133,76 +133,88 @@ colors <- c("Sentividad" = "red", "Especificidad" = "darkblue")
 
 #-- Comparacion sub-dataset y original (RF y Bagging)
 #-- Modelo 2
-ggplot(dataframe_puntos_corte_rf, aes(x = factor(pto_corte))) + 
+p <- ggplot(dataframe_puntos_corte_rf, aes(x = factor(pto_corte))) + 
   geom_point(aes(y = sensitividad, color = "Sentividad")) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
-  ggtitle("Especificidad vs Sensitividad (Random Forest) - Modelo 2") +
+  ggtitle("Especificidad vs Sensitividad (Random Forest)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors)
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
-ggplot(dataframe_puntos_corte_bagging, aes(x = factor(pto_corte))) + 
+q <- ggplot(dataframe_puntos_corte_gbm, aes(x = factor(pto_corte))) + 
   geom_point(aes(y = sensitividad, color = "Sentividad")) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
-  ggtitle("Especificidad vs Sensitividad (Bagging) - Modelo 2") +
+  ggtitle("Especificidad vs Sensitividad (gbm)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors)
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+
+ggpubr::ggarrange(p, q, common.legend = TRUE)
 
 #-- Modelo 2
-ggplot(dataframe_puntos_corte_rf_1, aes(x = factor(pto_corte))) + 
+p <- ggplot(dataframe_puntos_corte_rf_1, aes(x = factor(pto_corte))) + 
   geom_point(aes(y = sensitividad, color = "Sentividad")) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (Random Forest) - Modelo 1") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors)
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
-ggplot(dataframe_puntos_corte_bagging_1, aes(x = factor(pto_corte))) + 
+q <- ggplot(dataframe_puntos_corte_bagging_1, aes(x = factor(pto_corte))) + 
   geom_point(aes(y = sensitividad, color = "Sentividad")) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (Bagging) - Modelo 1") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors)
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+ggpubr::ggarrange(p, q, common.legend = TRUE)
 
 #-----------------------------------------------------------------------------------------------------
 #-- Probamos con diferentes semillas (10)
 semillas <- sample(1:10000, size = 10)
 dataframe_puntos_corte_rf_multiple_seeds <- data.frame()
-dataframe_puntos_corte_bagging_multiple_seeds <- data.frame()
+dataframe_puntos_corte_gbm_multiple_seeds <- data.frame()
 
 for(semilla in semillas) {
   for(punto_corte in puntos_corte) {
-    result_rf <- resultadosrf(dataf=surgical_dataset,vardep=target,listconti=var_modelo2,mtry=2,ntree=2000,sampsize=1000,
-                              nodesize=20,corte=punto_corte, sinicio = semilla)
-    result_rf$AUC <- as.numeric(result_rf$AUC)
-    result_rf$tasa <- as.numeric(result_rf$tasa)
-    result_rf$pto_corte <- punto_corte
-    
-    dataframe_puntos_corte_rf_multiple_seeds <- rbind(dataframe_puntos_corte_rf_multiple_seeds, result_rf)
 
-    result_rf <- resultadosrf(dataf=surgical_dataset,vardep=target,listconti=var_modelo2,mtry=4,ntree=900, sampsize=1000,
-                              nodesize=20,corte=punto_corte, sinicio = semilla)
+    result_rf <- resultadosgbm(dataf=surgical_dataset,
+                               vardep=target,listconti=var_modelo2,
+                               n.minobsinnode=20,shrink=0.2,n.trees=100,
+                               bag.fraction=0.5,corte=punto_corte)
     result_rf$AUC <- as.numeric(result_rf$AUC)
     result_rf$tasa <- as.numeric(result_rf$tasa)
     result_rf$pto_corte <- punto_corte
     
-    dataframe_puntos_corte_bagging_multiple_seeds <- rbind(dataframe_puntos_corte_bagging_multiple_seeds, result_rf)
+    dataframe_puntos_corte_gbm_multiple_seeds <- rbind(dataframe_puntos_corte_gbm_multiple_seeds, as.data.frame(t(unlist(result_rf))))
   }
   print(semilla)
 }
 
 #-- Solo con el subconjunto
-ggplot(dataframe_puntos_corte_rf_multiple_seeds, aes(x = factor(pto_corte))) + 
+p <- ggplot(dataframe_puntos_corte_rf_multiple_seeds, aes(x = factor(pto_corte))) + 
   geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
   geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (Random Forest)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors)
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
-ggplot(dataframe_puntos_corte_bagging_multiple_seeds, aes(x = factor(pto_corte))) + 
+q <- ggplot(dataframe_puntos_corte_rf_multiple_seeds[dataframe_puntos_corte_rf_multiple_seeds$pto_corte > 0.1 & dataframe_puntos_corte_rf_multiple_seeds$pto_corte< 0.5, ], aes(x = factor(pto_corte))) + 
   geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
   geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
-  ggtitle("Especificidad vs Sensitividad (Bagging)") +
+  ggtitle("Especificidad vs Sensitividad (Ampliado)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors)
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+
+p <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds, aes(x = factor(pto_corte))) + 
+  geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
+  geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
+  ggtitle("Especificidad vs Sensitividad (gbm)") +
+  labs(x ="Punto de corte", y = "Valor") +
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+
+q <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds[dataframe_puntos_corte_gbm_multiple_seeds$pto_corte > 0.1 & dataframe_puntos_corte_gbm_multiple_seeds$pto_corte< 0.5, ], aes(x = factor(pto_corte))) + 
+  geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
+  geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
+  ggtitle("Especificidad vs Sensitividad (Ampliado)") +
+  labs(x ="Punto de corte", y = "Valor") +
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
 
 #-- ¿En que punto de corte existe un equilibrio entre sensitividad y especificidad?
@@ -220,10 +232,10 @@ dataframe_puntos_corte_bagging_multiple_seeds[obs_bagging, ]
 
 #-- Indice de Youden
 indice_youden_rf      <- dataframe_puntos_corte_rf_multiple_seeds$especificidad + dataframe_puntos_corte_rf_multiple_seeds$sensitividad - 1
-indice_youden_bagging <- dataframe_puntos_corte_bagging_multiple_seeds$especificidad + dataframe_puntos_corte_bagging_multiple_seeds$sensitividad - 1
+indice_youden_gbm <- dataframe_puntos_corte_gbm_multiple_seeds$especificidad + dataframe_puntos_corte_gbm_multiple_seeds$sensitividad - 1
 
 dataframe_puntos_corte_rf_multiple_seeds[which(indice_youden_rf == max(indice_youden_rf)), ]
-dataframe_puntos_corte_bagging_multiple_seeds[which(indice_youden_bagging == max(indice_youden_bagging)), ]
+dataframe_puntos_corte_gbm_multiple_seeds[which(indice_youden_gbm == max(indice_youden_gbm)), ]
 
 # F-1 score
 f1_rf <- dataframe_puntos_corte_rf_multiple_seeds$VP / (dataframe_puntos_corte_rf_multiple_seeds$VP + 
@@ -256,8 +268,8 @@ result_rf <- famdcontour(dataf=surgical_dataset,listconti=var_modelo2,listclass=
                          nodesize=20)
 
 result_bagging <-famdcontour(dataf=surgical_dataset,listconti=var_modelo2,listclass=c(""),vardep=target,
-                             title="Bagging",title2=" ",selec=0,modelo="rf",classvar=0,mtry=4,ntree=900,sampsize=1000,
-                             nodesize=20)
+                             title="gbm",title2=" ",selec=0,modelo="rf",classvar=0,n.minobsinnode=20,shrink=0.2,ntreegbm = 100,
+                             bag.fraction=0.5)
 
 
 

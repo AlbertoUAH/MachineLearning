@@ -2,14 +2,14 @@
 title: "Práctica Machine Learning"
 author: "Fernández Hernández, Alberto"
 date: "4/28/2021"
-header-includes:
-  - \usepackage[font={small}]{caption}
-  - \usepackage[document]{ragged2e}
-
 output:
-  pdf_document: 
+  word_document: default
+  pdf_document:
     fig_cap: yes
     keep_tex: yes
+header-includes:
+- \usepackage[font={small}]{caption}
+- \usepackage[document]{ragged2e}
 ---
 \justify
 ```{r setup, include=FALSE}
@@ -608,7 +608,7 @@ knitr::include_graphics("./charts/01_feature_selection_primera_comparacion.png")
 
 Como primera impresión, y dada la escala del eje Y, la diferencia en cuanto a tasa de fallos y AUC se refiere es muy pequeña, concretamente de 0.01, aproximadamente (0.21 en tasa de fallos y 0.79 en AUC frente a 0.22 y 0.78).
 
-Por tanto, dado que la diferencia entre ambos _datasets_ es pequeña, __de cara al resto de la práctica se trabajó con el subconjunto del 40 %__. No obstante, en los últimos apartados (y una vez tuneados los modelos), se realiza una última comparación con el fichero original, comprobando de este modo si el orden de los algoritmos se conserva. Además, de cara a la evaluación de los modelos se ha tomado la decisión de utilizar el resto de observaciones del _dataset_ original como conjunto _test_ __con el que evaluar (como primera impresión) la precisión del modelo__.
+Por tanto, dado que la diferencia entre ambos _datasets_ es pequeña, __de cara al resto de la práctica se trabajó con el subconjunto del 40 %__. No obstante, en los últimos apartados (y una vez tuneados los modelos), se realiza una última comparación con el fichero original, comprobando de este modo si el orden de los algoritmos se conserva.
 
 ### 4.6.2 Selección de los mejores sets de variables
 
@@ -691,20 +691,7 @@ Finalmente, realizamos una última comparación de ambos modelos candidatos, __a
 knitr::include_graphics('./charts/01_feature_selection_comparacion_5_10_rep.png')
 ```
 
-A primera vista, al aumentar el número de repeticiones, la varianza en ambos modelos es muy similar, con una ventaja en el segundo modelo en cuanto a AUC se refiere (0.775 frente a 0.755, aproximadamente). Por otro lado, si nos fijamos en las estadísticas obtenidas a partir de los datos _test_:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.794, 0.7824),
-           sensibilidad = c(0.67730, 0.66707), especificidad = c(0.81011, 0.79434),
-           valor_pred_pos = c(0.33013, 0.25194), valor_pred_neg = c(0.94783, 0.95830))
-```
-
-Observamos que la sensibilidad de ambos modelos ronda el 66-67 %, mientras que la especificidad aumenta hasta el 80 %, aproximadamente. Es decir, con un modelo lineal como es el caso de la regresión logística conseguimos clasificar la mayoría de los pacientes a 0 (sin complicaciones). Sin embargo, tanto el valor predictivo positivo como la sensibilidad nos indican justo con lo contrario en relación a los pacientes con complicaciones: 
-
-1. __Valor predictivo positivo__ (en torno al 25-33 % en ambos modelos), lo que se traduce en un alto número de falsos positivos.
-
-2. __Sensbilidad__ (en torno al 66-67 % en ambos modelos), lo que se traduce en un alto número de falsos negativos.
+A primera vista, al aumentar el número de repeticiones, la varianza en ambos modelos es muy similar, con una ventaja en el segundo modelo en cuanto a AUC se refiere (0.775 frente a 0.755, aproximadamente).
 
 # 5. Modelos iniciales con H2O
 
@@ -764,7 +751,9 @@ Analizando los parámetros, por lo general _h2o_ __opta por un modelo _gbm_ senc
 10          GBM_grid__1_AutoML_20210422_182719_model_1 0.9044822 0.3115999            0.1720491
 ```
 
-Nuevamente, con el segundo _set_ de variables continua optando por un modelo _grandient boosting_, con un AUC muy similar al primer _set_ de variables (0.90 frente a 0.92). Además, si analizamos los parámetros del mejor modelo:
+Nuevamente, con el segundo _set_ de variables continua optando por un modelo _grandient boosting_, con un AUC muy similar al primer _set_ de variables (0.90 frente a 0.92). Dado que los modelo logísticos obtenidos hasta el momento apenas superan el 75 y 77 % de AUC, el hecho de obtener un mejor resultado con _gradient boosting_ __es un claro indicio de la no linealidad de las variables__.
+
+Además, si analizamos los parámetros del mejor modelo:
 
 ```{r, echo=FALSE}
 data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (AIC-BIC-top4)"),
@@ -906,18 +895,7 @@ Del mismo modo que sucedía con el primer _set_ de variables, __aumentar el núm
 
 ## 6.3 Comparación final
 
-Una vez obtenidos ambos modelos, con los datos _test_ realizamos las primeras predicciones:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.8992, 0.9032),
-           sensibilidad = c(0.9471, 0.9639), especificidad = c(0.8897, 0.8913),
-           valor_pred_pos = c(0.6305, 0.6351), valor_pred_neg = c(0.9883, 0.9921))
-```
-
-En primera instancia, __con un modelo de red sencillo conseguimos mejorar prácticamente en todos los aspectos__. No obstante, cabe destacar el valor predictivo positivo, que pese a su mejoría (del 20-30 al 63 %), __continua existiendo un alto porcentaje de falsos positivos__.
-
-En conclusión, a la vista de los resultados obtenidos, tanto en tasa de fallos como en AUC, __los modelos de red mejoran significativamente los resultados del modelo__, un claro indicio de la __no linealidad con la variable objetivo__. En relación con ambos _set_ de variables, el hecho de añadir una variable _input_ adicional en el primer modelo __no hace mejorar significativamente sus resultados__:
+Una vez obtenidos ambos modelos, realizamos la comparación con logística:
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/02_log_avnnet_tasa.jpeg")
@@ -925,6 +903,8 @@ knitr::include_graphics("./charts/comparativas/02_log_avnnet_tasa.jpeg")
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion AUC log-avnnet", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/02_log_avnnet_auc.jpeg")
 ```
+
+A la vista de los resultados obtenidos, tanto en tasa de fallos como en AUC, __los modelos de red mejoran significativamente los resultados del modelo__, un claro indicio (del mismo modo que en _h2o_) de la __no linealidad con la variable objetivo__. Por otro lado, en relación con ambos _set_ de variables, el hecho de añadir una variable _input_ adicional en el primer modelo __no hace mejorar significativamente sus resultados__.
 
 __RESUMEN red neuronal__:
 
@@ -1125,18 +1105,7 @@ A simple vista, no existe diferencia entre modelos con o sin reemplazamiento en 
 
 ## 7.5 Comparación final
 
-Finalmente, realizamos la comparación final de ambos modelos _bagging_ con los datos _test_:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.901, 0.9019),
-           sensibilidad = c(0.9214, 0.9468), especificidad = c(0.8966, 0.8928),
-           valor_pred_pos = c(0.6589, 0.6424), valor_pred_neg = c(0.9813, 0.9880))
-```
-
-Por lo general, la estadísticas de las predicciones mejoran ligeramente, aunque se mantienen en la misma línea del modelo de red neuronal: altos porcentajes de sensibilidad, especificidad y valor predictivo negativo, aunque el valor predictivo positivo se sitúa en torno al 64-65 %, aproximadamente, lo cual es un indicativo de la presencia de un alto número de falsos positivos en las predicciones. Además, la diferencia entre el primer modelo _bagging_ (con 5 variables _input_) y el segundo (con tan solo 4), no es muy relevante en base a las estadísticas anteriores. 
-
-Además, si observamos la distribución de la tasa de fallos y AUC en los modelos: 
+Finalmente, realizamos la comparación final de ambos modelos _bagging_, tanto en tasa de fallos como en AUC, con el resto de modelos:
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/03_log_avnnet_bagging_tasa.jpeg")
@@ -1316,31 +1285,7 @@ Como podemos comprobar, el hecho de seleccionar muestras con o sin reemplazamien
 
 ## 8.4 Comparación final
 
-Por último, realizamos la comparación final de ambos modelos _random forest_ con los datos _test_:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.899, 0.8964),
-           sensibilidad = c(0.9052, 0.9117), especificidad = c(0.8976, 0.8931),
-           valor_pred_pos = c(0.6639, 0.6465), valor_pred_neg = c(0.9769, 0.9792))
-```
-
-En base a los resultados obtenidos, no se diferencia demasiado de un modelo _bagging_:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.901, 0.9019),
-           sensibilidad = c(0.9214, 0.9468), especificidad = c(0.8966, 0.8928),
-           valor_pred_pos = c(0.6589, 0.6424), valor_pred_neg = c(0.9813, 0.9880))
-```
-
-1. __Precisión__: de 0.901 y 0.9019 a 0.899 y 0.8964 en ambos _sets_ de variables, respectivamente.
-2. __Sensibilidad__: de 0.9214 y 0.9468 a 0.9052 y 0.9117, respectivamente (empeora ligeramente).
-3. __Especificidad__: tanto en _bagging_ como en _random forest_ se sitúa en torno a 0.89.
-4. __Valor predictivo positivo__: continúa situándose en torno a 0.64-0.65-0.66.
-5. __Valor predictivo negativo__: continúa situándose en torno a 0.97-0.98.
-
-Es decir, __añadiendo el sorteo de variables al modelo (mtry), la variación que experimenta en el conjunto _test_ es muy pequeña__. De hecho, si observamos la distribución de la tasa de fallos y AUC:
+Por último, realizamos la comparación final de ambos modelos _random forest_ con el resto de modelos:
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg")
@@ -1457,17 +1402,6 @@ __RESUMEN _gradient boosting___:
 
 ## 9.2 Comparación final
 
-A continuación, con los modelos obtenidos realizamos la predicción sobre el conjunto _test_:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.903, 0.9052),
-           sensibilidad = c(0.9149, 0.9264), especificidad = c(0.9003, 0.9006),
-           valor_pred_pos = c(0.6731, 0.6731), valor_pred_neg = c(0.9792, 0.9823))
-```
-
-Como podemos comprobar, _gradient boosting_ se sitúa prácticamente en la misma línea que el resto de modelos basados en árbol: __alta precisión, sensibilidad, especificidad y valor predictivo negativo, pero con un valor predictivo positivo menor, en torno al 67 %__:
-
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf-gbm", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa.jpeg")
 ```
@@ -1475,7 +1409,7 @@ knitr::include_graphics("./charts/comparativas/05_log_avnnet_bagging_rf_gbm_tasa
 knitr::include_graphics("./charts/comparativas/05_log_avnnet_bagging_rf_gbm_auc.jpeg")
 ```
 
-De hecho, aunque la tasa de fallos en _gradient boosting_ sea ligeramente menor, __modelos como _random forest_ o _bagging_ continuan siendo una mejor alternativa__.
+Como podemos comprobar, _gradient boosting_ se sitúa prácticamente en la misma línea que el resto de modelos basados en árbol. De hecho, aunque la tasa de fallos en _gradient boosting_ sea ligeramente menor, __modelos como _random forest_ o _bagging_ continuan siendo una mejor alternativa__, dado que obtienen modelos similares con menos muestras (con 1000 observaciones en lugar del 50 % de los datos, además de sortear variables).
 
 # 10. _Support Vector Machines_
 
@@ -1650,36 +1584,7 @@ Sin duda alguna, __la mejor alternativa tanto en tasa de fallos como en AUC es e
 
 2. Por el contrario, con el _kernel_ radial, añadir dicha variable perjudica al modelo en cuanto a la tasa de fallos (de 0.16 con cinco variables a 0.12-0.13 con tan solo cuatro), aunque en AUC se mantienen prácticamente idénticos.
 
-Por otro lado, __analicemos las predicciones obtenidas con el conjunto _test___:
-
-__SVM Lineal__:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.789, 0.549),
-           sensibilidad = c(0.65844, 0.4998), especificidad = c(0.80678, 0.7655),
-           valor_pred_pos = c(0.31733, 0.1731), valor_pred_neg = c(0.94540, 0.7823))
-```
-
-__SVM Polinomial__:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.794, 0.7826),
-           sensibilidad = c(0.71977, 0.63188), especificidad = c(0.80205, 0.80316),
-           valor_pred_pos = c(0.28304, 0.30453), valor_pred_neg = c(0.96345, 0.94116))
-```
-
-__SVM RBF__:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 1 (BIC TOP 5)", "Modelo 2 (top 4)"),
-           precision = c(0.8517, 0.8804),
-           sensibilidad = c(0.8000, 0.8897), especificidad = c(0.8622, 0.8786),
-           valor_pred_pos = c(0.5396, 0.5935), valor_pred_neg = c(0.9553, 0.9756))
-```
-
-Al igual que en la comparación, con el conjunto _test_ __los modelos SVM RBF resultan ser claramente los ganadores__, aunque con unos porcentajes inferiores con respecto a los modelos basados en árbol o _gradient boosting_:
+A la vista de los resultados obtenidos, __los modelos SVM RBF resultan ser claramente los ganadores__, con tasas de fallos y AUC similares al de un modelo de red, pero inferiores (ligeramente) con respecto a modelos basados en árbol o _gradient boosting_:
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf-gbm-svm", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa.jpeg")
@@ -1789,16 +1694,7 @@ __RESUMEN _XGboost___:
 
 ## 11.5 Comparación final
 
-Una vez elaborado el modelo, realizamos una primera predicción con los datos _test_:
-
-```{r, echo=FALSE}
-data.frame(modelo = c("Modelo 2 (top 4)"),
-           precision = c(0.9091),
-           sensibilidad = c(0.9333), especificidad = c(0.9037),
-           valor_pred_pos = c(0.6840), valor_pred_neg = c(0.9838))
-```
-
-Del mismo modo, __se mantiene en la "linea" de lo obtenido de otros modelos no lineales como _random forest_, _bagging_ o _gradient boosting___ (aunque si mejora los resultados con respecto a la _svm_ radial).
+Del mismo modo, __se mantiene en la "linea" de lo obtenido de otros modelos no lineales como _random forest_, _bagging_ o _gradient boosting_: baja tasa de fallos y elevado AUC__: 
 
 ```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparacion tasa fallos log-avnnet-bagging-rf-gbm-svm-xgboost", echo=FALSE}
 knitr::include_graphics("./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg")
@@ -1989,16 +1885,90 @@ De todos los modelos presentes, y dejándonos guiar por los gráficos, diríamos
 
 De nuevo, la escala del gráfico puede llevar a engaño, y es que la diferencia entre los modelos basados en árboles y _boosting_ es ínfima. A modo de ejemplo, entre la tasa de fallos de _gbm_ y un modelo _Random Forest_ es de tan solo 0.007. En relación a la variancia, sucede lo mismo: aunque _Random Forest_ aperente tener la mayor variabilidad en cuanto a tasa de fallos, lo cierto es que la escala del eje puede conducir a engaño, puesto que la amplitud es de apenas unas milésimas. 
 
-Por tanto, a la vista de los resultados, __no merece la pena emplear un modelo _boosting_ en lugar de _Random Forest__. Además, pese al mayor número de árboles que se han empleado (2000), una de las ventajas del modelo _Random Forest_, frente a _gbm_, _Xgboost_ o incluso _bagging_, __es el sorteo de variables y el menor tamaño de la submuestra__. De este modo, sorteando tan solo dos variables a lo largo de cada nivel del árbol (mtry = 2), así como tan solo 1000 observaciones para cada árbol (lo cual supone alrededor del 17 % del _sub-dataset_ empleado, menos del 50 % como es el caso de _gbm_), __los resultados obtenidos son muy similares, aún incluso con menos recursos__. 
+Por tanto, y a la vista de los resultados obtenidos, __podemos decantarnos por dos posibles soluciones, cuya diferencia no es muy relevante__: __un modelo basado en árbol o por _boosting___. No obstante, analicemos las medidas obtenidas por cada modelo, esto es, __especificidad, sensibilidad, valor predictivo positivo y negativo__:
 
-No obstante, podemos comparar las medidas básicas de cada modelo (sensibilidad, especificidad, valor predictivo positivo y negativo):
+```{r}
+data.frame(modelo = c("gbm", "Random Forest", "bagging", "Xgboost"),
+           especificidad = c(0.9851, 0.9763, 0.9841, 0.9805), sensibilidad = c(0.6487, 0.6487, 0.6474, 0.6593), valor_pred_pos = c(0.9375, 0.9044, 0.9338, 0.9210), valor_pred_neg = c(0.8903, 0.8894, 0.8899, 0.8928))
+```
 
+En cualquiera de los modelos, __las medidas obtenidas son muy similares__, modelos cuyo principal "inconveniente" es la alta tasa de falsos negativos que presentan, lo cual se traduce en un porcentaje de sensibilidad bajo. Es decir, mientras que los modelos son capaces de clasisificar correctamente a un paciente sin complicación (alto porcentaje de especificidad), el alto número de falsos negativos __dificulta clasificar a un paciente con complicaciones__, es decir, como verdadero positivo. Si a lo anterior se le añade el desbalanceo de clases sobre la variable objetivo, el porcentaje se sensbilidad disminuye (también el valor predicitivo positivo, aunque en menor porcentaje dado el mayor número de pacientes "sin complicaciones").
 
+Por tanto, ¿Qué modelo basado en árbol y _boosting_ escogemos? En este caso, y dado que la diferencia no es especialmente relevante, podemos decantarnos por lo siguiente:
 
+1. __Modelos de árbol__: una buena opción sería escoger _Random Forest_, dado que a diferencia del modelo _bagging_ __no sortea todas las variables en cada nivel del árbol__, sino tan solo 2. Además, la ganancia de error que presenta con respecto a la tasa de fallos es ínfima.
 
-
-En conclusión, __estudiamos el punto de corte con las predicciones de _Random Forest___.
+2. __Modelos _boosting___: dado que no existe mucha diferencia entre _gbm_ y _XGboost_ (tan solo apenas unas centésimas de diferencia en tasa de fallos y AUC), __nos decantamos por _gradient boosting___.
 
 ## 16.1 Medidas básicas (punto de corte = 0.5)
 
-En primer lugar, 
+A continuación, procedemos a variar el punto de corte para los modelos _Random Forest_ y _gbm_, con saltos de 0.05 en 0.05 y validación cruzada de 5 grupos:
+
+```{r, eval=FALSE}
+puntos_corte <- seq(0, 1, 0.05)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Comparación puntos corte rf - gbm", echo=FALSE}
+knitr::include_graphics("./charts/comparativa_puntos_corte.png")
+```
+
+Analizando los puntos de corte, sobre ambos modelos __cabe destacar el uso de un punto de corte bajo__, en torno a 0.15, 0.2, aproximadamente; para equilibrar las tasas de sensitividad y especificidad, donde ambas medidas se sitúan en torno al 75-80 %. Con el punto de corte original, 0.5, los valores originales se sensibilidad no son especialmente bajos (0.66), por lo que está claro que es mejor utilizar uno de los dos modelos que una simple predicción aleatoria. Sin embargo, si lo que se desea es afinar aún más los modelos, aumentando la tasa de sensibilidad a costa de reducir la especificidad, una opción sería reducir el punto de corte de ambos modelos a 0.15-0.2, aproximadamente:
+
+```{r}
+data.frame(modelo = rep("Random Forest", 3), punto_corte = c(0.5, 0.2, 0.15),
+           VP = c(975, 1177, 1211), FP = c(103, 553, 867), VN = c(4248, 3798, 3484), FN = c(528, 326, 292))
+```
+
+```{r}
+data.frame(modelo = rep("gbm", 3), punto_corte = c(0.5, 0.2, 0.15),
+           VP = c(975, 1218, 1328), FP = c(65, 963, 1712), VN = c(4286, 3388, 2639), FN = c(528, 285, 175))
+```
+
+En general, observamos como a medida que reducimos los puntos de corte, el número de verdaderos positivos aumenta además de reducirse el número de falsos negativos, con su consiguiente aumento en el porcentaje de sensitividad. No obstante, disminuir demasiado el punto de corte provoca no solo un aumento en el número de falsos positivos y disminuyen los verdaderos negativos. A modo de ejemplo, tan solo reduciendo de 0.2 a 0.15, en el caso de _Random Forest_ pasamos 553 a 867 FP y de 3798 a 3484 VN; e incluso en _gradient boosting_ el cambio es más drástico: de 963 a 1712 FP y de 3388 a 2639 VN.
+
+Por tanto, __un buen punto de corte a elegir si lo que se desea es un equilibrio sensitividad-especificidad sería 0.2, pues no solo mejoraría el número de verdaderos positivos y falsos negativos, sino que mantendría incluso una alta tasa de verdaderos negativos__. Incluso si nos fijamos en el índice de _Youden_:
+
+$J = \text{especificidad + sensitividad - 1}$
+
+```{r, eval=FALSE}
+# Random Forest
+dataframe_puntos_corte_rf_multiple_seeds[which(indice_youden_rf == max(indice_youden_rf)), ]
+```
+
+```
+     FP  FN   VP   VN      AUC      tasa sensitividad especificidad pto_corte
+1   360 362 1141 3991 0.905239 0.1233345    0.7591484     0.9172604      0.25
+```
+
+```{r, eval=FALSE}
+# gbm
+dataframe_puntos_corte_gbm_multiple_seeds[which(indice_youden_gbm == max(indice_youden_gbm)), ]
+```
+
+```
+     FP  FN   VP   VN      tasa sensitividad especificidad pto_corte
+1   130 468 1035 4221 0.1021524    0.6886228     0.9701218       0.4
+```
+
+En ambos casos, continua recomendando un punto de corte bajo, especialmente con _Random Forest_, donde empleando 0.25 la sensitividad y especificidad rondan el 76 y 92 %, respectivamente.
+
+## 16.2 Prueba con diferentes semillas
+
+Por último, y con el simple objetivo de comprobar la estabilidad de los resultados, __lanzamos ambos modelos con una validación cruzada de 5 grupos, variando la semilla aleatoriamente__:
+
+```{r, eval=FALSE}
+#-- Probamos con diferentes semillas aleatorias (10)
+semillas <- sample(1:10000, size = 10)
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Puntos de corte RF - variando semillas", echo=FALSE}
+knitr::include_graphics("./charts/punto_corte_rf_varias_semillas.png")
+```
+
+```{r, out.width="99%", out.height="99%", fig.align="center", fig.cap="Puntos de corte gbm - variando semillas", echo=FALSE}
+knitr::include_graphics("./charts/punto_corte_gbm_varias_semillas.png")
+```
+
+Incluso variando el número de semillas, las medidas obtenidas son estables en ambos modelos.
+
+# 17. Conclusiones
