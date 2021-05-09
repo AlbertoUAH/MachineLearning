@@ -55,57 +55,29 @@ sinicio <- 1234; grupos <- 5; repe <- 10
 #   Bagging, XGboost, Random Forest, GBM, Avnnet y SVM RBF
 
 #-- Seleccion de variables empleadas
-modelo_1 <- list("modelo1" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age"))
-modelo_2 <- list("modelo2" = c("mortality_rsi", "bmi", "month.8", "Age"))
+# modelo_1 <- list("modelo1" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age"))
+modelo_2 <- list("set_2_empleado" = c("mortality_rsi", "bmi", "month.8", "Age"))
 
 #-- Recordemos las selecciones que desctartamos al comienzo
-candidato_aic_2 <- list("candidato_aic_2" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", 
-                                            "dow.0", "Age", "moonphase.0", "month.0", "baseline_osteoart", 
-                                            "baseline_charlson", "ahrq_ccs"))
+candidato_aic <- list("set_aic" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "baseline_cvd", 
+                                    "dow.0", "Age", "moonphase.0", "month.0", "asa_status.0", "baseline_osteoart", 
+                                    "baseline_charlson", "ahrq_ccs", "baseline_diabetes"))
 
-candidato_aic_3 <- list("candidato_aic_3" = c("mortality_rsi", "ahrq_ccs", "bmi", "month.8", "Age"))
+candidato_bic <- list("set_bic" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0", 
+                                    "Age", "moonphase.0", "baseline_osteoart", "asa_status.0"))
 
-candidato_bic_2 <- list("candidato_bic_2" = c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0",           
-                                              "Age", "moonphase.0", "baseline_osteoart"))
+candidato_rfe_lr_top3 <- list("set_rfe_lr_top3" = c("ccsMort30Rate", "mortality_rsi", "bmi"))
 
-candidato_bic_4 <- list("candidato_bic_4" = c("mortality_rsi", "baseline_osteoart", "bmi", "month.8", "Age"))
+candidato_rfe_rf      <- list("set_rfe_rf_top5" = c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs"))
 
-candidato_rfe_lr_top3 <- list("candidato_rfe_lr_top3" = c("ccsMort30Rate", "mortality_rsi", "bmi"))
+candidato_bic_top5    <- list("set_bic_top5" = c("mortality_rsi", "baseline_osteoart", "bmi", "month.8", "Age"))
 
-candidato_rfe_rf      <- list("candidato_rfe_rf" = c("Age", "mortality_rsi", "ccsMort30Rate", "bmi", "ahrq_ccs"))
-
-sel_variables <- list(modelo_1, modelo_2, candidato_aic_2, candidato_aic_3, candidato_bic_2, candidato_bic_4,
-                   candidato_rfe_lr_top3, candidato_rfe_rf)
+sel_variables <- list(modelo_2, candidato_aic, candidato_bic, candidato_rfe_lr_top3, candidato_rfe_rf,
+                      candidato_rfe_rf, candidato_bic_top5)
 
 
 #-- Tuneo de los modelos finales
-#   Regresion logistica
 modelos <- data.frame()
-
-for (vars in sel_variables) {
-  logistica <- cruzadalogistica(data=surgical_dataset, vardep=target,
-                                listconti=vars[[1]], listclass=c(""),
-                                grupos=grupos,sinicio=1234,repe=repe)[[1]]
-  
-  logistica$tipo <- "Logistica"
-  logistica$modelo <- names(vars)
-  
-  modelos <- rbind(modelos, logistica)
-}
-
-#  Avnnet
-for (vars in sel_variables) {
-  avnnet  <- cruzadaavnnetbin(data=surgical_dataset,vardep=target,
-                              listconti=vars[[1]], listclass=c(""),
-                              grupos=grupos,sinicio=sinicio,repe=repe, 
-                              size=10,decay=0.01,repeticiones=5,itera=200)[[1]]
-  
-  avnnet$tipo <- "Avnnet"
-  avnnet$modelo <- names(vars)
-  
-  modelos <- rbind(modelos, avnnet)
-}
-
 #  Bagging
 for (vars in sel_variables) {
   bagging <- cruzadarfbin(data=surgical_dataset, vardep=target,
@@ -152,7 +124,7 @@ for (vars  in sel_variables) {
                             listconti=vars[[1]],listclass=c(""),
                             grupos=grupos,sinicio=sinicio,repe=repe,
                             min_child_weight=20,eta=0.1,nrounds=100,max_depth=6,
-                            gamma=0,colsample_bytree=1,subsample=0.5)
+                            gamma=0,colsample_bytree=1,subsample=1)
   
   xgboost$tipo   <-"XGboost"
   xgboost$modelo <- names(vars)
@@ -160,98 +132,15 @@ for (vars  in sel_variables) {
   modelos <- rbind(modelos, xgboost)
 }
 
-# SVM RBF
-for (vars in sel_variables) {
-  svm_rbf   <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target, listconti=vars[[1]],
-                                listclass=c(""), grupos=grupos, sinicio=sinicio, repe=repe,
-                                C=1, sigma=5)
-  
-  svm_rbf$tipo   <-"SVM_RBF"
-  svm_rbf$modelo <- names(vars)
-  
-  modelos <- rbind(modelos, svm_rbf)
-}
-
-source("./librerias/cruzadas ensamblado binaria fuente.R")
-# Ensamblado Bagging + XGboost
-for (vars in sel_variables) {
-  bagging_ensemb <- cruzadarfbin(data=surgical_dataset, vardep=target,
-                                 listconti=vars[[1]],listclass=c(""),
-                                 grupos=grupos,sinicio=sinicio,repe=repe,nodesize=20,
-                                 mtry=4,ntree=900, sampsize=1000,replace = TRUE)
-  
-  medias_bagging    <- as.data.frame(bagging_ensemb[1])
-  medias_bagging$modelo <-"Bagging"
-  pred_bagging      <- as.data.frame(bagging_ensemb[2])
-  pred_bagging$bagging <- pred_bagging$Yes
-  
-  xgboost_ensemb <- cruzadaxgbmbin(data=surgical_dataset,vardep=target,
-                                   listconti=vars[[1]],listclass=c(""),
-                                   grupos=grupos,sinicio=sinicio,repe=repe,
-                                   min_child_weight=20,eta=0.1,nrounds=100,max_depth=6,
-                                   gamma=0,colsample_bytree=1,subsample=0.5)
-  
-  medias_xgboost    <- as.data.frame(xgboost_ensemb[1])
-  medias_xgboost$modelo <-"XGboost"
-  pred_xgboost      <- as.data.frame(xgboost_ensemb[2])
-  pred_xgboost$xgboost <- pred_xgboost$Yes
-  
-  unipredi <- cbind(pred_bagging, pred_xgboost)
-  unipredi <- unipredi[, !duplicated(colnames(unipredi))]
-  
-  unipredi[, "bagging-xgboost"] <- (unipredi[, "bagging"] + unipredi[, "xgboost"]) / 2
-  
-  listado <- c("bagging-xgboost")
-  
-  # Cambio a Yes, No, todas las predicciones
-  repeticiones<-nlevels(factor(unipredi$Rep))
-  unipredi$Rep<-as.factor(unipredi$Rep)
-  unipredi$Rep<-as.numeric(unipredi$Rep)
-  
-  
-  medias0<-data.frame(c())
-  for (prediccion in listado)
-  {
-    unipredi$proba<-unipredi[,prediccion]
-    unipredi[,prediccion]<-ifelse(unipredi[,prediccion]>0.5,"Yes","No")
-    for (repe in 1:repeticiones)
-    {
-      paso <- unipredi[(unipredi$Rep==repe),]
-      pre<-factor(paso[,prediccion])
-      archi<-paso[,c("proba","obs")]
-      archi<-archi[order(archi$proba),]
-      obs<-paso[,c("obs")]
-      tasa=1-tasafallos(pre,obs)
-      t<-as.data.frame(tasa)
-      t$modelo<-prediccion
-      auc<-suppressMessages(auc(archi$obs,archi$proba))
-      t$auc<-auc
-      medias0<-rbind(medias0,t)
-    }
-  }
-  
-  medias0$tipo   <-"Ensamblado"
-  medias0$modelo <- names(vars)
-  
-  modelos <- rbind(modelos, medias0[c("tasa", "auc", "tipo", "modelo")])
-  print(names(vars))
-  print("FINISHED!!!")
-}
-rm(unipredi); rm(bagging_ensemb); rm(xgboost_ensemb); rm(medias_bagging); rm(medias_xgboost)
-rm(pred_bagging); rm(pred_xgboost); rm(listado); rm(prediccion); rm(paso); rm(pre); rm(archi)
-rm(obs); rm(tasa); rm(t); rm(auc) ;rm(medias0)
-
-
 #-- Comenzamos con los cuatro mejores modelos: Bagging, Random Forest, XGboost + Ensamblado
 #   Tasa de fallos
-modelos$modelo <- with(modelos,
-                                reorder(modelo,tasa, mean))
+modelos$modelo <- with(modelos, reorder(modelo,tasa, mean))
 ggplot(modelos[modelos$tipo %in% c("Bagging", "Random_Forest", "XGboost", "Ensamblado"), ], aes(x = modelo, y = tasa, colour = tipo)) +
   geom_boxplot(adjust = 1.1) +
   facet_grid( . ~ tipo, scales = "free", space = "free") +
   ggtitle("Tasa de fallos por modelo") + 
-  theme(axis.text.x = element_text(angle = 45), legend.position = "none")
-
+  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 12, vjust = 0.5), text = element_text( face = "bold", size = 12), legend.position = "none")
+ggsave('./charts/sets_descartados_tasa_fallos.png')
 
 #   AUC
 modelos$modelo <- with(modelos, reorder(modelo,auc, mean))
@@ -259,7 +148,7 @@ ggplot(modelos[modelos$tipo %in% c("Bagging", "Random_Forest", "XGboost", "Ensam
   geom_boxplot(adjust = 1.1) +
   facet_grid( . ~ tipo, scales = "free", space = "free") +
   ggtitle("AUC por modelo") + 
-  theme(axis.text.x = element_text(angle = 45), legend.position = "none")
+  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 12, vjust = 0.5), text = element_text( face = "bold", size = 12), legend.position = "none")
 
 #-- Si nos vamos con gbm, avnnet y SVM RBF
 #   Tasa de fallos
