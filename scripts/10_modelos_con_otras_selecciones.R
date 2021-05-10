@@ -134,21 +134,20 @@ for (vars  in sel_variables) {
 
 #-- Comenzamos con los cuatro mejores modelos: Bagging, Random Forest, XGboost + Ensamblado
 #   Tasa de fallos
-modelos$modelo <- with(modelos, reorder(modelo,tasa, mean))
-ggplot(modelos[modelos$tipo %in% c("Bagging", "Random_Forest", "XGboost", "Ensamblado"), ], aes(x = modelo, y = tasa, colour = tipo)) +
+ggplot(modelos, aes(tidytext::reorder_within(modelo, tasa, tipo, fun=mean) , y = tasa, colour = tipo)) +
   geom_boxplot(adjust = 1.1) +
-  facet_grid( . ~ tipo, scales = "free", space = "free") +
-  ggtitle("Tasa de fallos por modelo") + 
-  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 12, vjust = 0.5), text = element_text( face = "bold", size = 12), legend.position = "none")
+  facet_wrap( . ~ tipo, scales = "free_x") +
+  ggtitle("Tasa de fallos por modelo y set de variables") + tidytext::scale_x_reordered() + labs(x = "Set de variables") +
+  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 10, vjust = 0.5), text = element_text( face = "bold", size = 10), legend.position = "none")
 ggsave('./charts/sets_descartados_tasa_fallos.png')
 
 #   AUC
-modelos$modelo <- with(modelos, reorder(modelo,auc, mean))
-ggplot(modelos[modelos$tipo %in% c("Bagging", "Random_Forest", "XGboost", "Ensamblado"), ], aes(x = modelo, y = auc, colour = tipo)) +
+ggplot(modelos, aes(tidytext::reorder_within(modelo, auc, tipo, fun=mean) , y = auc, colour = tipo)) +
   geom_boxplot(adjust = 1.1) +
-  facet_grid( . ~ tipo, scales = "free", space = "free") +
-  ggtitle("AUC por modelo") + 
-  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 12, vjust = 0.5), text = element_text( face = "bold", size = 12), legend.position = "none")
+  facet_wrap( . ~ tipo, scales = "free_x") +
+  ggtitle("AUC por modelo y set de variables") + tidytext::scale_x_reordered() + labs(x = "Set de variables") +
+  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 10, vjust = 0.5), text = element_text( face = "bold", size = 10), legend.position = "none")
+ggsave('./charts/sets_descartados_auc.png')
 
 #-- Si nos vamos con gbm, avnnet y SVM RBF
 #   Tasa de fallos

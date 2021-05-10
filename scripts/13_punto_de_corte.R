@@ -271,6 +271,17 @@ result_bagging <-famdcontour(dataf=surgical_dataset,listconti=var_modelo2,listcl
                              title="gbm",title2=" ",selec=0,modelo="rf",classvar=0,n.minobsinnode=20,shrink=0.2,ntreegbm = 100,
                              bag.fraction=0.5)
 
+candidato_bic <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "dow.0", 
+                                    "Age", "moonphase.0", "baseline_osteoart", "asa_status.0")
+
+result_rf_2 <- famdcontour(dataf=surgical_dataset,listconti=candidato_bic,listclass=c(""),vardep=target,
+                         title="Random Forest",title2=" ",selec=0,modelo="rf",classvar=0,mtry=2,ntree=2000,sampsize=1000,
+                         nodesize=20)
+
+result_bagging_2 <-famdcontour(dataf=surgical_dataset,listconti=candidato_bic,listclass=c(""),vardep=target,
+                             title="gbm",title2=" ",selec=0,modelo="rf",classvar=0,n.minobsinnode=20,shrink=0.2,ntreegbm = 100,
+                             bag.fraction=0.5)
+
 
 
 
