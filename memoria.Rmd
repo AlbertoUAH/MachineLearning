@@ -408,9 +408,9 @@ Por otro lado, en un primer análisis exploratorio se observó que en las variab
 __AGE__:
 
 ```{r, echo=FALSE, fig.width=7, fig.height=4}
-barras <- ggplot(surgical_dataset, aes(x = Age, fill = factor(complication))) + 
-                  geom_boxplot() + 
-                  theme_minimal() + ggtitle("Age boxplot by target") + theme(legend.position = "bottom")
+barras <- ggplot(surgical_dataset, aes(x = ccsMort30Rate, fill = factor(complication))) + 
+          geom_boxplot() + 
+       theme_minimal() + ggtitle("ccsMort30Rate boxplot by target") + theme(legend.position = "bottom")
 
 barras
 ```
