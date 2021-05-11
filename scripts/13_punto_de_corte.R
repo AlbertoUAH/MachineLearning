@@ -198,7 +198,7 @@ p <- ggplot(dataframe_puntos_corte_rf_multiple_seeds, aes(x = factor(pto_corte))
 q <- ggplot(dataframe_puntos_corte_rf_multiple_seeds[dataframe_puntos_corte_rf_multiple_seeds$pto_corte > 0.1 & dataframe_puntos_corte_rf_multiple_seeds$pto_corte< 0.5, ], aes(x = factor(pto_corte))) + 
   geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
   geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
-  ggtitle("Especificidad vs Sensitividad (Ampliado)") +
+  ggtitle("Especificidad vs Sensitividad (RF - Ampliado)") +
   labs(x ="Punto de corte", y = "Valor") +
   scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
@@ -209,10 +209,10 @@ p <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds, aes(x = factor(pto_corte)
   labs(x ="Punto de corte", y = "Valor") +
   scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
-q <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds[dataframe_puntos_corte_gbm_multiple_seeds$pto_corte > 0.1 & dataframe_puntos_corte_gbm_multiple_seeds$pto_corte< 0.5, ], aes(x = factor(pto_corte))) + 
+r <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds[dataframe_puntos_corte_gbm_multiple_seeds$pto_corte > 0.1 & dataframe_puntos_corte_gbm_multiple_seeds$pto_corte< 0.5, ], aes(x = factor(pto_corte))) + 
   geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
   geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
-  ggtitle("Especificidad vs Sensitividad (Ampliado)") +
+  ggtitle("Especificidad vs Sensitividad (gbm - Ampliado)") +
   labs(x ="Punto de corte", y = "Valor") +
   scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
 
