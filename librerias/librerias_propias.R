@@ -179,17 +179,17 @@ train_rf_model <- function(dataset, formula, mtry, ntree, grupos, repe,
 show_vars_importance <- function(modelo, title) {
   final<-modelo$finalModel
   tabla<-as.data.frame(final$importance)
-  tabla<-tabla[order(tabla$MeanDecreaseAccuracy),]
+  tabla<-tabla[order(tabla$MeanDecreaseGini),]
   vars <- rownames(tabla)
   tabla$vars <- factor(vars, levels=unique(vars))
   rownames(tabla) <- NULL
   
-  print(tabla %>% arrange(.,-MeanDecreaseAccuracy))
+  print(tabla %>% arrange(.,-MeanDecreaseGini))
   
-  s <- tabla %>% arrange(.,-MeanDecreaseAccuracy) %>% 
-    ggplot(aes(MeanDecreaseAccuracy, vars)) +
+  s <- tabla %>% arrange(.,-MeanDecreaseGini) %>% 
+    ggplot(aes(MeanDecreaseGini, vars)) +
     geom_col() +
-    geom_label(aes(label=round(MeanDecreaseAccuracy,3), x=MeanDecreaseAccuracy+0.01), size=3.5, colour="blue", fontface = "bold") +
+    geom_label(aes(label=round(MeanDecreaseGini,3), x=MeanDecreaseGini+0.01), size=3.5, colour="blue", fontface = "bold") +
     scale_x_continuous(expand=expansion(c(0,0.04))) +
     ggtitle(title) +
     theme_bw() +

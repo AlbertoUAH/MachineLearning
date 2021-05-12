@@ -420,9 +420,9 @@ En este caso, __bien es cierto que los pacientes que no sufren complicaciones os
 __BMI__:
 
 ```{r, echo=FALSE, fig.width=7, fig.height=4}
-barras <- ggplot(surgical_dataset, aes(x = bmi, fill = factor(complication))) + 
+barras <- ggplot(surgical_dataset, aes(x = mortality_rsi, fill = factor(complication))) + 
                   geom_boxplot() + 
-                  theme_minimal() + ggtitle("bmi boxplot by target") + theme(legend.position = "bottom")
+                  theme_minimal() + ggtitle("mortality_rsi boxplot by target") + theme(legend.position = "bottom")
 
 barras
 ```

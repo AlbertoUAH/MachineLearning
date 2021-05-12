@@ -1,0 +1,12 @@
+obs:  5854 
+obs clase minoritaria:  1503 
+% clase minoritaria:  26 % 
+tasa fallos:  0.2567475 
+auc:  0.9022257 
+sensitivity:  0 
+specificity:  1 
+numero de Yes predichos:  0 
+FP:  0 
+FN:  1503 
+VP:  0 
+VN:  4351 

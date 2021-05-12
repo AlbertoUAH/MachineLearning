@@ -225,14 +225,15 @@ imp2 <- show_vars_importance(rf_modelo_bic, "Importancia variables (BIC)")
 ggpubr::ggarrange(imp1, imp2, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_comparacion_random_forest.png')
 
+top4_soloaic <- c("Age", "mortality_rsi", "ahrq_ccs", "bmi")
 top4 <- c("Age", "mortality_rsi", "bmi", "month.8")
 candidato.aic.top5 <- c("Age", "mortality_rsi", "bmi", "month.8", "ahrq_ccs")
 candidato.bic.4 <- c("Age", "mortality_rsi", "bmi", "month.8", "baseline_osteoart")
 candidato.bic.5 <- c("Age", "mortality_rsi", "bmi", "month.8", "ccsMort30Rate")
 
-candidatos_4         <- list(candidato.rfe.lr.2, candidato.aic, candidato.bic, top4, candidato.rfe.rf, 
+candidatos_4         <- list(candidato.rfe.lr.2, candidato.aic, candidato.bic, top4, top4_soloaic, candidato.rfe.rf, 
                              candidato.bic.4, candidato.bic.5)
-nombres_candidatos_4 <- c("RFE LR TOP 3", "AIC" , "BIC" , "AIC-BIC-TOP 4", "RFE RF TOP 5 (AIC TOP 5)",
+nombres_candidatos_4 <- c("RFE LR TOP 3", "AIC" , "BIC" , "AIC-BIC-TOP 4", "TOP4_SOLOAIC", "RFE RF TOP 5 (AIC TOP 5)",
                           "BIC (TOP 5 - baseline_osteoart)", "BIC (TOP 5 - ccsMort30Rate)")
 union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
                             grupos = 5, repe = 5)
@@ -242,14 +243,14 @@ t <- ggplot(union4, aes(x = modelo, y = tasa)) +
   ggtitle("Comparacion (tasa fallos)") +
   labs(color='Dataset')  +
   theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
-
+t
 union4$modelo <- with(union4, reorder(modelo,auc, mean))
 a <- ggplot(union4, aes(x = modelo, y = auc)) +
   geom_boxplot() +
   ggtitle("Comparacion (AUC)") +
   labs(color='Dataset')  +
   theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
-
+a
 ggpubr::ggarrange(t, a, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_comparacion_final.png')
 
