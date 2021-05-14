@@ -40,7 +40,7 @@ rm(surgical_test_data)
 target <- "target"
 
 #-- Modelo 1
-var_modelo1 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8", "Age")
+var_modelo1 <- c("mortality_rsi", "bmi", "ahrq_ccs", "Age")
 #-- Modelo 2
 var_modelo2 <- c("mortality_rsi", "bmi", "month.8", "Age")
 
@@ -263,7 +263,7 @@ dataframe_puntos_corte_rf_multiple_seeds[which(f1_rf$f1_score == max(f1_rf$f1_sc
 dataframe_puntos_corte_bagging_multiple_seeds[which(f1_bagging$f1_score == max(f1_bagging$f1_score)), ]
 
 
-result_rf <- famdcontour(dataf=surgical_dataset,listconti=var_modelo2,listclass=c(""),vardep=target,
+result_rf <- famdcontour(dataf=surgical_dataset,listconti=var_modelo1,listclass=c(""),vardep=target,
                          title="Random Forest",title2=" ",selec=0,modelo="rf",classvar=0,mtry=2,ntree=2000,sampsize=1000,
                          nodesize=20, alpha1 = 1, alpha2 = 1, alpha3 = 1)
 

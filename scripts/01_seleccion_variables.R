@@ -220,8 +220,8 @@ rf_modelo_aic   <- train_rf_model(surgical_dataset,
 
 # Importancia de las variables en un random forest
 # ¿Pueden sobrar dow.0, moonphase.0? y baseline osteoart?
-imp1 <- show_vars_importance(rf_modelo_aic, "Importancia variables (AIC)")
-imp2 <- show_vars_importance(rf_modelo_bic, "Importancia variables (BIC)")
+imp1 <- show_vars_importance(rf_modelo_aic, "Con ahrq_ccs")
+imp2 <- show_vars_importance(rf_modelo_bic, "Con month.8")
 ggpubr::ggarrange(imp1, imp2, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_comparacion_random_forest.png')
 
@@ -232,9 +232,9 @@ candidato.bic.4 <- c("Age", "mortality_rsi", "bmi", "month.8", "baseline_osteoar
 candidato.bic.5 <- c("Age", "mortality_rsi", "bmi", "month.8", "ccsMort30Rate")
 
 candidatos_4         <- list(candidato.rfe.lr.2, candidato.aic, candidato.bic, top4, top4_soloaic, candidato.rfe.rf, 
-                             candidato.bic.4, candidato.bic.5)
-nombres_candidatos_4 <- c("RFE LR TOP 3", "AIC" , "BIC" , "AIC-BIC-TOP 4", "TOP4_SOLOAIC", "RFE RF TOP 5 (AIC TOP 5)",
-                          "BIC (TOP 5 - baseline_osteoart)", "BIC (TOP 5 - ccsMort30Rate)")
+                             candidato.bic.4, candidato.bic.5, candidato.aic.top5)
+nombres_candidatos_4 <- c("RFE LR TOP 3", "AIC" , "BIC" , "1", "2", "RFE RF TOP 5",
+                          "4", "5", "3")
 union4 <- cruzada_logistica(surgical_dataset, target, candidatos_4, nombres_candidatos_4,
                             grupos = 5, repe = 5)
 union4$modelo <- with(union4, reorder(modelo,tasa, mean))

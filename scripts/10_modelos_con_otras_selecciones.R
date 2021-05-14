@@ -72,8 +72,10 @@ candidato_rfe_rf      <- list("set_rfe_rf_top5" = c("Age", "mortality_rsi", "ccs
 
 candidato_bic_top5    <- list("set_bic_top5" = c("mortality_rsi", "baseline_osteoart", "bmi", "month.8", "Age"))
 
+
+top4_soloaic <-  list("set_aic_top4" = c("Age", "mortality_rsi", "ahrq_ccs", "bmi"))
 sel_variables <- list(modelo_2, candidato_aic, candidato_bic, candidato_rfe_lr_top3, candidato_rfe_rf,
-                      candidato_rfe_rf, candidato_bic_top5)
+                      candidato_rfe_rf, candidato_bic_top5, top4_soloaic)
 
 
 #-- Tuneo de los modelos finales

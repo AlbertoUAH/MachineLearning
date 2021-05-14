@@ -123,7 +123,7 @@ for (i  in 1:2) {
                                      n.minobsinnode=20,shrinkage=0.2,n.trees=100,
                                      interaction.depth=2, bag.fraction=0.5)
   
-  gradient_boosting$tipo   <-"Gradient_Boosting"
+  gradient_boosting$tipo   <-"gbm"
   gradient_boosting$modelo <- names(datasets)[i]
   
   modelos <- rbind(modelos, gradient_boosting)
