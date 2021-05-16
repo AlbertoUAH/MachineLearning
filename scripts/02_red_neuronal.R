@@ -65,6 +65,7 @@ union_2 <- comparar_modelos_red(
                                 repe = 5,
                                 iteraciones = 200
 )
+union_2$modelo <- stringi::stri_replace_all_fixed(union_2$modelo, " - DECAY: 0.01", replacement = "")
 
 # Llama la atencion 25-30 y 40 nodos, aunque con 25 nodos la tasa de fallos es bastante menor
 # aunque con alta varianza en el AUC
@@ -79,6 +80,8 @@ union_2_bis <- comparar_modelos_red(
   repe = 10,
   iteraciones = 200
 )
+
+union_2_bis$modelo <- stringi::stri_replace_all_fixed(union_2_bis$modelo, " - DECAY: 0.01", replacement = "")
 
 # Nos decantamos por 25-30 nodos y decay 0.01 Por los siguientes motivos:
 # -> Con tan solo 5 repeticiones, la varianza de la tasa de fallos es mayor en
@@ -117,6 +120,7 @@ union_3 <- comparar_modelos_red(
   repe = 5,
   iteraciones = 200
 )
+
 # A simple vista, como posibles opciones tendriamos o 10, 15 o 20 nodos en la red
 
 # ¿Y si aumentamos el numero de repeticiones?
@@ -384,20 +388,22 @@ modelos_actuales$tipo <- c(rep("LOGISTICA", 20), rep("RED NEURONAL", 20))
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,tasa, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
+p <- ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
        geom_boxplot(alpha = 0.7) +
        scale_x_discrete(name = "Modelo") +
        ggtitle("Tasa de fallos por modelo") +
-       theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+       theme(text = element_text(size=17, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+p
 ggsave('./charts/comparativas/02_log_avnnet_tasa.jpeg')
 
 modelos_actuales$modelo <- with(modelos_actuales,
                                 reorder(modelo,auc, mean))
-ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
+q <- ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
        geom_boxplot(alpha = 0.7) +
        scale_x_discrete(name = "Modelo") +
        ggtitle("AUC por modelo") +
-       theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+       theme(text = element_text(size=17, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+q
 ggsave('./charts/comparativas/02_log_avnnet_auc.jpeg')
 
 #-- Si hacemos zoom sobre los modelos avnnet...

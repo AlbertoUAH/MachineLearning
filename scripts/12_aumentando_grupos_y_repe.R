@@ -108,14 +108,14 @@ modelos$modelo <- with(modelos,
 p <- ggplot(modelos, aes(x = modelo, y = tasa, colour = cv)) +
             geom_boxplot(notch = FALSE) +
             ggtitle("Tasa de fallos CV 5 folds vs CV 10 folds") +
-            theme_bw() + theme(text = element_text(face = "bold", size = 13))
+            theme_bw() + theme(text = element_text(face = "bold", size = 15), axis.text.x = element_text(angle=45, vjust = 0.7))
 
 modelos$modelo <- with(modelos,
                        reorder(modelo, auc, mean))
 q <- ggplot(modelos, aes(x = modelo, y = auc, colour = cv)) +
             geom_boxplot(notch = FALSE) +
             ggtitle("AUC CV 5 folds vs CV 10 folds") +
-            theme_bw() + theme(text = element_text(face = "bold", size = 13))
+            theme_bw() + theme(text = element_text(face = "bold", size = 15), axis.text.x = element_text(angle=45, vjust=0.7))
 
 ggpubr::ggarrange(p, q, common.legend = TRUE)
 ggsave('./charts/comparacion_5_10_folds.png')

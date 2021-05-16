@@ -138,14 +138,14 @@ p <- ggplot(dataframe_puntos_corte_rf, aes(x = factor(pto_corte))) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (Random Forest)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 13), axis.text.x = element_text(angle=45))
 
 q <- ggplot(dataframe_puntos_corte_gbm, aes(x = factor(pto_corte))) + 
   geom_point(aes(y = sensitividad, color = "Sentividad")) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (gbm)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 13), axis.text.x = element_text(angle=45))
 
 ggpubr::ggarrange(p, q, common.legend = TRUE)
 
@@ -155,14 +155,14 @@ p <- ggplot(dataframe_puntos_corte_rf_1, aes(x = factor(pto_corte))) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (Random Forest) - Modelo 1") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11), axis.text.x = element_text(angle = 45))
 
 q <- ggplot(dataframe_puntos_corte_bagging_1, aes(x = factor(pto_corte))) + 
   geom_point(aes(y = sensitividad, color = "Sentividad")) +
   geom_point(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (Bagging) - Modelo 1") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11), axis.text.x = element_text(angle = 45))
 ggpubr::ggarrange(p, q, common.legend = TRUE)
 
 #-----------------------------------------------------------------------------------------------------
@@ -200,7 +200,7 @@ q <- ggplot(dataframe_puntos_corte_rf_multiple_seeds[dataframe_puntos_corte_rf_m
   geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (RF - Ampliado)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 15))
 
 p <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds, aes(x = factor(pto_corte))) + 
   geom_boxplot(aes(y = sensitividad, color = "Sentividad")) +
@@ -214,7 +214,7 @@ r <- ggplot(dataframe_puntos_corte_gbm_multiple_seeds[dataframe_puntos_corte_gbm
   geom_boxplot(aes(y = especificidad, color = "Especificidad")) +
   ggtitle("Especificidad vs Sensitividad (gbm - Ampliado)") +
   labs(x ="Punto de corte", y = "Valor") +
-  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 11))
+  scale_color_manual(values = colors) +  theme(text = element_text(face = "bold", size = 15))
 
 
 #-- ¿En que punto de corte existe un equilibrio entre sensitividad y especificidad?
@@ -263,7 +263,7 @@ dataframe_puntos_corte_rf_multiple_seeds[which(f1_rf$f1_score == max(f1_rf$f1_sc
 dataframe_puntos_corte_bagging_multiple_seeds[which(f1_bagging$f1_score == max(f1_bagging$f1_score)), ]
 
 
-result_rf <- famdcontour(dataf=surgical_dataset,listconti=var_modelo1,listclass=c(""),vardep=target,
+result_rf <- famdcontour(dataf=surgical_dataset,listconti=var_modelo2,listclass=c(""),vardep=target,
                          title="Random Forest",title2=" ",selec=0,modelo="rf",classvar=0,mtry=2,ntree=2000,sampsize=1000,
                          nodesize=20, alpha1 = 1, alpha2 = 1, alpha3 = 1)
 

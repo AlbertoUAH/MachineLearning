@@ -60,10 +60,10 @@ svm_bin_2 <- cruzadaSVMbin(data=surgical_dataset, vardep=target,
 svm_5_rep <- as.data.frame(read_xlsx("./data/modelos_svm.xlsx", sheet = "SVM_lineal"))
 svm_5_rep$C <- as.numeric(svm_5_rep$C)
 
-p <- ggplot(svm_5_rep_v2[svm_5_rep_v2$Modelo == 1, ], aes(x = C, y = Accuracy)) + geom_point() + ggtitle("SVM Lineal Modelo 1") + theme(text = element_text(size=13, face = "bold"))
+p <- ggplot(svm_5_rep_v2[svm_5_rep_v2$Modelo == 1, ], aes(x = C, y = Accuracy)) + geom_point() + ggtitle("SVM Lineal Modelo 1") + theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/lineal/svm_lineal_modelo1.png")
 
-q <- ggplot(svm_5_rep_v2[svm_5_rep_v2$Modelo == 2, ], aes(x = C, y = Accuracy)) + geom_point() + ggtitle("SVM Lineal Modelo 2") + theme(text = element_text(size=13, face = "bold"))
+q <- ggplot(svm_5_rep_v2[svm_5_rep_v2$Modelo == 2, ], aes(x = C, y = Accuracy)) + geom_point() + ggtitle("SVM Lineal Modelo 2") + theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/lineal/svm_lineal_modelo2.png")
 
 # En el Modelo 1, parecen ser buenas alternativas 0.50, 0.10, 0.05 y 0.01
@@ -120,7 +120,7 @@ svm_poly_5_rep   <- as.data.frame(read_xlsx("./data/modelos_svm.xlsx", sheet = "
 svm_poly_5_rep$C <- reorder.factor(svm_poly_5_rep[svm_poly_5_rep$Modelo == 1, "C"], new.order = c(1,2,3,4,5,6,8,9,7))
 p <- ggplot(svm_poly_5_rep[svm_poly_5_rep$Modelo == 1, ], aes(x = factor(C), y = Accuracy,
                                                         color = factor(scale), pch = factor(scale))) + 
-            geom_point(position = position_dodge(width = 0.5), size = 3) + theme(text = element_text(size=13, face = "bold"))
+            geom_point(position = position_dodge(width = 0.5), size = 3) + theme(text = element_text(size=15, face = "bold"))
             ggtitle("SVM Poly Modelo 1 (Grado 2)")
 ggsave("./charts/SVM/polinomica/svm_polinomica_modelo1.png")
 
@@ -132,7 +132,7 @@ ggsave("./charts/SVM/polinomica/svm_polinomica_modelo1.png")
 q <- svm_poly_5_rep[svm_poly_5_rep$Modelo == 2, ] %>% ggplot(aes(x = factor(C), y = Accuracy,
                                                             color = factor(scale), pch = factor(scale))) + 
                     geom_point(position = position_dodge(width = 0.5), size = 3) + 
-                    ggtitle("SVM Poly Modelo 2 (Grado 2)")  + theme(text = element_text(size=13, face = "bold"))
+                    ggtitle("SVM Poly Modelo 2 (Grado 2)")  + theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/polinomica/svm_polinomica_modelo2.png")
 
 # En relacion al segundo modelo, llama la atencion la necesidad de un factor de escala pequeño (en torno a 0.01 y 0.1)
@@ -180,7 +180,7 @@ svm_poly_5_rep_v2 <- rbind(svm_poly_5_rep_v2, svm_pol_2_2)
 p <- ggplot(svm_poly_5_rep_v2[svm_poly_5_rep_v2$Modelo == 1 & svm_poly_5_rep_v2$C > 0.005, ], aes(x = factor(C), y = Accuracy,
                                                          color = factor(scale), pch = factor(scale))) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) + 
-  ggtitle("SVM Polinomial Modelo 1 (Grado 2)")  + theme(text = element_text(size=13, face = "bold"))
+  ggtitle("SVM Polinomial Modelo 1 (Grado 2)")  + theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/polinomica/svm_polinomica_modelo1_v2.png")
 
 # Dado que la decision esta basada por patrones y no en valores puntuales, 
@@ -192,7 +192,7 @@ ggsave("./charts/SVM/polinomica/svm_polinomica_modelo1_v2.png")
 q <- ggplot(svm_poly_5_rep_v2[svm_poly_5_rep_v2$Modelo == 2, ], aes(x = factor(C), y = Accuracy,
                                                                color = factor(scale), pch = factor(scale))) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) + 
-  ggtitle("SVM Polinomial Modelo 2 (Grado 2)")  + theme(text = element_text(size=13, face = "bold"))
+  ggtitle("SVM Polinomial Modelo 2 (Grado 2)")  + theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/polinomica/svm_polinomica_modelo2_v2.png")
 
 # Podemos comprobar que disminuyendo el factor C no mejora el modelo. De nuevo, la decision esta basada por patrones y no
@@ -227,7 +227,7 @@ svm_rbf_5_rep$sigma <- as.numeric(svm_rbf_5_rep$sigma)
 p <- ggplot(svm_rbf_5_rep[svm_rbf_5_rep$Modelo == 1, ], aes(x = factor(C), y = Accuracy,
                                                        color = factor(sigma))) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) +
-  ggtitle("SVM RBF Modelo 1") +  theme(text = element_text(size=13, face = "bold"))
+  ggtitle("SVM RBF Modelo 1") +  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/RBF/svm_rbf_modelo1.png")
 
 # Destaca el patron que presenta, con valores sigmas grandes (entre 5 y 10) y un C entre 0.01 y 0.5 (para sigma = 10)
@@ -237,7 +237,7 @@ ggsave("./charts/SVM/RBF/svm_rbf_modelo1.png")
 t <- ggplot(svm_rbf_5_rep[svm_rbf_5_rep$Modelo == 2, ], aes(x = factor(C), y = Accuracy,
                                                        color = factor(sigma))) + 
   geom_point(position = position_dodge(width = 0.5), size = 3) +
-  ggtitle("SVM RBF Modelo 2") +  theme(text = element_text(size=13, face = "bold"))
+  ggtitle("SVM RBF Modelo 2") +  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/RBF/svm_rbf_modelo2.png")
 
 # Destaca un parametro sigma grande (entre 5 y 10) y un C entre 0.2 y 1 o bien sigma = 2 y C = 10
@@ -264,7 +264,7 @@ svm_rbf_5_rep_v2$C <- as.numeric(svm_rbf_5_rep_v2$C)
 p <- ggplot(svm_rbf_5_rep_v2[svm_rbf_5_rep_v2$Modelo == 1 & svm_rbf_5_rep_v2$sigma == 2 & svm_rbf_5_rep_v2$C > 1, ], aes(x = factor(C), y = Accuracy,
                                                        )) + 
             geom_point(position = position_dodge(width = 0.5), size = 3) +
-            ggtitle("SVM RBF Modelo 1 (sigma = 2") +  theme(text = element_text(size=13, face = "bold"))
+            ggtitle("SVM RBF Modelo 1 (sigma = 2)") +  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/RBF/svm_rbf_modelo1_v2.png")
 
 
@@ -272,7 +272,7 @@ ggsave("./charts/SVM/RBF/svm_rbf_modelo1_v2.png")
 t <- ggplot(svm_rbf_5_rep_v2[svm_rbf_5_rep_v2$Modelo == 2 & svm_rbf_5_rep_v2$sigma == 2 & svm_rbf_5_rep_v2$C > 1, ], aes(x = factor(C), y = Accuracy,
                                                        )) + 
             geom_point(position = position_dodge(width = 0.5), size = 3) +
-            ggtitle("SVM RBF Modelo 2 (sigma = 2)") +  theme(text = element_text(size=13, face = "bold"))
+            ggtitle("SVM RBF Modelo 2 (sigma = 2)") +  theme(text = element_text(size=15, face = "bold"))
 
 ggsave("./charts/SVM/RBF/svm_rbf_modelo2_v2.png")
 
@@ -370,7 +370,7 @@ svm_10_rep_final$modelo <- with(svm_10_rep_final,
 p <- ggplot(svm_10_rep_final, aes(x = modelo, y = tasa, colour = set)) +
   geom_boxplot() +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos modelos SVM")  +  theme(text = element_text(size=13, face = "bold"))
+  ggtitle("Tasa de fallos modelos SVM")  +  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/comparacion_tasa_fallos_modelo1.png")
 
 svm_10_rep_final$modelo <- with(svm_10_rep_final,
@@ -378,7 +378,7 @@ svm_10_rep_final$modelo <- with(svm_10_rep_final,
 q <- ggplot(svm_10_rep_final, aes(x = modelo, y = auc, colour = set)) +
   geom_boxplot() +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC modelos SVM")  +  theme(text = element_text(size=13, face = "bold"))
+  ggtitle("AUC modelos SVM")  +  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/SVM/comparacion_auc_modelo1.png")
 
 ggplot(svm_10_rep_modelo2, aes(x = modelo, y = tasa)) +
@@ -454,7 +454,7 @@ modelos_actuales$modelo <- with(modelos_actuales,
 ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo") + theme(text = element_text(size=11, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+  ggtitle("Tasa de fallos por modelo") + theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 ggsave('./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_tasa.jpeg')
 
@@ -463,7 +463,7 @@ modelos_actuales$modelo <- with(modelos_actuales,
 ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo") + theme(text = element_text(size=11, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+  ggtitle("AUC por modelo") + theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 ggsave('./charts/comparativas/06_log_avnnet_bagging_rf_gbm_svm_auc.jpeg')
 

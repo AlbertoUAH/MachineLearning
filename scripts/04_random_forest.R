@@ -122,26 +122,33 @@ rf_stats_distribution(bagging_modelo1_mtry3, title.1 = "Distribucion de la tasa 
 
 # Vamos con mtry 2 (aumentando a 10 repeticiones para observar)
 nodesizes.1 <- list(20)
-sampsizes.1 <- list(1, 500, 1000, 1500, 2000, 2500, 3000)
+sampsizes.1 <- list(1000)
 bagging_modelo1_2 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
                                    nodesizes = nodesizes.1,
                                    sampsizes = sampsizes.1, mtry = 2,
-                                   ntree = 2500, grupos = 5, repe = 10)
+                                   ntree = 2000, grupos = 5, repe = 5)
 
 # Vamos con mtry 3 (aumentando a 10 repeticiones para observar)
 bagging_modelo1_3 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
                                    nodesizes = nodesizes.1,
                                    sampsizes = sampsizes.1, mtry = 3,
-                                   ntree = 2000, grupos = 5, repe = 10)
+                                   ntree = 2000, grupos = 5, repe = 5)
 
 # Vamos con mtry 4 (aumentando a 10 repeticiones para observar)
 bagging_modelo1_4 <- tuneo_bagging(surgical_dataset, target = target,
                                    lista.continua = var_modelo1,
                                    nodesizes = nodesizes.1,
                                    sampsizes = sampsizes.1, mtry = 4,
-                                   ntree = 1500, grupos = 5, repe = 10)
+                                   ntree = 2000, grupos = 5, repe = 5)
+
+bagging_modelo1_5 <- tuneo_bagging(surgical_dataset, target = target,
+                                   lista.continua = var_modelo1,
+                                   nodesizes = nodesizes.1,
+                                   sampsizes = sampsizes.1, mtry = 5,
+                                   ntree = 2000, grupos = 5, repe = 5)
+
 
 # Analizando las salidas resultantes, podemos comprobar que emplear un valor
 # mtry muy pequeño implica aumentar el numero de muestras a sortear para obtener 
@@ -155,31 +162,26 @@ bagging_modelo1_4 <- tuneo_bagging(surgical_dataset, target = target,
 # Nos decantamos por mtry = 3
 #-- Posible candidato:   mtry 2-3, nodesize 20 y sampsize 500-1000-1500
 union_bagging_modelo1 <- rbind(
-  bagging_modelo1_2[bagging_modelo1_2$modelo == "20+1", ],
-  bagging_modelo1_2[bagging_modelo1_2$modelo == "20+500", ],
-  bagging_modelo1_2[bagging_modelo1_2$modelo == "20+1000", ],
-  bagging_modelo1_2[bagging_modelo1_2$modelo == "20+1500", ],
-  bagging_modelo1_3[bagging_modelo1_3$modelo == "20+1", ],
-  bagging_modelo1_3[bagging_modelo1_3$modelo == "20+500", ],
-  bagging_modelo1_3[bagging_modelo1_3$modelo == "20+1000", ],
-  bagging_modelo1_3[bagging_modelo1_3$modelo == "20+1500", ]
+  bagging_modelo2_mtry2, bagging_modelo2_mtry3, bagging_modelo2_mtry4
 )
-union_bagging_modelo1$mtry <- c(rep("mtry2", 40), rep("mtry3", 40))
+union_bagging_modelo1$mtry <- c(rep("mtry2", 5), rep("mtry3", 5), rep("mtry4", 5))
 
 union_bagging_modelo1$modelo <- with(union_bagging_modelo1,
                                      reorder(modelo,tasa, mean))
-ggplot(union_bagging_modelo1, aes(x = modelo, y = tasa, col = mtry)) +
+p <- ggplot(union_bagging_modelo1, aes(x = mtry, y = tasa, col = mtry)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo")
+  ggtitle("Tasa de fallos por modelo")  +
+  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/random_forest/bis_03_comparacion_final_tasa_modelo1_5_folds.png")
 
 union_bagging_modelo1$modelo <- with(union_bagging_modelo1,
                                      reorder(modelo,auc, mean))
-ggplot(union_bagging_modelo1, aes(x = modelo, y = auc, col = mtry)) +
+q <- ggplot(union_bagging_modelo1, aes(x = mtry, y = auc, col = mtry)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo")
+  ggtitle("AUC por modelo") +
+  theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/random_forest/bis_03_comparacion_final_auc_modelo1_5_folds.png")
 
 #-- ¿Por qué modelo bagging nos decantamos? Si aumentamos los grupos a 10
@@ -293,8 +295,8 @@ cruzadarfbin(data=surgical_dataset, vardep=target,listconti=var_modelo2,listclas
 # Con mtry = 2
 # Observamos los nodesizes y sampsizes para cada mtry
 # De hecho, la tasa de error con mtry = 4 y mtry = 5 es muy similar
-sampsizes.2 <- list(1, 100, 500, 1000, 2000, 3000, 4600)
-nodesizes.2 <- list(5, 10, 20, 30, 40, 50, 100)
+sampsizes.2 <- list(1000)
+nodesizes.2 <- list(20)
 
 # Probamos con mtry = 2
 bagging_modelo2_mtry2 <-  tuneo_bagging(surgical_dataset, target = target,
@@ -484,7 +486,7 @@ p <- ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo") +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 p
 ggsave('./charts/comparativas/03_log_avnnet_bagging_rf_tasa.jpeg')
 
@@ -494,7 +496,7 @@ t <- ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo") +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 t
 ggsave('./charts/comparativas/03_log_avnnet_bagging_rf_auc.jpeg')
 
@@ -508,7 +510,7 @@ p <- ggplot(modelos_actuales_zoomed, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo (solo BAGGING)") +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 ggsave('./charts/random_forest/03_FINAL_tasa.jpeg')
 
@@ -519,7 +521,7 @@ t <- ggplot(modelos_actuales_zoomed, aes(x = modelo, y = auc, col = tipo)) +
             geom_boxplot(alpha = 0.7) +
             scale_x_discrete(name = "Modelo") +
             ggtitle("AUC por modelo (solo BAGGING)") +
-            theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
+            theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 ggsave('./charts/random_forest/03_FINAL_auc.jpeg')
 

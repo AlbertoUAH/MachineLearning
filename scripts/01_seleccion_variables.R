@@ -279,7 +279,7 @@ p <- ggplot(union_10_rep, aes(x = modelo, y = tasa, col = rep)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo") +
-  theme(text = element_text(size=13, face = "bold"))
+  theme(text = element_text(size=17, face = "bold"))
 p
 ggsave('./charts/01_boxplot_log_modelo1_error_10rep.jpeg')
 
@@ -288,7 +288,7 @@ g <- ggplot(union_10_rep, aes(x = modelo, y = auc, col = rep)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo") +
-  theme(text = element_text(size=13, face = "bold"))
+  theme(text = element_text(size=17, face = "bold"))
 g
 ggsave('./charts/01_boxplot_log_modelo1_auc_10rep.jpeg')
 

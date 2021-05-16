@@ -133,14 +133,16 @@ for (vars  in sel_variables) {
   
   modelos <- rbind(modelos, xgboost)
 }
+modelos$modelo <- stringi::stri_replace_all_fixed(modelos$modelo, "set_", "")
 
 #-- Comenzamos con los cuatro mejores modelos: Bagging, Random Forest, XGboost + Ensamblado
 #   Tasa de fallos
+aux <- modelos[modelos$tipo %in% c("Bagging", "Random_Forest"), ]
 ggplot(modelos, aes(tidytext::reorder_within(modelo, tasa, tipo, fun=mean) , y = tasa, colour = tipo)) +
   geom_boxplot(adjust = 1.1) +
-  facet_wrap( . ~ tipo, scales = "free_x") +
+  facet_wrap( . ~ tipo, scales = "free_x", ) +
   ggtitle("Tasa de fallos por modelo y set de variables") + tidytext::scale_x_reordered() + labs(x = "Set de variables") +
-  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 10, vjust = 0.5), text = element_text( face = "bold", size = 10), legend.position = "none")
+  theme(axis.text.x = element_text(color = colours, angle = 45, face = "bold", size = 13, vjust = 0.5), text = element_text( face = "bold", size = 13), legend.position = "none")
 ggsave('./charts/sets_descartados_tasa_fallos.png')
 
 #   AUC
@@ -148,7 +150,7 @@ ggplot(modelos, aes(tidytext::reorder_within(modelo, auc, tipo, fun=mean) , y = 
   geom_boxplot(adjust = 1.1) +
   facet_wrap( . ~ tipo, scales = "free_x") +
   ggtitle("AUC por modelo y set de variables") + tidytext::scale_x_reordered() + labs(x = "Set de variables") +
-  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 10, vjust = 0.5), text = element_text( face = "bold", size = 10), legend.position = "none")
+  theme(axis.text.x = element_text(angle = 45, face = "bold", size = 13, vjust = 0.5), text = element_text( face = "bold", size = 13), legend.position = "none")
 ggsave('./charts/sets_descartados_auc.png')
 
 #-- Si nos vamos con gbm, avnnet y SVM RBF

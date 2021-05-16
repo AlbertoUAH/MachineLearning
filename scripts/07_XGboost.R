@@ -103,7 +103,7 @@ gbm_modelos_early_stopping[gbm_modelos_early_stopping$eta == 0.1 & gbm_modelos_e
   geom_line() + geom_label(data = gbm_modelos_early_stopping[gbm_modelos_early_stopping$eta == 0.1 & gbm_modelos_early_stopping$nrounds == 100, ]  %>% filter(Modelo == "Modelo 2"), aes(label = round(Accuracy, 3)), show.legend = FALSE) +
   ggtitle("Evolucion XGboost (Early Stopping)") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 
 #  En general, en ambos modelos se obtiene un buen accuracy con 100 iteraciones y un valor eta = 0.1
@@ -207,7 +207,7 @@ p <- ggplot(tuneo_modelo2, aes(x = modelo, y = auc, col = rep)) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por subsample") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 
 tuneo_modelo2$modelo <- with(tuneo_modelo2, reorder(modelo,tasa, mean))
@@ -216,7 +216,7 @@ q <- ggplot(tuneo_modelo2, aes(x = modelo, y = tasa, col = rep)) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por subsample") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 
 ggsave("./charts/xgboost/auc_modelo2_05_10_rep.png")
@@ -263,24 +263,24 @@ modelos_actuales <- as.data.frame(read_excel("./ComparativaModelos.xlsx",
                                              sheet = "xgboost"))
 modelos_actuales$tasa <- as.numeric(modelos_actuales$tasa)
 modelos_actuales$auc <- as.numeric(modelos_actuales$auc)
-modelos_actuales$modelo <- c(rep("LOGISTICA", 10), rep("RED NEURONAL", 10), rep("BAGGING", 10), rep("RANDOM FOREST", 10),
+modelos_actuales$Modelo <- c(rep("LOGISTICA", 10), rep("RED NEURONAL", 10), rep("BAGGING", 10), rep("RANDOM FOREST", 10),
                            rep("GBM", 10), rep("SVM", 30), rep("XGBOOST", 10))
 
-modelos_actuales$modelo <- with(modelos_actuales,
-                                reorder(modelo,tasa, mean))
-p <- ggplot(modelos_actuales[modelos_actuales$modelo %in% c("LOGISTICA", "XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ], aes(x = modelo, y = tasa)) +
+modelos_actuales$Modelo <- with(modelos_actuales,
+                                reorder(Modelo,tasa, mean))
+p <- ggplot(modelos_actuales[modelos_actuales$Modelo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ], aes(x = Modelo, y = tasa)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=14, face = "bold"))
+  ggtitle("Tasa de fallos por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=15, face = "bold"))
 
 ggsave('./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_tasa.jpeg')
 
 
-modelos_actuales$modelo <- with(modelos_actuales, reorder(modelo,auc, mean))
-q <- ggplot(modelos_actuales[modelos_actuales$modelo %in% c("LOGISTICA", "XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ], aes(x = modelo, y = auc)) +
+modelos_actuales$Modelo <- with(modelos_actuales, reorder(Modelo,auc, mean))
+q <- ggplot(modelos_actuales[modelos_actuales$Modelo %in% c("XGBOOST", "GBM", "RANDOM FOREST", "BAGGING"), ], aes(x = modelo, y = auc)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=14, face = "bold"))
+  ggtitle("AUC por modelo") + theme(axis.text.x = element_text(angle = 45, vjust = 0.5), text = element_text(size=15, face = "bold"))
 
 ggsave('./charts/comparativas/07_log_avnnet_bagging_rf_gbm_svm_xgboost_auc.jpeg')
 
@@ -322,7 +322,7 @@ p <- ggplot(aux, aes(x = factor(max_depth), y = tasa)) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por max_depth") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 
 
@@ -332,10 +332,10 @@ q <- ggplot(aux, aes(x = factor(max_depth), y = auc)) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por max_depth") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 
-
+ggpubr::ggarrange(p, q)
 
 
 

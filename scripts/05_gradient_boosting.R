@@ -150,7 +150,7 @@ p <- gbm_modelo1_es_final[gbm_modelo1_es_final$n.trees >= 100, ] %>% ggplot(aes(
   geom_line() + geom_label(data = gbm_modelo1_es_final[gbm_modelo1_es_final$n.trees == 100, ], aes(label = round(Accuracy, 3)), show.legend = FALSE) +
   ggtitle("Evolucion Modelo 1 (Early Stopping)") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 #-- Llama la atencion 100 + 0.2 ; 100 + 0.3
 
@@ -182,7 +182,7 @@ t <- gbm_modelo2_es_final[gbm_modelo2_es_final$n.trees >= 100, ] %>% ggplot(aes(
   geom_line() + geom_label(data = gbm_modelo2_es_final[gbm_modelo2_es_final$n.trees == 100, ], aes(label = round(Accuracy, 3)), show.legend = FALSE) +
   ggtitle("Evolucion Modelo 2 (Early Stopping)") +
   theme(
-    text = element_text(size=14, face = "bold")
+    text = element_text(size=15, face = "bold")
   )
 
 # Nuevamente, nos encontramos que con 100 iteraciones parece una buena alternativa
@@ -361,7 +361,7 @@ p <- ggplot(modelos_actuales, aes(x = modelo, y = tasa, col = tipo)) +
             geom_boxplot(alpha = 0.7) +
             scale_x_discrete(name = "Modelo") +
             ggtitle("Tasa de fallos por modelo") + theme(
-              text = element_text(size=11, face = "bold"),
+              text = element_text(size=13, face = "bold"),
               axis.text.x = element_text(vjust = 0.5, angle = 45)
             )
 p
@@ -373,7 +373,7 @@ t <- ggplot(modelos_actuales, aes(x = modelo, y = auc, col = tipo)) +
             geom_boxplot(alpha = 0.7) +
             scale_x_discrete(name = "Modelo") +
             ggtitle("AUC por modelo") + theme(
-              text = element_text(size=11, face = "bold"),
+              text = element_text(size=13, face = "bold"),
               axis.text.x = element_text(vjust = 0.5, angle = 45)
             )
 t

@@ -188,7 +188,7 @@ modelos$tipo <- with(modelos,
 ggplot(modelos, aes(x = tipo, y = tasa, colour = modelo)) +
   geom_boxplot(notch = FALSE) +
   ggtitle("Comparacion tasa de fallos dataset (subconjunto) y dataset original") +
-  theme_bw() + theme(text = element_text(face = "bold", size = 13))
+  theme_bw() + theme(text = element_text(face = "bold", size = 17), axis.text.x = element_text(angle=45, vjust=0.5))
 ggsave('./charts/comparacion_datasets_tasa_fallos.png')
 
 #  AUC
@@ -197,5 +197,5 @@ modelos$tipo <- with(modelos,
 ggplot(modelos, aes(x = tipo, y = auc, colour = modelo)) +
   geom_boxplot(notch = FALSE) +
   ggtitle("Comparacion AUC dataset (subconjunto) y dataset original") +
-  theme_bw() + theme(text = element_text(face = "bold", size = 13))
+  theme_bw() + theme(text = element_text(face = "bold", size = 17), axis.text.x = element_text(angle=45, vjust=0.5))
 ggsave('./charts/comparacion_datasets_auc.png')

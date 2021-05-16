@@ -167,8 +167,8 @@ modelos  <- c("logi","avnnet", "bagging", "rf", "gbm", "xgboost", "svmlin", "svm
 mat <- unigraf[,modelos] 
 matrizcorr <- cor(mat)
 colmat <- colorRampPalette(c("#BB4444", "#EE9988", "#FFFFFF", "#77AADD", "#4477AA"))
-ggcorrplot(matrizcorr, hc.order = TRUE, type = "lower", ggtheme = ggplot2::theme_gray,
-           lab = TRUE,colors = c("#6D9EC1", "white", "#E46726")) + theme(text = element_text(size=13, face = "bold"))
+ggcorrplot(matrizcorr, tl.cex = 18,lab_size = 6,  hc.order = TRUE, type = "lower", ggtheme = ggplot2::theme_gray,
+           lab = TRUE,colors = c("#6D9EC1", "white", "#E46726")) + theme(text = element_text(size=15, face = "bold"))
 ggsave("./charts/ensamb_corr.png")
 #-- Comentarios: cabe destacar que el modelo de regresion logistica presenta una correlación moderada con 
 #   la mayoría de los modelos, a excepción del kernel SVM Lineal.
@@ -246,7 +246,7 @@ medias0$tipo <- c(rep("Logistica", 10),
 
 
 medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), "modelo"] <- with(medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), ],
-                       reorder(modelo,auc, mean))
+                       reorder(modelo, tasa, mean))
 ggplot(medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), ], aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
@@ -254,12 +254,13 @@ ggplot(medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26
   theme(axis.text.x = element_text(angle = 45, face = "bold"), text = element_text(face = "bold"))
 ggsave('./charts/ensamblado_tasa_fallos_1_corr08.png')
 
+aux <- medias0[!medias0$modelo %in% c("en-16", "en-23", "en-22", "en-10", "en-26", "en-18", "en-22", "en-17", "en-9", "en-21", "en-27", "en-12", "en-33", "en-11", "en-30", "en-15"), ]
 aux$modelo <- with(aux, reorder(modelo,auc, max))
 ggplot(aux, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo (modelos originales + Ensamblado < 0.8 corr)") + 
-  theme(axis.text.x = element_text(angle = 45, face = "bold"), text = element_text(face = "bold"))
+  theme(axis.text.x = element_text(angle = 45, face = "bold"), text = element_text(face = "bold", size = 11))
 ggsave('./charts/ensamblado_auc_1_corr08.png')
 
 #-- Hagamos zoom a los mejores modelos: "avnnet-gbm" (11), "avnnet-bagging" (9), "bagging-gbm" (17)
@@ -270,8 +271,8 @@ p <- ggplot(medias0[medias0$modelo %in% c("en-11", "en-12", "en-27", "avnnet", "
                                      "en-16", "en-18", "en-23"), ], aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("Tasa de fallos (originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
+  ggtitle("Tasa de fallos por modelo") + 
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 15))
 
 medias0$modelo <- with(medias0,
                        reorder(modelo,auc, mean))
@@ -279,8 +280,8 @@ q <- ggplot(medias0[medias0$modelo %in% c("en-11", "en-12", "en-27", "avnnet", "
                                      "en-16", "en-18", "en-23"), ], aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
-  ggtitle("AUC (originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
+  ggtitle("AUC por modelo") + 
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 15))
 
 
 #-- Comentarios:
@@ -360,7 +361,7 @@ ggplot(medias1, aes(x = modelo, y = tasa, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("Tasa de fallos por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 15, vjust=0.7))
 ggsave('./charts/ensamblado_modelos3.png')
 
 medias1$modelo <- with(medias1,
@@ -369,7 +370,7 @@ ggplot(medias1, aes(x = modelo, y = auc, col = tipo)) +
   geom_boxplot(alpha = 0.7) +
   scale_x_discrete(name = "Modelo") +
   ggtitle("AUC por modelo (modelos originales + Ensamblado)") + 
-  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 13))
+  theme(axis.text.x = element_text(angle = 45), text = element_text(face = "bold", size = 15, vjust=0.7))
 ggsave('./charts/ensamblado_modelos3_auc.png')
 
 #-- Pese a añadir mas de 3 modelos por ensamblado, continuan siendo mejor los modelos originales
