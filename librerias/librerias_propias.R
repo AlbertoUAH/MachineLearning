@@ -189,14 +189,14 @@ show_vars_importance <- function(modelo, title) {
   s <- tabla %>% arrange(.,-MeanDecreaseAccuracy) %>% 
     ggplot(aes(MeanDecreaseAccuracy, vars)) +
     geom_col() +
-    geom_label(aes(label=round(MeanDecreaseAccuracy,3), x=MeanDecreaseAccuracy+0.01), size=3.5, colour="blue", fontface = "bold") +
+    geom_label(aes(label=round(MeanDecreaseAccuracy,3), x=MeanDecreaseAccuracy+0.01), size=4, colour="blue", fontface = "bold") +
     scale_x_continuous(expand=expansion(c(0,0.04))) +
     ggtitle(title) +
     theme_bw() +
     theme(panel.grid.minor=element_blank(),
           panel.grid.major=element_blank(),
           axis.title=element_blank(),
-          text = element_text(size=14, face = "bold"))
+          text = element_text(size=15, face = "bold"))
   return(s)
 }
 

@@ -182,7 +182,7 @@ candidato.aic.2 <- c("mortality_rsi", "ccsMort30Rate", "bmi", "month.8",
                      "baseline_charlson", "ahrq_ccs")
 
 candidatos_3         <- list(candidato.aic, candidato.aic.2, candidato.bic, candidato.bic.2, candidato.rfe.lr.2, candidato.rfe.rf)
-nombres_candidatos_3 <- c("LOGISTICA AIC", "LOGISTICA AIC (11 vars)" ,"LOGISTICA BIC", "LOGISTICA BIC (8 vars)" , "RFE LR TOP 3", "RFE RF TOP 5")
+nombres_candidatos_3 <- c("AIC", "AIC (11 vars)" ,"BIC", "BIC (8 vars)" , "RFE LR TOP 3", "RFE RF TOP 5")
 union3 <- cruzada_logistica(surgical_dataset, target, candidatos_3, nombres_candidatos_3,
                             grupos = 5, repe = 5)
 
@@ -191,14 +191,14 @@ t <- ggplot(union3, aes(x = modelo, y = tasa)) +
   geom_boxplot() +
   ggtitle("Comparacion (tasa fallos)") +
   labs(color='Dataset')  +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 
 union3$modelo <- with(union3, reorder(modelo,auc, mean))
 a <- ggplot(union3, aes(x = modelo, y = auc)) +
   geom_boxplot() +
   ggtitle("Comparacion (AUC)") +
   labs(color='Dataset')  +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 
 ggpubr::ggarrange(t, a, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_segunda_comparacion.png')
@@ -220,8 +220,8 @@ rf_modelo_aic   <- train_rf_model(surgical_dataset,
 
 # Importancia de las variables en un random forest
 # ¿Pueden sobrar dow.0, moonphase.0? y baseline osteoart?
-imp1 <- show_vars_importance(rf_modelo_aic, "Con ahrq_ccs")
-imp2 <- show_vars_importance(rf_modelo_bic, "Con month.8")
+imp1 <- show_vars_importance(rf_modelo_aic, "Set variables AIC")
+imp2 <- show_vars_importance(rf_modelo_bic, "Set variables BIC")
 ggpubr::ggarrange(imp1, imp2, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_comparacion_random_forest.png')
 
@@ -242,14 +242,14 @@ t <- ggplot(union4, aes(x = modelo, y = tasa)) +
   geom_boxplot() +
   ggtitle("Comparacion (tasa fallos)") +
   labs(color='Dataset')  +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 t
 union4$modelo <- with(union4, reorder(modelo,auc, mean))
 a <- ggplot(union4, aes(x = modelo, y = auc)) +
   geom_boxplot() +
   ggtitle("Comparacion (AUC)") +
   labs(color='Dataset')  +
-  theme(text = element_text(size=13, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
+  theme(text = element_text(size=15, face = "bold"), axis.text.x = element_text(angle = 45, vjust = 0.8))
 a
 ggpubr::ggarrange(t, a, common.legend = TRUE)
 ggsave('./charts/01_feature_selection_comparacion_final.png')
