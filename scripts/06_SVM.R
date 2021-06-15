@@ -201,8 +201,8 @@ ggsave("./charts/SVM/polinomica/svm_polinomica_modelo2_v2.png")
 # Elegimos un factor C = 0.01 y escala = 0.1
 
 #--- SVM RBF
-C_rbf_1 <- c(0.01,0.05,0.1,0.2,0.5,1,2,5,10)
-sigma_rbf_1  <- c(0.1, 0.5, 1, 2, 5, 10)
+C_rbf_1 <- c(2,5,10,15,20,30)
+sigma_rbf_1  <- c(1,2)
 
 svm_rbf_1 <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target,
                               listconti = var_modelo1, listclass=c(""),
@@ -210,8 +210,8 @@ svm_rbf_1 <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target,
                               sigma = sigma_rbf_1, label = "Modelo 1")
 
 
-C_rbf_2 <- c(0.01,0.05,0.1,0.2,0.5,1,2,5,10)
-sigma_rbf_2  <- c(0.1, 0.5, 1, 2, 5, 10)
+C_rbf_2 <- c(2,5,10,15,20,30)
+sigma_rbf_2  <- c(1,2)
 
 svm_rbf_2 <- cruzadaSVMbinRBF(data=surgical_dataset, vardep=target,
                               listconti = var_modelo2, listclass=c(""),
